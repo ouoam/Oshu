@@ -83,7 +83,6 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>D:\game\SFML-2.5.0-32bit\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-main-d.lib;sfml-network-d.lib;sfml-system-d.lib;sfml-window-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -91,13 +90,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>D:\game\SFML-2.5.0-64bit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>D:\game\SFML-2.5.0-64bit\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>D:\game\sfeMovie-64bit\lib;D:\game\SFML-2.5.0-64bit\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>sfml-audio-d.lib;sfml-graphics-d.lib;sfml-main-d.lib;sfml-network-d.lib;sfml-system-d.lib;sfml-window-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -125,20 +123,38 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>D:\game\SFML-2.5.0-64bit\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>D:\game\SFML-2.5.0-64bit\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\game\sfeMovie-64bit\lib;D:\game\SFML-2.5.0-64bit\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>sfml-audio.lib;sfml-graphics.lib;sfml-main.lib;sfml-network.lib;sfml-system.lib;sfml-window.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Beatmap\Beatmap.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Object\Animate\Animate.cpp" />
+    <ClCompile Include="Object\Animate\Easing.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Audio\hitsound.h" />
+    <ClInclude Include="Beatmap\Beatmap.h" />
+    <ClInclude Include="Object\Animate\Animate.h" />
+    <ClInclude Include="Object\Animate\Easing.h" />
+    <ClInclude Include="Object\Pieces\ApproachCircle.h" />
+    <ClInclude Include="Object\Pieces\CirclePiece.h" />
+    <ClInclude Include="Object\Pieces\SliderBall.h" />
+    <ClInclude Include="Object\Pieces\SliderBody.h" />
+    <ClInclude Include="Overlay\hitwindows.h" />
+    <ClInclude Include="Utility\BezierApproximator.h" />
+    <ClInclude Include="Utility\CircularArc.h" />
+    <ClInclude Include="Utility\file.h" />
+    <ClInclude Include="Utility\lineThinkness.h" />
+    <ClInclude Include="Utility\string.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

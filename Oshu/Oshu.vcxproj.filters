@@ -13,10 +13,84 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Beatmap">
+      <UniqueIdentifier>{9812c08e-68a7-45f0-b82e-c6e6e005dee6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utility">
+      <UniqueIdentifier>{a0c224a5-8032-4f1e-91c6-f6042b10988a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Overlay">
+      <UniqueIdentifier>{72ff8825-206b-43a0-b7f9-aaba58e13baf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Audio">
+      <UniqueIdentifier>{6d876899-6206-41cf-ad2a-b3becf214c79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Object">
+      <UniqueIdentifier>{e43ec74a-c3f4-47f1-b652-7a3859b2a413}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Object\Pieces">
+      <UniqueIdentifier>{66c89131-f79b-4b02-ad1f-1f6e021376dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Object\Animate">
+      <UniqueIdentifier>{2917378c-f4c4-4ffb-b19c-ccd24004a25e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Beatmap\Beatmap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Animate\Animate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Animate\Easing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Beatmap\Beatmap.h">
+      <Filter>Header Files\Beatmap</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\string.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\BezierApproximator.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\CircularArc.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\lineThinkness.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Overlay\hitwindows.h">
+      <Filter>Header Files\Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio\hitsound.h">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\file.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Pieces\ApproachCircle.h">
+      <Filter>Header Files\Object\Pieces</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Pieces\CirclePiece.h">
+      <Filter>Header Files\Object\Pieces</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Pieces\SliderBody.h">
+      <Filter>Header Files\Object\Pieces</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Pieces\SliderBall.h">
+      <Filter>Header Files\Object\Pieces</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Animate\Easing.h">
+      <Filter>Header Files\Object\Animate</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Animate\Animate.h">
+      <Filter>Header Files\Object\Animate</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
