@@ -27,9 +27,9 @@ namespace Object {
 			Easing easing;
 			union changeTo{
 				sf::Vector2f position;
-				sf::Vector2f scale;
 				sf::Vector2f origin;
 				sf::Color color;
+				float scale;
 				float angle;
 				int16_t opacity;
 
@@ -48,13 +48,14 @@ namespace Object {
 
 			void update();
 			Animate &moveTo			(sf::Vector2f position, uint32_t duration = 0, Easing easing = None);
-			Animate &scaleTo		(sf::Vector2f scale,	uint32_t duration = 0, Easing easing = None);
 			Animate &moveOriginTo	(sf::Vector2f origin,	uint32_t duration = 0, Easing easing = None);
+			Animate &scaleTo		(float scale,			uint32_t duration = 0, Easing easing = None);
 			Animate &colorTo		(sf::Color color,		uint32_t duration = 0, Easing easing = None);
 			Animate &rotateTo		(float angle,			uint32_t duration = 0, Easing easing = None);
 			Animate &fadeTo			(uint8_t opacity,		uint32_t duration = 0, Easing easing = None);
 			Animate &then();
 			Animate &expire();
+			Animate &setScaleFromNow();
 
 			bool willBeRemove;
 		
@@ -62,15 +63,19 @@ namespace Object {
 			void init();
 			sf::Clock stTime;
 			std::queue<std::vector<toChange>> timeline;
-
 			sf::Vector2f stPosition;
-			sf::Vector2f stScale;
 			sf::Vector2f stOrigin;
 			sf::Color stColor;
+			float relativeScale;
+			float stScale;
 			float stAngle;
 			int16_t stOpacity;
 
+			bool haveUpdate;
+
 			void addEvent(toChange toAdd);
+
+			sf::Mutex Mutex;
 		};
 	}
 }

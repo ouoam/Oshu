@@ -34,6 +34,12 @@
     <Filter Include="Header Files\Object\Animate">
       <UniqueIdentifier>{2917378c-f4c4-4ffb-b19c-ccd24004a25e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Skin">
+      <UniqueIdentifier>{a8a4739b-12dd-4949-8087-51b681ab5024}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UI">
+      <UniqueIdentifier>{3b2563bd-9b7c-4538-ae4d-841debd96977}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -46,6 +52,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Object\Animate\Easing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="old--temp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -91,6 +100,15 @@
     </ClInclude>
     <ClInclude Include="Object\Animate\Animate.h">
       <Filter>Header Files\Object\Animate</Filter>
+    </ClInclude>
+    <ClInclude Include="Skin\Skin.h">
+      <Filter>Header Files\Skin</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Cursor.h">
+      <Filter>Header Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Playfield.h">
+      <Filter>Header Files\UI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

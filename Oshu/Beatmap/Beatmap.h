@@ -131,6 +131,7 @@ namespace Beatmap {
 		Beatmap(std::string file) {
 			load(file);
 		}
+		Beatmap() {}
 	};
 }
 

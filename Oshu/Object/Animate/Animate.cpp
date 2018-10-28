@@ -4,13 +4,16 @@ namespace Object {
 	namespace Animate {
 		void Animate::init() {
 			willBeRemove = false;
+			haveUpdate = false;
 
 			stPosition = getPosition();
-			stScale = getScale();
+			stScale = (getScale().x + getScale().y) / 2.0;
 			stOrigin = getOrigin();
 			stColor = getColor();
 			stAngle = getRotation();
 			stOpacity = getColor().a;
+
+			relativeScale = 1;
 		}
 
 		Animate::Animate()
@@ -33,6 +36,10 @@ namespace Object {
 		}
 
 		void Animate::update() {
+			haveUpdate = true;
+
+			Mutex.lock();
+
 			if (!timeline.empty()) {
 				uint32_t elapsed = stTime.getElapsedTime().asMilliseconds();
 
@@ -52,7 +59,7 @@ namespace Object {
 								stPosition = it->to.position;
 								break;
 							case Scale:
-								setScale(it->to.scale);
+								setScale(sf::Vector2f(it->to.scale, it->to.scale));
 								stScale = it->to.scale;
 								break;
 							case Origin:
@@ -88,12 +95,14 @@ namespace Object {
 							
 						} else {
 							sf::Color tempColor = getColor();
+							float tempScale;
 							switch (it->todo) {
 							case Position:
 								setPosition(doApply(stPosition, it->to.position, elapsed, it->duration, it->easing));
 								break;
 							case Scale:
-								setScale(doApply(stScale, it->to.scale, elapsed, it->duration, it->easing));
+								tempScale = doApply(stScale, it->to.scale, elapsed, it->duration, it->easing);
+								setScale(sf::Vector2f(tempScale, tempScale));
 								break;
 							case Origin:
 								setOrigin(doApply(stOrigin, it->to.origin, elapsed, it->duration, it->easing));
@@ -123,9 +132,19 @@ namespace Object {
 					timeline.pop();
 				}
 			}
+
+			Mutex.unlock();
 		}
 
 		void Animate::addEvent(toChange toAdd) {
+			Mutex.lock();
+
+			if (haveUpdate == true) {
+				while (!timeline.empty())
+					timeline.pop();
+				haveUpdate = false;
+			}
+
 			if (timeline.empty()) {
 				std::vector<toChange> temp;
 				timeline.push(temp);		// For get start value
@@ -133,6 +152,8 @@ namespace Object {
 			}
 
 			timeline.back().push_back(toAdd);
+
+			Mutex.unlock();
 		}
 
 		Animate &Animate::moveTo(sf::Vector2f position, uint32_t duration, Easing easing) {
@@ -143,9 +164,9 @@ namespace Object {
 			return *this;
 		}
 
-		Animate &Animate::scaleTo(sf::Vector2f scale, uint32_t duration, Easing easing) {
+		Animate &Animate::scaleTo(float scale, uint32_t duration, Easing easing) {
 			toChange toPush(Scale, duration, easing);
-			toPush.to.scale = scale;
+			toPush.to.scale = scale * relativeScale;
 
 			addEvent(toPush);
 			return *this;
@@ -185,14 +206,26 @@ namespace Object {
 
 		Animate &Animate::then() {
 			std::vector<toChange> temp;
+
+			Mutex.lock();
+
 			timeline.push(temp);
+
+			Mutex.unlock();
 
 			return *this;
 		}
+
 		Animate &Animate::expire() {
 			toChange toPush(Remove, 0, None);
 
 			addEvent(toPush);
+			return *this;
+		}
+
+		Animate &Animate::setScaleFromNow() {
+			relativeScale = (getScale().x + getScale().y) / 2.0;
+
 			return *this;
 		}
 
