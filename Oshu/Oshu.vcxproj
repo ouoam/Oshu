@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Beatmap\Beatmap.cpp" />
+    <ClCompile Include="Library\clipper_ver6.4.2\cpp\clipper.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object\Animate\Animate.cpp" />
     <ClCompile Include="Object\Animate\Easing.cpp" />

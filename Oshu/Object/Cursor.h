@@ -8,8 +8,8 @@
 namespace Object {
 
 	class Cursor {
-		Animate::Animate mou;
-		Animate::Animate mou2;
+		Animate::AnimeSprite mou;
+		Animate::AnimeSprite mou2;
 
 		int downCount = 0;
 
@@ -23,17 +23,13 @@ namespace Object {
 
 		Cursor(sf::RenderWindow& window) : m_window(window)  {
 			sf::Vector2u size = Skin::Cursor::cursor.getSize();
-
 			mou.setTexture(Skin::Cursor::cursor);
-
 			mou.setOrigin(size.x / 2.0, size.y / 2.0);
 			mou.scale(sf::Vector2f(0.4, 0.4));
 			mou.setScaleFromNow();
 
 			sf::Vector2u size2 = Skin::Cursor::cursorMiddle.getSize();
-
 			mou2.setTexture(Skin::Cursor::cursorMiddle);
-
 			mou2.setOrigin(size2.x / 2.0, size2.y / 2.0);
 			mou2.scale(sf::Vector2f(0.3, 0.3));
 

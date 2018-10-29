@@ -67,7 +67,7 @@ namespace UI {
 				int distant = sqrt((position.x * position.x) + (position.y * position.y));
 				dist = distant;
 
-				if (distant <= CircleRadius + 20) {
+				if (distant <= CircleRadius) {
 					if (-hitWinWidth.s50 <= hitDelay && hitDelay <= hitWinWidth.s50) {
 						last = " 50";
 						if (-hitWinWidth.s100 <= hitDelay && hitDelay <= hitWinWidth.s100) {
@@ -114,9 +114,7 @@ namespace UI {
 
 		//load beatmap
 		std::string base_dir = "resource/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/";
-		bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [ReFaller's Hard].osu");
-		//std::string base_dir = "resource/150945 Knife Party - Centipede/";
-		//Beatmap::Beatmap bmPlay(base_dir + "Knife Party - Centipede (Sugoi-_-Desu) [This isn't a map, just a simple visualisation].osu");
+		bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [Smoothie World's Extra].osu");
 		loadHitSound(&bmPlay, base_dir);
 
 		hitWinWidth.s50 = 150 - 50 * (5 - bmPlay.Difficulty.OverallDifficulty) / 5;
@@ -144,12 +142,9 @@ namespace UI {
 		transform.translate(80, 60);
 
 		if (!music.openFromFile("resource/audio.wav"))
-		//if (!music.openFromFile("resource/150945 Knife Party - Centipede/02-knife_party-centipede.wav"))
 			return ; // error
 		music.setVolume(50);
-		//music.setPlayingOffset(sf::seconds(52));
 		music.play();
-
 	}
 
 	void OnPressed(sf::Event event) {
@@ -223,8 +218,8 @@ namespace UI {
 
 		int iHO = 0;
 		// Hit Object
-		iHO = showHitObj.front;
-		while (iHO < showHitObj.back) {
+		iHO = showHitObj.back - 1;
+		while (iHO >= showHitObj.front) {
 			int opacity = 0;
 			if (bmPlay.HitObjects[iHO].time - preempt + fade_in <= time) {
 				opacity = 255;
@@ -240,18 +235,7 @@ namespace UI {
 
 				win->m_window.draw(bmPlay.HitObjects[iHO].sliders.curvePoints, transform);
 
-				sf::VertexArray line[2];
-				line[0].setPrimitiveType(sf::LineStrip);
-				line[1].setPrimitiveType(sf::LineStrip);
-				int n = bmPlay.HitObjects[iHO].sliders.lineThinkness.getVertexCount();
-				for (int i = 0; i < n; i++) {
-					bmPlay.HitObjects[iHO].sliders.lineThinkness[i].color = sf::Color(255, 255, 255, opacity);
-					line[i % 2].append(bmPlay.HitObjects[iHO].sliders.lineThinkness[i]);
-				}
 				win->m_window.draw(bmPlay.HitObjects[iHO].sliders.lineThinkness, transform);
-
-				win->m_window.draw(line[0], transform);
-				win->m_window.draw(line[1], transform);
 
 				int duration = bmPlay.HitObjects[showHitObj.front].sliders.pixelLength / (100.0 * bmPlay.Difficulty.SliderMultiplier) * mspb;
 				int endTime = bmPlay.HitObjects[showHitObj.front].time + duration * bmPlay.HitObjects[showHitObj.front].sliders.repeat;
@@ -333,7 +317,7 @@ namespace UI {
 				win->m_window.draw(approachcircle, transform);
 			}
 
-			iHO++;
+			iHO--;
 		}
 		// End Hit Object
 
