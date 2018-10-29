@@ -28,7 +28,8 @@ void renderingThread(sf::RenderWindow* window)
 	{
 		UI::update();
 
-		window->clear(sf::Color::Black);
+		//window->clear(sf::Color::Black);
+		window->clear();
 
 		UI::draw();
 

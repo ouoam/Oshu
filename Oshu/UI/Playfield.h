@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include <SFML/Graphics.hpp>
 
 #include "../Object/Cursor.h"
@@ -13,7 +15,6 @@ namespace UI {
 	float oldmspb = 0;
 
 	int lastTimePass = 0;
-	int keyPressed = 0;
 	int nextHit = -1;
 	int lastHit = -1;
 	int hit = 0;
@@ -48,6 +49,63 @@ namespace UI {
 		sf::RenderWindow& m_window;
 		A(sf::RenderWindow& window) : m_window(window) {}
 	}*win;
+
+	void testHit() {
+		if (showHitObj.front < bmPlay.HitObjects.size()) {
+			int64_t time = music.getPlayingOffset().asMilliseconds();
+
+			sf::Vector2i position = sf::Mouse::getPosition(win->m_window);
+			int hit = 0;
+			int isHO = showHitObj.front;
+			while (hit == 0 && isHO < showHitObj.back) {
+				int hitTime = bmPlay.HitObjects[isHO].time;
+				int hitDelay = time - hitTime - 20;
+				lastDelay = hitDelay;
+				position -= bmPlay.HitObjects[isHO].position;
+				position -= sf::Vector2i(80, 80);
+
+				int distant = sqrt((position.x * position.x) + (position.y * position.y));
+				dist = distant;
+
+				if (distant <= CircleRadius + 20) {
+					if (-hitWinWidth.s50 <= hitDelay && hitDelay <= hitWinWidth.s50) {
+						last = " 50";
+						if (-hitWinWidth.s100 <= hitDelay && hitDelay <= hitWinWidth.s100) {
+							last = "100";
+							if (-hitWinWidth.s300 <= hitDelay && hitDelay <= hitWinWidth.s300) {
+								last = "300";
+							}
+						}
+									
+						int sampleset = bmPlay.TimingPoints[bmPlay.iTimingPoints].SampleSet;
+						int sound_id = bmPlay.HitObjects[isHO].hitSound;
+						int index = bmPlay.TimingPoints[bmPlay.iTimingPoints].SampleIndex;
+						sound_id = (sound_id & 8) ? 3 : ((sound_id & 4) ? 2 : ((sound_id & 2) ? 1 : 0));
+
+						sound[iSound % 10].setBuffer(hitSoundList[sampleset][sound_id][index]);
+						sound[iSound % 10].play();
+						sound[iSound % 10].setPlayingOffset(sf::seconds(0));
+						iSound++;
+									
+
+						showHitObj.front = isHO + 1;
+						combo++;
+
+									
+
+						hit = 1;
+					}
+					else {
+						showHitObj.front++;
+					}
+
+					std::cout << lastDelay << std::endl;
+				}
+
+				isHO++;
+			}
+		}
+	}
 	
 
 	void load(sf::RenderWindow& window) {
@@ -88,7 +146,7 @@ namespace UI {
 		if (!music.openFromFile("resource/audio.wav"))
 		//if (!music.openFromFile("resource/150945 Knife Party - Centipede/02-knife_party-centipede.wav"))
 			return ; // error
-		music.setVolume(70);
+		music.setVolume(50);
 		//music.setPlayingOffset(sf::seconds(52));
 		music.play();
 
@@ -96,6 +154,7 @@ namespace UI {
 
 	void OnPressed(sf::Event event) {
 		cur->OnPressed(event.key.code);
+		testHit();
 	}
 
 	void OnReleased(sf::Event event) {
@@ -280,5 +339,57 @@ namespace UI {
 
 
 		cur->draw();
+
+
+
+
+
+
+
+
+
+
+		// For debug
+
+		sf::Text text;
+		sf::Font font;
+		font.loadFromFile("arial.ttf");
+		text.setFont(font);
+		text.setString(std::to_string(lastDelay));
+		text.setCharacterSize(16);
+		text.setFillColor(sf::Color::Red);
+		win->m_window.draw(text);
+
+		sf::Text text1;
+		text1.setFont(font);
+		text1.setString(last);
+		text1.setCharacterSize(16);
+		text1.setFillColor(sf::Color::Red);
+		text1.setPosition(0, 20);
+		win->m_window.draw(text1);
+
+		sf::Text text2;
+		text2.setFont(font);
+		text2.setString(std::to_string(combo) + "x");
+		text2.setCharacterSize(16);
+		text2.setFillColor(sf::Color::Red);
+		text2.setPosition(0, 40);
+		win->m_window.draw(text2);
+
+		sf::Text text3;
+		text3.setFont(font);
+		text3.setString("mspb = " + std::to_string(mspb));
+		text3.setCharacterSize(16);
+		text3.setFillColor(sf::Color::Red);
+		text3.setPosition(0, 60);
+		win->m_window.draw(text3);
+
+		sf::Text text5;
+		text5.setFont(font);
+		text5.setString("dist = " + std::to_string(dist));
+		text5.setCharacterSize(16);
+		text5.setFillColor(sf::Color::Red);
+		text5.setPosition(0, 100);
+		win->m_window.draw(text5);
 	}
 }
