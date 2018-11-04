@@ -114,7 +114,7 @@ namespace UI {
 
 		//load beatmap
 		std::string base_dir = "resource/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/";
-		bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [Smoothie World's Extra].osu");
+		bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [ReFaller's Hard].osu");
 		loadHitSound(&bmPlay, base_dir);
 
 		hitWinWidth.s50 = 150 - 50 * (5 - bmPlay.Difficulty.OverallDifficulty) / 5;
@@ -333,47 +333,47 @@ namespace UI {
 
 
 
-		// For debug
+		//// For debug
 
-		sf::Text text;
-		sf::Font font;
-		font.loadFromFile("arial.ttf");
-		text.setFont(font);
-		text.setString(std::to_string(lastDelay));
-		text.setCharacterSize(16);
-		text.setFillColor(sf::Color::Red);
-		win->m_window.draw(text);
+		//sf::Text text;
+		//sf::Font font;
+		//font.loadFromFile("arial.ttf");
+		//text.setFont(font);
+		//text.setString(std::to_string(lastDelay));
+		//text.setCharacterSize(16);
+		//text.setFillColor(sf::Color::Red);
+		//win->m_window.draw(text);
 
-		sf::Text text1;
-		text1.setFont(font);
-		text1.setString(last);
-		text1.setCharacterSize(16);
-		text1.setFillColor(sf::Color::Red);
-		text1.setPosition(0, 20);
-		win->m_window.draw(text1);
+		//sf::Text text1;
+		//text1.setFont(font);
+		//text1.setString(last);
+		//text1.setCharacterSize(16);
+		//text1.setFillColor(sf::Color::Red);
+		//text1.setPosition(0, 20);
+		//win->m_window.draw(text1);
 
-		sf::Text text2;
-		text2.setFont(font);
-		text2.setString(std::to_string(combo) + "x");
-		text2.setCharacterSize(16);
-		text2.setFillColor(sf::Color::Red);
-		text2.setPosition(0, 40);
-		win->m_window.draw(text2);
+		//sf::Text text2;
+		//text2.setFont(font);
+		//text2.setString(std::to_string(combo) + "x");
+		//text2.setCharacterSize(16);
+		//text2.setFillColor(sf::Color::Red);
+		//text2.setPosition(0, 40);
+		//win->m_window.draw(text2);
 
-		sf::Text text3;
-		text3.setFont(font);
-		text3.setString("mspb = " + std::to_string(mspb));
-		text3.setCharacterSize(16);
-		text3.setFillColor(sf::Color::Red);
-		text3.setPosition(0, 60);
-		win->m_window.draw(text3);
+		//sf::Text text3;
+		//text3.setFont(font);
+		//text3.setString("mspb = " + std::to_string(mspb));
+		//text3.setCharacterSize(16);
+		//text3.setFillColor(sf::Color::Red);
+		//text3.setPosition(0, 60);
+		//win->m_window.draw(text3);
 
-		sf::Text text5;
-		text5.setFont(font);
-		text5.setString("dist = " + std::to_string(dist));
-		text5.setCharacterSize(16);
-		text5.setFillColor(sf::Color::Red);
-		text5.setPosition(0, 100);
-		win->m_window.draw(text5);
+		//sf::Text text5;
+		//text5.setFont(font);
+		//text5.setString("dist = " + std::to_string(dist));
+		//text5.setCharacterSize(16);
+		//text5.setFillColor(sf::Color::Red);
+		//text5.setPosition(0, 100);
+		//win->m_window.draw(text5);
 	}
 }
