@@ -115,6 +115,12 @@ namespace UI {
 		//load beatmap
 		std::string base_dir = "resource/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/";
 		bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [ReFaller's Hard].osu");
+		
+
+		//std::string base_dir = "resource/150945 Knife Party - Centipede/";
+		//bmPlay.load(base_dir + "Knife Party - Centipede (Sugoi-_-Desu) [This isn't a map, just a simple visualisation].osu");
+		//
+
 		loadHitSound(&bmPlay, base_dir);
 
 		hitWinWidth.s50 = 150 - 50 * (5 - bmPlay.Difficulty.OverallDifficulty) / 5;
@@ -148,12 +154,12 @@ namespace UI {
 	}
 
 	void OnPressed(sf::Event event) {
-		cur->OnPressed(event.key.code);
+		cur->onMouseDown(event.key.code);
 		testHit();
 	}
 
 	void OnReleased(sf::Event event) {
-		cur->OnReleased(event.key.code);
+		cur->onMouseUp(event.key.code);
 	}
 
 	void update() {
@@ -322,14 +328,7 @@ namespace UI {
 		// End Hit Object
 
 
-		cur->draw();
-
-
-
-
-
-
-
+		win->m_window.draw(*cur);
 
 
 

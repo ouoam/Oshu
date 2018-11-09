@@ -147,7 +147,9 @@
     <ClInclude Include="Beatmap\Beatmap.h" />
     <ClInclude Include="Object\Animate\Animate.h" />
     <ClInclude Include="Object\Animate\Easing.h" />
+    <ClInclude Include="Object\Circle.h" />
     <ClInclude Include="Object\Cursor.h" />
+    <ClInclude Include="Object\Container.h" />
     <ClInclude Include="Object\Pieces\ApproachCircle.h" />
     <ClInclude Include="Object\Pieces\CirclePiece.h" />
     <ClInclude Include="Object\Pieces\SliderBall.h" />

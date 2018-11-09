@@ -113,5 +113,11 @@
     <ClInclude Include="UI\Playfield.h">
       <Filter>Header Files\UI</Filter>
     </ClInclude>
+    <ClInclude Include="Object\Circle.h">
+      <Filter>Header Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Container.h">
+      <Filter>Header Files\Object</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
