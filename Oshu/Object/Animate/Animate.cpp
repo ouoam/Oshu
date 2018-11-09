@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Animate.h"
 
 namespace Object {

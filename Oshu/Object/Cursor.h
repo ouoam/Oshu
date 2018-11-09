@@ -75,8 +75,10 @@ public:
 			mou2.setPosition((sf::Vector2f) temp);
 			oldLocation = temp;
 		}
-			
+		
 	}
+
+private:
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		target.draw(mou, states);

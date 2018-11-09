@@ -99,7 +99,7 @@ namespace UI {
 						showHitObj.front++;
 					}
 
-					std::cout << lastDelay << std::endl;
+					std::cout << last << "\t" << lastDelay << std::endl;
 				}
 
 				isHO++;
@@ -210,6 +210,7 @@ namespace UI {
 				showHitObj.front++;
 				combo = 0;
 				last = "Miss";
+				std::cout << "Miss" << std::endl;
 			}
 			else {
 				break;

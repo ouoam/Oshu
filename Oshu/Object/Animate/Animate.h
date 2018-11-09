@@ -74,7 +74,7 @@ private:
 	float stAngle;
 };
 
-class AnimeSprite : public Animate, public sf::Drawable {
+class AnimeSprite : public Animate, public virtual sf::Drawable {
 public:
 	////////////////////////////////////////////////////////////
 	/// \brief Default constructor
