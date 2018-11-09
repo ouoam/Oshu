@@ -1,3 +1,4 @@
+#include <iostream>
 #include "Animate.h"
 
 namespace Object {
@@ -207,26 +208,33 @@ void AnimeSprite::update() {
 			std::vector<toChange>::iterator it = (*front).begin();
 			while (it != (*front).end()) {
 				if (it->duration <= elapsed) {
+					bool willErase = false;
 					sf::Color tempColor = getColor();
 
 					switch (it->todo) {
 					case Color:
 						setColor(it->to.color);
 						stColor = it->to.color;
+						willErase = true;
 						break;
 					case Opacity:
 						tempColor.a = it->to.opacity;
 						setColor(tempColor);
 						stOpacity = it->to.opacity;
+						willErase = true;
 						break;
 					}
 
 					// Thank https://stackoverflow.com/questions/15042942/vector-iterators-incompatible-while-erase-from-vector
-					it = (*front).erase(it);
+					if (willErase) {
+						it = (*front).erase(it);
 
-					if (it != (*front).begin()) {
-						it = std::prev(it);
-						continue;
+						if (it != (*front).begin()) {
+							it = std::prev(it);
+							continue;
+						}
+					} else {
+						++it;
 					}
 
 				} else {
