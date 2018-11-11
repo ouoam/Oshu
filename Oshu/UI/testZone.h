@@ -11,7 +11,6 @@
 #include "../Object/Container.h"
 #include "../Object/Cursor.h"
 #include "../Object/Circle.h"
-#include "../Object/Slider.h"
 
 
 
@@ -125,19 +124,12 @@ void update() {
 		if (bmPlay.HitObjects[showHitObj.back].time - Beatmap::bmHitObjects::TimePreempt <= time) {
 			showHitObj.back++;
 
-			if (bmPlay.HitObjects[showHitObj.front].type & 1) { // circle
+			if (bmPlay.HitObjects[showHitObj.front].type & 1 || bmPlay.HitObjects[showHitObj.front].type & 2) { // circle
 				Object::Circle *newCircle = new Object::Circle(&bmPlay.HitObjects[showHitObj.front]);
 				newCircle->StartPreemptState();
 
 				Mutex.lock();
 				objs.push_back(newCircle);
-				Mutex.unlock();
-			} else if (bmPlay.HitObjects[showHitObj.front].type & 2) { // slider
-				Object::Slider *newSlider = new Object::Slider(&bmPlay.HitObjects[showHitObj.front]);
-				newSlider->StartPreemptState();
-
-				Mutex.lock();
-				objs.push_back(newSlider);
 				Mutex.unlock();
 			}
 		}
@@ -187,13 +179,9 @@ void draw() {
 	
 
 	Mutex.lock();
-	for (int i = 0; i < 5; i++) {  //Loop for select layer
-		Object::Container::renderLayer = i;
-		std::deque<Object::Container*>::reverse_iterator rit = objs.rbegin();
-		for (rit = objs.rbegin(); rit != objs.rend(); ++rit) {
-			win->m_window.draw(**rit, transform);
-		}
-	}
+	std::deque<Object::Container*>::reverse_iterator rit = objs.rbegin();
+	for (rit = objs.rbegin(); rit != objs.rend(); ++rit)
+		win->m_window.draw(**rit, transform);
 	Mutex.unlock();
 
 

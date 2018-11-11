@@ -95,6 +95,8 @@ namespace Beatmap {
 			float pixelLength;
 			std::string edgeHitsounds;
 			std::string edgeAddition;
+
+			sf::VertexArray lineThinkness;
 			sf::Vector2f endPoint;
 		} sliders;
 

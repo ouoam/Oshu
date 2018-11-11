@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <vector>
+#include <iostream>
 #include <SFML/Graphics.hpp>
 
 #include <../../Library/clipper_ver6.4.2/cpp/clipper.hpp>
@@ -88,6 +89,14 @@ namespace sf
 			}
 			output.append(sf::Vertex(sf::Vector2f(path[0].X / 10.0, path[0].Y / 10.0)));
 		}
+
+		//std::cout << points.getVertexCount() << "\t";
+		//std::cout << in.size() << "\t";
+		//std::cout << sol.size() << "\t";
+
+		//for (ClipperLib::Path path : sol)
+		//	std::cout << path.size() << "\t";
+		//std::cout << std::endl;
 
 		return output;
 	}

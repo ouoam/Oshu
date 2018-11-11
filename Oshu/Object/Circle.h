@@ -56,8 +56,10 @@ public:
 		circle.fadeTo(255, hitObject->TimeFadeIn).then();
 		circle.fadeTo(255, 0).then().expire();
 
+
 		circleOverlay.fadeTo(255, hitObject->TimeFadeIn).then();
 		circleOverlay.fadeTo(255, 0).then().expire();
+
 
 		approach.fadeTo(255, std::min(hitObject->TimeFadeIn, hitObject->TimePreempt));
 		approach.scaleTo(1.1, hitObject->TimePreempt).then();
@@ -67,17 +69,9 @@ public:
 private:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		states.transform *= getTransform();
-		switch (renderLayer) {
-		case 0:
-			target.draw(circle, states);
-			break;
-		case 1:
-			target.draw(circleOverlay, states);
-			break;
-		case 2:
-			target.draw(approach, states);
-			break;
-		}
+		target.draw(circle, states);
+		target.draw(circleOverlay, states);
+		target.draw(approach, states);
 	}
 };
 
