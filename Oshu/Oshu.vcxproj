@@ -150,10 +150,7 @@
     <ClInclude Include="Object\Circle.h" />
     <ClInclude Include="Object\Cursor.h" />
     <ClInclude Include="Object\Container.h" />
-    <ClInclude Include="Object\Pieces\ApproachCircle.h" />
-    <ClInclude Include="Object\Pieces\CirclePiece.h" />
-    <ClInclude Include="Object\Pieces\SliderBall.h" />
-    <ClInclude Include="Object\Pieces\SliderBody.h" />
+    <ClInclude Include="Object\Pieces.h" />
     <ClInclude Include="Overlay\hitwindows.h" />
     <ClInclude Include="Skin\Skin.h" />
     <ClInclude Include="UI\Playfield.h" />

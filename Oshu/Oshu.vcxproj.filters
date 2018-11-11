@@ -28,9 +28,6 @@
     <Filter Include="Header Files\Object">
       <UniqueIdentifier>{e43ec74a-c3f4-47f1-b652-7a3859b2a413}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Object\Pieces">
-      <UniqueIdentifier>{66c89131-f79b-4b02-ad1f-1f6e021376dc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Object\Animate">
       <UniqueIdentifier>{2917378c-f4c4-4ffb-b19c-ccd24004a25e}</UniqueIdentifier>
     </Filter>
@@ -86,18 +83,6 @@
     <ClInclude Include="Utility\file.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Object\Pieces\ApproachCircle.h">
-      <Filter>Header Files\Object\Pieces</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\Pieces\CirclePiece.h">
-      <Filter>Header Files\Object\Pieces</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\Pieces\SliderBody.h">
-      <Filter>Header Files\Object\Pieces</Filter>
-    </ClInclude>
-    <ClInclude Include="Object\Pieces\SliderBall.h">
-      <Filter>Header Files\Object\Pieces</Filter>
-    </ClInclude>
     <ClInclude Include="Object\Animate\Easing.h">
       <Filter>Header Files\Object\Animate</Filter>
     </ClInclude>
@@ -121,6 +106,9 @@
     </ClInclude>
     <ClInclude Include="UI\testZone.h">
       <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Pieces.h">
+      <Filter>Header Files\Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <vector>
+#include <deque>
 
 #include <SFML/System.hpp>
 
@@ -14,7 +14,7 @@ namespace UI {
 
 Object::Cursor *cur;
 
-std::vector<Object::Container*> objs;
+std::deque<Object::Container*> objs;
 
 sf::Mutex Mutex;
 
@@ -34,7 +34,7 @@ void OnPressed(sf::Event event) {
 	sf::Vector2i temp = sf::Mouse::getPosition(win->m_window);
 	
 	Object::Circle *newCircle = new Object::Circle();
-	newCircle->setPosition(sf::Vector2f(temp) + sf::Vector2f(-60, 0));
+	newCircle->setPosition(sf::Vector2f(temp));
 	newCircle->StartPreemptState();
 
 	Mutex.lock();
@@ -50,7 +50,7 @@ void update() {
 	cur->update();
 
 	Mutex.lock();
-	std::vector<Object::Container*>::iterator it = objs.begin();
+	std::deque<Object::Container*>::iterator it = objs.begin();
 	while (it != objs.end()) {
 		(**it).update();
 
@@ -70,13 +70,16 @@ void update() {
 }
 
 void draw() {
-	win->m_window.draw(*cur);
+	
 
 	Mutex.lock();
 	for (auto obj : objs) {
 		win->m_window.draw(*obj);
 	}
 	Mutex.unlock();
+
+
+	win->m_window.draw(*cur);
 
 }
 
