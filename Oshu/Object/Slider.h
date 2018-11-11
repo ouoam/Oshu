@@ -25,7 +25,7 @@ public:
 		sliderBody.setVertex(lineThinkness);
 
 		sliderBody.fadeTo(0);
-		sliderBody.colorTo(sf::Color(255, 0, 0));
+		sliderBody.colorTo(sf::Color(128, 0, 0));
 		sliderBody.update();
 
 		sliderBody.setOutlineThickness(-5);
@@ -42,7 +42,8 @@ public:
 
 	void StartPreemptState() {
 		sliderBody.fadeTo(255, hitObject->TimeFadeIn).then();
-		sliderBody.fadeTo(255, 0).then().expire();
+		sliderBody.fadeTo(255, hitObject->TimePreempt).then();
+		sliderBody.fadeTo(0, 500).expire();
 
 		circle->StartPreemptState();
 	}

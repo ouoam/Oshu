@@ -29,7 +29,7 @@ public:
 		circle.scale(sf::Vector2f(scale, scale));
 		circle.setScaleFromNow();
 		circle.fadeTo(0);
-		circle.colorTo(sf::Color(255, 0, 0));
+		circle.colorTo(sf::Color(128, 0, 0));
 		circle.update();
 
 		circleOverlay.scale(sf::Vector2f(scale, scale));
@@ -54,14 +54,17 @@ public:
 
 	void StartPreemptState() {
 		circle.fadeTo(255, hitObject->TimeFadeIn).then();
-		circle.fadeTo(255, 0).then().expire();
+		circle.fadeTo(255, hitObject->TimePreempt).then();
+		circle.fadeTo(0,500).expire();
 
 		circleOverlay.fadeTo(255, hitObject->TimeFadeIn).then();
-		circleOverlay.fadeTo(255, 0).then().expire();
+		circleOverlay.fadeTo(255, hitObject->TimePreempt).then();
+		circleOverlay.fadeTo(0, 500).expire();
 
 		approach.fadeTo(255, std::min(hitObject->TimeFadeIn, hitObject->TimePreempt));
 		approach.scaleTo(1.1, hitObject->TimePreempt).then();
-		approach.fadeTo(255, 0).then().expire();
+		approach.fadeTo(255, hitObject->TimePreempt).then();
+		approach.fadeTo(0, 500).expire();
 	}
 
 private:
