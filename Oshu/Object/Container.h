@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SFML/Graphics.hpp>
+
 namespace Object {
 
 class Container : public sf::Drawable, public sf::Transformable {
@@ -13,6 +15,8 @@ public:
 	virtual void StartPreemptState() {};
 
 	bool willBeRemove = false;
+
+	static int renderLayer;
 };
 
 }

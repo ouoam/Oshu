@@ -140,6 +140,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object\Animate\Animate.cpp" />
     <ClCompile Include="Object\Animate\Easing.cpp" />
+    <ClCompile Include="Object\Container.cpp" />
     <ClCompile Include="old--temp.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -151,6 +152,7 @@
     <ClInclude Include="Object\Cursor.h" />
     <ClInclude Include="Object\Container.h" />
     <ClInclude Include="Object\Pieces.h" />
+    <ClInclude Include="Object\Slider.h" />
     <ClInclude Include="Overlay\hitwindows.h" />
     <ClInclude Include="Skin\Skin.h" />
     <ClInclude Include="UI\Playfield.h" />
