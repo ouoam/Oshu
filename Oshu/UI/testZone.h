@@ -168,15 +168,9 @@ void update() {
 
 		if ((**it).willBeRemove) {
 			delete *it;  // Because I use new for Object::Circle
-
 			it = objs.erase(it);
-			if (it != objs.begin()) {
-				it = std::prev(it);
-			}
 		}
-		else {
-			++it;
-		}
+		else ++it;
 	}
 	Mutex.unlock();
 }

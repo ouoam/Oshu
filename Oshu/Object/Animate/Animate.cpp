@@ -58,12 +58,6 @@ void Animate::update() {
 
 					// Thank https://stackoverflow.com/questions/15042942/vector-iterators-incompatible-while-erase-from-vector
 					it = (*front).erase(it);
-
-					if (it != (*front).begin())
-					{
-						it = std::prev(it);
-					}
-							
 				} else {
 					float tempScale;
 					switch (it->todo) {
@@ -227,15 +221,8 @@ void AnimeSprite::update() {
 					}
 
 					// Thank https://stackoverflow.com/questions/15042942/vector-iterators-incompatible-while-erase-from-vector
-					if (willErase) {
-						it = (*front).erase(it);
-
-						if (it != (*front).begin()) {
-							it = std::prev(it);
-						}
-					} else {
-						++it;
-					}
+					if (willErase) it = (*front).erase(it);
+					else ++it;
 
 				} else {
 					sf::Color tempColor = getColor();
