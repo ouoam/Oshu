@@ -3,18 +3,16 @@
 #include "../Animate/Animate.h"
 #include "../../Skin/Skin.h"
 
+#include <iostream>
+
 namespace Object {
 
 namespace Pieces {
 
-class CirclePiece : public Animate::AnimeSprite {
+class CirclePiece : public Object::Animate::AnimeSprite {
 
 public:
-	CirclePiece() {
-		sf::Vector2u size = Skin::Hitcircle::hitcircle.getSize();
-		setTexture(Skin::Hitcircle::hitcircle);
-		setOrigin(size.x / 2.0, size.y / 2.0);
-	}
+	CirclePiece() : AnimeSprite(Skin::Hitcircle::hitcircle) {}
 };
 
 }

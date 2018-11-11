@@ -1,4 +1,5 @@
 #include "Animate.h"
+#include <iostream>
 
 namespace Object {
 
@@ -22,7 +23,7 @@ void Animate::update() {
 
 	Mutex.lock();
 
-	if (!timeline.empty()) {
+	while (!timeline.empty()) {
 		uint32_t elapsed = stTime.getElapsedTime().asMilliseconds();
 
 		std::vector<toChange> *front;
@@ -61,7 +62,6 @@ void Animate::update() {
 					if (it != (*front).begin())
 					{
 						it = std::prev(it);
-						continue;
 					}
 							
 				} else {
@@ -93,6 +93,8 @@ void Animate::update() {
 		if (timeline.front().empty()) {
 			stTime.restart();
 			timeline.pop();
+		} else {
+			break;
 		}
 	}
 
@@ -179,16 +181,16 @@ Animate &Animate::setScaleFromNow() {
 }
 
 
-AnimeSprite::AnimeSprite() :
+AnimeSprite::AnimeSprite() : 
+	Animate(),
 	m_texture(NULL),
 	m_textureRect() {}
 
-AnimeSprite::AnimeSprite(const sf::Texture& texture) :
+AnimeSprite::AnimeSprite(const sf::Texture& texture) : 
+	Animate(),
 	m_texture(NULL),
 	m_textureRect() {
 	setTexture(texture);
-	stColor = getColor();
-	stOpacity = getColor().a;
 }
 
 void AnimeSprite::update() {
@@ -196,7 +198,7 @@ void AnimeSprite::update() {
 
 	Mutex.lock();
 
-	if (!timeline.empty()) {
+	while (!timeline.empty()) {
 		uint32_t elapsed = stTime.getElapsedTime().asMilliseconds();
 
 		std::vector<toChange> *front;
@@ -230,7 +232,6 @@ void AnimeSprite::update() {
 
 						if (it != (*front).begin()) {
 							it = std::prev(it);
-							continue;
 						}
 					} else {
 						++it;
@@ -238,7 +239,6 @@ void AnimeSprite::update() {
 
 				} else {
 					sf::Color tempColor = getColor();
-					float tempScale;
 					switch (it->todo) {
 					case Color:
 						setColor(doApply(stColor, it->to.color, elapsed, it->duration, it->easing));
@@ -254,9 +254,11 @@ void AnimeSprite::update() {
 			}
 		}
 
-		if (timeline.front().empty()) {
+		if ((*front).empty()) {
 			stTime.restart();
 			timeline.pop();
+		} else {
+			break;
 		}
 	}
 
@@ -289,6 +291,12 @@ void AnimeSprite::setTexture(const sf::Texture& texture, bool resetRect) {
 
 	// Assign the new texture
 	m_texture = &texture;
+
+	stColor = getColor();
+	stOpacity = getColor().a;
+
+	sf::Vector2u size = texture.getSize();
+	setOrigin(size.x / 2.0, size.y / 2.0);
 }
 
 

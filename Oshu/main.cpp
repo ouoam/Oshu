@@ -17,7 +17,10 @@
 #include "Object/Animate/Animate.h"
 #include "Skin/Skin.h"
 
-#include "UI/Playfield.h"
+
+
+//#include "UI/Playfield.h"
+#include "UI/testZone.h"
 
 
 void renderingThread(sf::RenderWindow* window)
@@ -41,12 +44,13 @@ void renderingThread(sf::RenderWindow* window)
 
 int main()
 {
+	
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
 	sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!", sf::Style::Titlebar | sf::Style::Close, settings);
 	window.setMouseCursorVisible(false);
-	window.setFramerateLimit(60);
-	window.setVerticalSyncEnabled(true);
+	window.setFramerateLimit(120);
+	//window.setVerticalSyncEnabled(true);
 	window.setKeyRepeatEnabled(false);
 
 	Skin::load();

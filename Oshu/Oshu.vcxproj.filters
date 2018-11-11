@@ -119,5 +119,8 @@
     <ClInclude Include="Object\Container.h">
       <Filter>Header Files\Object</Filter>
     </ClInclude>
+    <ClInclude Include="UI\testZone.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

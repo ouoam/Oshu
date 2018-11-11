@@ -96,9 +96,9 @@ public:
 
 	virtual void update();
 
-	AnimeSprite &colorTo(sf::Color color, uint32_t duration, Easing easing);
+	AnimeSprite &colorTo(sf::Color color, uint32_t duration = 0, Easing easing = None);
 
-	AnimeSprite &fadeTo(uint8_t opacity, uint32_t duration, Easing easing);
+	AnimeSprite &fadeTo(uint8_t opacity, uint32_t duration = 0, Easing easing = None);
 
 
 	////////////////////////////////////////////////////////////
