@@ -321,6 +321,12 @@ void AnimeSprite::setColor(const sf::Color& color) {
 
 
 ////////////////////////////////////////////////////////////
+const sf::Texture* AnimeSprite::getTexture() const {
+	return m_texture;
+}
+
+
+////////////////////////////////////////////////////////////
 const sf::Color& AnimeSprite::getColor() const {
 	return m_vertices[0].color;
 }

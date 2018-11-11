@@ -1,10 +1,12 @@
 #pragma once
 
+#include <algorithm>
 #include <SFML/Graphics.hpp>
 
 #include "Container.h"
 #include "Animate/Animate.h"
 #include "../Skin/Skin.h"
+#include "../Beatmap/Beatmap.h"
 
 #include "Pieces.h"
 
@@ -14,14 +16,28 @@ class Circle : public Container {
 
 	Pieces::CirclePiece circle;
 	Pieces::ApproachCircle approach;
+	Pieces::CircleOverlay circleOverlay;
+
+	Beatmap::bmHitObjects *hitObject;
 
 public:
-	Circle() {
-		circle.scale(sf::Vector2f(0.4, 0.4));
+	Circle(Beatmap::bmHitObjects *HitObject) : hitObject(HitObject) {
+		setPosition(sf::Vector2f(hitObject->position));
+		sf::Vector2u size = circle.getTexture()->getSize();
+		float scale = (float)hitObject->CR / (float)std::min(size.x, size.y);
+
+		circle.scale(sf::Vector2f(scale, scale));
 		circle.setScaleFromNow();
 		circle.fadeTo(0);
+		circle.colorTo(sf::Color(255, 0, 0));
 		circle.update();
-		approach.scale(sf::Vector2f(0.4, 0.4));
+
+		circleOverlay.scale(sf::Vector2f(scale, scale));
+		circleOverlay.setScaleFromNow();
+		circleOverlay.fadeTo(0);
+		circleOverlay.update();
+
+		approach.scale(sf::Vector2f(scale, scale));
 		approach.setScaleFromNow();
 		approach.scaleTo(4);
 		approach.fadeTo(0);
@@ -30,26 +46,32 @@ public:
 
 	void update() {
 		circle.update();
+		circleOverlay.update();
 		approach.update();
 
-		willBeRemove = circle.willBeRemove && approach.willBeRemove;
+		willBeRemove = circle.willBeRemove && approach.willBeRemove && circleOverlay.willBeRemove;
 	}
 
 	void StartPreemptState() {
-		circle.fadeTo(255, 400).then();
-		//circle.fadeTo(255, 2000).then().expire();
-		approach.fadeTo(255, 600);
-		approach.scaleTo(1.1, 600).then();
-		//approach.fadeTo(255, 2000).then().expire();
+		circle.fadeTo(255, hitObject->TimeFadeIn).then();
+		circle.fadeTo(255, 0).then().expire();
+
+
+		circleOverlay.fadeTo(255, hitObject->TimeFadeIn).then();
+		circleOverlay.fadeTo(255, 0).then().expire();
+
+
+		approach.fadeTo(255, std::min(hitObject->TimeFadeIn, hitObject->TimePreempt));
+		approach.scaleTo(1.1, hitObject->TimePreempt).then();
+		approach.fadeTo(255, 0).then().expire();
 	}
 
 private:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		states.transform *= getTransform();
 		target.draw(circle, states);
+		target.draw(circleOverlay, states);
 		target.draw(approach, states);
-		//target.draw(circle);
-		//target.draw(approach);
 	}
 };
 

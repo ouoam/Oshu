@@ -17,6 +17,11 @@ public:
 	CirclePiece() : AnimeSprite(Skin::Hitcircle::hitcircle) {}
 };
 
+class CircleOverlay : public Object::Animate::AnimeSprite {
+public:
+	CircleOverlay() : AnimeSprite(Skin::Hitcircle::hitcircleoverlay) {}
+};
+
 }
 
 }

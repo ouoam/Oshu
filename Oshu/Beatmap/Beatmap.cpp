@@ -10,7 +10,12 @@
 #include "../Utility/CircularArc.h"
 #include "../Utility/lineThinkness.h"
 
+
 namespace Beatmap {
+
+	int bmHitObjects::TimePreempt = 600;
+	int bmHitObjects::TimeFadeIn = 400;
+	int bmHitObjects::CR = 5;
 
 	void Beatmap::load(std::string file) {
 		std::string line;
@@ -211,7 +216,9 @@ namespace Beatmap {
 				Difficulty.SliderTickRate = stof(value);
 			}
 
-			Difficulty.CircleRadius = 32 * (1 - 0.7 * (Difficulty.CircleSize - 5) / 5);
+			Difficulty.CircleRadius = 128.0 * (1.0 - 0.7 * (Difficulty.CircleSize - 5.0) / 5.0) / 2.0;
+
+			//Scale = (1.0f - 0.7f * (difficulty.CircleSize - 5) / 5) / 2;
 		}
 	}
 

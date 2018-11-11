@@ -53,7 +53,7 @@ namespace Beatmap {
 		float SliderMultiplier;
 		float SliderTickRate;
 
-		int CircleRadius;
+		float CircleRadius;
 	};
 
 	struct nmEvents {
@@ -101,6 +101,10 @@ namespace Beatmap {
 		} sliders;
 
 		int endTime;
+
+		static int TimePreempt;
+		static int TimeFadeIn;
+		static int CR;
 	};
 
 	class Beatmap {
