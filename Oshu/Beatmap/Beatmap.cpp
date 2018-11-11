@@ -8,7 +8,6 @@
 #include "../Utility/string.h"
 #include "../Utility/BezierApproximator.h"
 #include "../Utility/CircularArc.h"
-#include "../Utility/lineThinkness.h"
 
 
 namespace Beatmap {
@@ -343,8 +342,6 @@ namespace Beatmap {
 				{
 					bmho.sliders.curvePoints = BezierApproximator(curvePoints).CreateBezier();
 				}
-
-				bmho.sliders.lineThinkness = GenerateTrianglesStrip(bmho.sliders.curvePoints, Difficulty.CircleRadius * 2);
 
 				getline(str, value, ',');
 				bmho.sliders.repeat = stoi(value);
