@@ -27,10 +27,9 @@ public:
 		sliderBody.colorTo(sf::Color(128, 0, 0));
 		sliderBody.update();
 
-		//sliderBody.setOutlineThickness(5);
+		sliderBody.setOutlineThickness(5);
 
 		circle = new Circle(HitObject);
-		
 	}
 
 	void update() {

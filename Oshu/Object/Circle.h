@@ -67,10 +67,10 @@ public:
 
 	void onMouseClick(uint8_t key) {
 		approach.fadeTo(1).fadeTo(0, 50).then().expire();
-		circle.fadeTo(0, 800).scaleTo(1)
-			.scaleTo(1.5f, 400, Object::Animate::Easing::OutQuad).then().expire();
-		circleOverlay.fadeTo(0, 800).scaleTo(1)
-			.scaleTo(1.5f, 400, Object::Animate::Easing::OutQuad).then().expire();
+		circle.fadeTo(0, 400).scaleTo(1)
+			.scaleTo(1.5f, 200, Object::Animate::Easing::OutQuad).then().expire();
+		circleOverlay.fadeTo(0, 400).scaleTo(1)
+			.scaleTo(1.5f, 200, Object::Animate::Easing::OutQuad).then().expire();
 		canClick = false;
 	}
 

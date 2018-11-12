@@ -662,10 +662,10 @@ void AnimeShape::updateOutline() {
 
 		// Make sure that the normals point towards the outside of the shape
 		// (this depends on the order in which the points were defined)
-		if (dotProduct(n1, m_vertices[0].position - p1) > 0)
-			n1 = -n1;
-		if (dotProduct(n2, m_vertices[0].position - p1) > 0)
-			n2 = -n2;
+		//if (dotProduct(n1, m_vertices[0].position - p1) > 0)
+		//	n1 = -n1;
+		//if (dotProduct(n2, m_vertices[0].position - p1) > 0)
+		//	n2 = -n2;
 
 		// Combine them to get the extrusion direction
 		float factor = 1.f + (n1.x * n2.x + n1.y * n2.y);

@@ -3,7 +3,7 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 
-#include <../../Library/clipper_ver6.4.2/cpp/clipper.hpp>
+#include "../Library/clipper_ver6.4.2/cpp/clipper.hpp"
 
 namespace sf
 {
