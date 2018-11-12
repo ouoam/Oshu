@@ -16,6 +16,7 @@ public:
 	virtual void StartPreemptState() {};
 
 	bool willBeRemove = false;
+	bool canClick = true;
 
 	static int renderLayer;
 

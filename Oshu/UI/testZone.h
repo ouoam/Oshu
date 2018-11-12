@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <deque>
+#include <cmath>
 
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
@@ -59,8 +60,12 @@ void load(sf::RenderWindow& window) {
 	cur = new Object::Cursor(window);
 
 
+	//std::string base_dir = "resource/150945 Knife Party - Centipede/";
+	//bmPlay.load(base_dir + "Knife Party - Centipede (Sugoi-_-Desu) [This isn't a map, just a simple visualisation].osu");
+	
+
 	std::string base_dir = "resource/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/";
-	bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [Smoothie World's Extra].osu");
+	bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [Rocket's Easy].osu");
 
 	loadHitSound(&bmPlay, base_dir);
 
@@ -89,16 +94,33 @@ void load(sf::RenderWindow& window) {
 		return; // error
 	music.setVolume(50);
 	music.play();
+
+
+	//music.setPlayingOffset(sf::seconds(40));
 }
 
 void OnPressed(sf::Event event) {
 	cur->onMouseDown(event.key.code);
 	
 	Mutex.lock();
+
+	sf::Vector2f click = sf::Vector2f(sf::Mouse::getPosition(win->m_window));
+
 	std::deque<Object::Container*>::iterator it = objs.begin();
 	while (it != objs.end()) {
-		(**it).update();
+		if ((*it)->canClick) {
+			sf::Vector2f offset = click - transform.transformPoint(sf::Vector2f((*it)->hitObject->position));
 
+			std::cout << offset.x << "\t" << offset.y << std::endl;
+
+			float dist = sqrt(offset.x * offset.x + offset.y * offset.y);
+
+			if (dist <= ((*it)->hitObject->CR) / 2) {
+				std::cout << (int)dist << "hit\n";
+				(*it)->onMouseClick(event.key.code);
+				break;
+			}
+		}
 		++it;
 	}
 	Mutex.unlock();

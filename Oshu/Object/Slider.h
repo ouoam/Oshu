@@ -27,7 +27,7 @@ public:
 		sliderBody.colorTo(sf::Color(128, 0, 0));
 		sliderBody.update();
 
-		sliderBody.setOutlineThickness(5);
+		//sliderBody.setOutlineThickness(5);
 
 		circle = new Circle(HitObject);
 		
@@ -45,6 +45,11 @@ public:
 		sliderBody.fadeTo(0, 500).expire();
 
 		circle->StartPreemptState();
+	}
+
+	void onMouseClick(uint8_t key) {
+		circle->onMouseClick(key);
+		canClick = circle->canClick;
 	}
 
 private:

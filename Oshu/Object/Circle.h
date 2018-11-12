@@ -65,6 +65,15 @@ public:
 		approach.fadeTo(0, 500).expire();
 	}
 
+	void onMouseClick(uint8_t key) {
+		approach.fadeTo(1).fadeTo(0, 50).then().expire();
+		circle.fadeTo(0, 800).scaleTo(1)
+			.scaleTo(1.5f, 400, Object::Animate::Easing::OutQuad).then().expire();
+		circleOverlay.fadeTo(0, 800).scaleTo(1)
+			.scaleTo(1.5f, 400, Object::Animate::Easing::OutQuad).then().expire();
+		canClick = false;
+	}
+
 private:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		states.transform *= getTransform();
