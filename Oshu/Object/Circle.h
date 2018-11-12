@@ -18,10 +18,8 @@ class Circle : public Container {
 	Pieces::ApproachCircle approach;
 	Pieces::CircleOverlay circleOverlay;
 
-	Beatmap::bmHitObjects *hitObject;
-
 public:
-	Circle(Beatmap::bmHitObjects *HitObject) : hitObject(HitObject) {
+	Circle(Beatmap::bmHitObjects *HitObject) : Container(HitObject) {
 		setPosition(sf::Vector2f(hitObject->position));
 		sf::Vector2u size = circle.getTexture()->getSize();
 		float scale = (float)hitObject->CR / (float)std::min(size.x, size.y);

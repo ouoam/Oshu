@@ -394,10 +394,10 @@ void AnimeShape::update() {
 		if (!(*front).empty()) {
 			std::vector<toChange>::iterator it = (*front).begin();
 			while (it != (*front).end()) {
+				sf::Color tempColor = getFillColor();
+				sf::Color tempColorO = getOutlineColor();
 				if (it->duration <= elapsed) {
 					bool willErase = false;
-					sf::Color tempColor = getFillColor();
-
 					switch (it->todo) {
 					case Color:
 						setFillColor(it->to.color);
@@ -406,7 +406,9 @@ void AnimeShape::update() {
 						break;
 					case Opacity:
 						tempColor.a = it->to.opacity;
+						tempColorO.a = tempColor.a;
 						setFillColor(tempColor);
+						setOutlineColor(tempColorO);
 						stOpacity = it->to.opacity;
 						willErase = true;
 						break;
@@ -418,16 +420,17 @@ void AnimeShape::update() {
 
 				}
 				else {
-					sf::Color tempColor = getFillColor();
 					switch (it->todo) {
 					case Color:
 						setFillColor(doApply(stColor, it->to.color, elapsed, it->duration, it->easing));
 						break;
 					case Opacity:
 						tempColor.a = doApply(stOpacity, it->to.opacity, elapsed, it->duration, it->easing);
+						tempColorO.a = tempColor.a;
 						//std::cout << stOpacity << "\t" << it->to.opacity << "\t" << elapsed << "\t" << it->duration << "\t" << tempColor.a << std::endl;
 						//std::cout << (int)tempColor.r << "\t" << (int)tempColor.g << "\t" << (int)tempColor.b << "\t" << (int)tempColor.a << std::endl;
 						setFillColor(tempColor);
+						setOutlineColor(tempColorO);
 						break;
 					}
 

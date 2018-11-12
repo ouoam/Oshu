@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "../Beatmap/Beatmap.h"
 
 namespace Object {
 
@@ -17,6 +18,10 @@ public:
 	bool willBeRemove = false;
 
 	static int renderLayer;
+
+	Beatmap::bmHitObjects *hitObject;
+
+	Container(Beatmap::bmHitObjects *HitObject) : hitObject(HitObject) {}
 };
 
 }

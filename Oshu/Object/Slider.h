@@ -14,21 +14,20 @@
 namespace Object {
 
 class Slider : public Container {
-	Beatmap::bmHitObjects *hitObject;
 	Animate::AnimeShape sliderBody;
 
 	Circle *circle;
 
 public:
-	Slider(Beatmap::bmHitObjects *HitObject) : hitObject(HitObject) {
-		lineThinkness = GenerateTrianglesStrip(hitObject->sliders.curvePoints, hitObject->CR);
+	Slider(Beatmap::bmHitObjects *HitObject) : Container(HitObject) {
+		lineThinkness = GenerateTrianglesStrip(hitObject->sliders.curvePoints, hitObject->CR - 5);
 		sliderBody.setVertex(lineThinkness);
 
 		sliderBody.fadeTo(0);
 		sliderBody.colorTo(sf::Color(128, 0, 0));
 		sliderBody.update();
 
-		sliderBody.setOutlineThickness(-5);
+		sliderBody.setOutlineThickness(5);
 
 		circle = new Circle(HitObject);
 		

@@ -22,7 +22,7 @@ class Cursor : public Container {
 
 public:
 
-	Cursor(sf::RenderWindow& window) : m_window(window)  {
+	Cursor(sf::RenderWindow& window) : m_window(window) , Container(0){
 		sf::Vector2u size = Skin::Cursor::cursor.getSize();
 		mou.setTexture(Skin::Cursor::cursor);
 		mou.setOrigin(size.x / 2.0, size.y / 2.0);

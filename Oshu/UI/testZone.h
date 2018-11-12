@@ -60,7 +60,7 @@ void load(sf::RenderWindow& window) {
 
 
 	std::string base_dir = "resource/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/";
-	bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [ReFaller's Hard].osu");
+	bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [Smoothie World's Extra].osu");
 
 	loadHitSound(&bmPlay, base_dir);
 
@@ -75,7 +75,7 @@ void load(sf::RenderWindow& window) {
 		Beatmap::bmHitObjects::TimePreempt = 1200 + 600 * (5 - AR) / 5;
 		Beatmap::bmHitObjects::TimeFadeIn = 800 + 400 * (5 - AR) / 5;
 	}
-	else if (bmPlay.Difficulty.ApproachRate > 5) {
+	else if (AR > 5) {
 		Beatmap::bmHitObjects::TimePreempt = 1200 - 750 * (AR - 5) / 5;
 		Beatmap::bmHitObjects::TimeFadeIn = 800 - 500 * (AR - 5) / 5;
 	}
@@ -93,6 +93,15 @@ void load(sf::RenderWindow& window) {
 
 void OnPressed(sf::Event event) {
 	cur->onMouseDown(event.key.code);
+	
+	Mutex.lock();
+	std::deque<Object::Container*>::iterator it = objs.begin();
+	while (it != objs.end()) {
+		(**it).update();
+
+		++it;
+	}
+	Mutex.unlock();
 }
 
 void OnReleased(sf::Event event) {
