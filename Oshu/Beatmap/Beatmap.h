@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 
+
 #include <SFML/Graphics.hpp>
 
 namespace Beatmap {
@@ -106,7 +107,7 @@ namespace Beatmap {
 	};
 
 	class Beatmap {
-		std::ifstream bmFile;
+		FILE * bmFile;
 		void bmProGeneral();
 		void bmProEditor();
 		void bmProMetadata();
@@ -115,6 +116,8 @@ namespace Beatmap {
 		void bmProTimingPoints();
 		void bmProColours();
 		void bmProHitObjects(bool calcCurve);
+
+		char * buffer = nullptr;
 
 	public:
 		struct bmGeneral General;

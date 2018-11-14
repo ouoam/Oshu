@@ -18,9 +18,9 @@ namespace Beatmap {
 
 	void Beatmap::load(std::string file, bool calcCurve) {
 		std::string line;
-		bmFile.open(file);
-		if (bmFile.is_open()) {
-			while (getline(bmFile, line)) {
+		bmFile = fopen(file.c_str(), "r");
+		if (bmFile != NULL) {
+			while (getline(buffer, 0, bmFile)) {
 				if (line.compare(0, 2, "//") == 0) {
 					// This Line Is Comment
 					continue;
@@ -53,7 +53,7 @@ namespace Beatmap {
 					}
 				}
 			}
-			bmFile.close();
+			fclose(bmFile);
 		}
 	}
 
@@ -382,8 +382,9 @@ namespace Beatmap {
 				getline(str, value, ':');
 				bmho.extras.filename = value;
 			}
-
-			HitObjects.push_back(bmho);
+			if (calcCurve) {
+				HitObjects.push_back(bmho);
+			}
 			getline(bmFile, line);
 		}
 	}
