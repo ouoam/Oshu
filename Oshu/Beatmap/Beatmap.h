@@ -3,6 +3,10 @@
 #include <string>
 #include <vector>
 #include <fstream>
+<<<<<<< HEAD
+=======
+
+>>>>>>> parent of a381f4a... Merge branch 'master' of https://github.com/ouoam/Oshu
 
 #include <SFML/Graphics.hpp>
 
