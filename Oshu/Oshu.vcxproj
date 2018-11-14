@@ -157,6 +157,7 @@
     <ClInclude Include="Object\Pieces.h" />
     <ClInclude Include="Object\Slider.h" />
     <ClInclude Include="Overlay\hitwindows.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Skin\Skin.h" />
     <ClInclude Include="UI\Playfield.h" />
     <ClInclude Include="UI\testZone.h" />
@@ -165,6 +166,12 @@
     <ClInclude Include="Utility\file.h" />
     <ClInclude Include="Utility\lineThinkness.h" />
     <ClInclude Include="Utility\string.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
