@@ -14,13 +14,11 @@ protected:
 
 	std::string openFile = "";
 
-	bool haveErr(std::string in = "", bool closeIfErr = true) {
+	bool haveErr(std::string in = "") {
 		if (rc != SQLITE_OK) {
 			std::cerr << "Error SQLite3 database: " << in << " : " << sqlite3_errmsg(db) << std::endl << std::endl;
-			if (closeIfErr) {
-				sqlite3_close(db);
-				isOpen = false;
-			}
+			sqlite3_close(db);
+			isOpen = false;
 			return true;
 		}
 		return false;
@@ -33,20 +31,9 @@ protected:
 		return isOpen;
 	}
 
-	int countRow(sqlite3_stmt *stmt) {
-		int count = 0;
-		while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
-			count++;
-			if (haveErr("update result")) return 1;
-		}
-
-		sqlite3_reset(stmt);
-		sqlite3_clear_bindings(stmt);
-
-		return count;
-	}
-
 public:
+	std::string path = "";
+
 	int open(std::string dbFile = "") {
 		if (dbFile == "") dbFile = openFile;
 
