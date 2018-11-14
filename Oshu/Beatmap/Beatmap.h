@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <cstdlib>
+#include <cstdio>
 
 
 #include <SFML/Graphics.hpp>
