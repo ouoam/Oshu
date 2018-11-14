@@ -37,6 +37,9 @@
     <Filter Include="Header Files\UI">
       <UniqueIdentifier>{3b2563bd-9b7c-4538-ae4d-841debd96977}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\DB">
+      <UniqueIdentifier>{1adfd02f-af69-417c-a6a7-ee06b8889fd2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -115,6 +118,12 @@
     </ClInclude>
     <ClInclude Include="Object\Slider.h">
       <Filter>Header Files\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="DB\DB.h">
+      <Filter>Header Files\DB</Filter>
+    </ClInclude>
+    <ClInclude Include="DB\beatmap.h">
+      <Filter>Header Files\DB</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

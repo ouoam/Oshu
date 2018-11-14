@@ -65,7 +65,7 @@ void load(sf::RenderWindow& window) {
 	
 
 	std::string base_dir = "resource/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/";
-	bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [Rocket's Easy].osu");
+	bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [ReFaller's Hard].osu");
 
 	loadHitSound(&bmPlay, base_dir);
 

@@ -46,14 +46,14 @@ namespace Beatmap {
 	};
 
 	struct bmDifficulty {
-		float HPDrainRate;
-		float CircleSize;
-		float OverallDifficulty;
-		float ApproachRate;
-		float SliderMultiplier;
-		float SliderTickRate;
+		double HPDrainRate;
+		double CircleSize;
+		double OverallDifficulty;
+		double ApproachRate;
+		double SliderMultiplier;
+		double SliderTickRate;
 
-		float CircleRadius;
+		double CircleRadius;
 	};
 
 	struct nmEvents {
@@ -114,7 +114,7 @@ namespace Beatmap {
 		void bmProEvents();
 		void bmProTimingPoints();
 		void bmProColours();
-		void bmProHitObjects();
+		void bmProHitObjects(bool calcCurve);
 
 	public:
 		struct bmGeneral General;
@@ -129,9 +129,13 @@ namespace Beatmap {
 		int iTimingPoints = 0;
 		int iHitObjects = 0;
 
-		void load(std::string);
-		Beatmap(std::string file) {
-			load(file);
+		int nHitcircles = 0;
+		int nSlider = 0;
+		int nSplinners = 0;
+
+		void load(std::string, bool calcCurve = true);
+		Beatmap(std::string file, bool calcCurve = true) {
+			load(file, calcCurve);
 		}
 		Beatmap() {}
 	};

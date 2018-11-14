@@ -16,7 +16,7 @@ namespace Beatmap {
 	int bmHitObjects::TimeFadeIn = 400;
 	int bmHitObjects::CR = 5;
 
-	void Beatmap::load(std::string file) {
+	void Beatmap::load(std::string file, bool calcCurve) {
 		std::string line;
 		bmFile.open(file);
 		if (bmFile.is_open()) {
@@ -49,7 +49,7 @@ namespace Beatmap {
 						bmProColours();
 					}
 					else if (line == "[HitObjects]") {
-						bmProHitObjects();
+						bmProHitObjects(calcCurve);
 					}
 				}
 			}
@@ -197,22 +197,22 @@ namespace Beatmap {
 			getline(str, value);
 
 			if (key == "HPDrainRate") {
-				Difficulty.HPDrainRate = stof(value);
+				Difficulty.HPDrainRate = stod(value);
 			}
 			else if (key == "CircleSize") {
-				Difficulty.CircleSize = stof(value);
+				Difficulty.CircleSize = stod(value);
 			}
 			else if (key == "OverallDifficulty") {
-				Difficulty.OverallDifficulty = stof(value);
+				Difficulty.OverallDifficulty = stod(value);
 			}
 			else if (key == "ApproachRate") {
-				Difficulty.ApproachRate = stof(value);
+				Difficulty.ApproachRate = stod(value);
 			}
 			else if (key == "SliderMultiplier") {
-				Difficulty.SliderMultiplier = stof(value);
+				Difficulty.SliderMultiplier = stod(value);
 			}
 			else if (key == "SliderTickRate") {
-				Difficulty.SliderTickRate = stof(value);
+				Difficulty.SliderTickRate = stod(value);
 			}
 
 			Difficulty.CircleRadius = 128.0 * (1.0 - 0.7 * (Difficulty.CircleSize - 5.0) / 5.0) / 2.0;
@@ -284,10 +284,10 @@ namespace Beatmap {
 		}
 	}
 
-	void Beatmap::bmProHitObjects() {
+	void Beatmap::bmProHitObjects(bool calcCurve) {
 		std::string line = "++";
 		getline(bmFile, line);
-		while (line != "") {
+		while (line != "" && !bmFile.eof()) {
 			std::string value;
 			std::istringstream str(line);
 
@@ -328,19 +328,25 @@ namespace Beatmap {
 				}
 				bmho.sliders.endPoint = curvePoints[curvePoints.getVertexCount() - 1].position;
 
-				if (bmho.sliders.sliderType == "L") {
-					sf::VertexArray line(sf::LineStrip, 2);
-					line[0].position = sf::Vector2f(curvePoints[0].position);
-					line[1].position = sf::Vector2f(curvePoints[1].position);
-					bmho.sliders.curvePoints = line;
-				}
-				else if (bmho.sliders.sliderType == "P")
-				{
-					bmho.sliders.curvePoints = CircularArcApproximator(curvePoints).CreateArc();
-				}
-				else if (bmho.sliders.sliderType == "B")
-				{
-					bmho.sliders.curvePoints = BezierApproximator(curvePoints).CreateBezier();
+				if (calcCurve) {
+					if (bmho.sliders.sliderType == "L") {
+						sf::VertexArray line(sf::LineStrip, 2);
+						line[0].position = sf::Vector2f(curvePoints[0].position);
+						if (curvePoints.getVertexCount() == 1) {
+							line[1].position = sf::Vector2f(curvePoints[0].position);
+						}
+						else {
+							line[1].position = sf::Vector2f(curvePoints[1].position);
+						}
+
+						bmho.sliders.curvePoints = line;
+					}
+					else if (bmho.sliders.sliderType == "P") {
+						bmho.sliders.curvePoints = CircularArcApproximator(curvePoints).CreateArc();
+					}
+					else if (bmho.sliders.sliderType == "B") {
+						bmho.sliders.curvePoints = BezierApproximator(curvePoints).CreateBezier();
+					}
 				}
 
 				getline(str, value, ',');
@@ -351,23 +357,31 @@ namespace Beatmap {
 				bmho.sliders.edgeHitsounds = value;
 				getline(str, value, ',');
 				bmho.sliders.edgeAddition = value;
+
+				nSlider++;
 			}
 			else if (bmho.type & 8) { // spinner
 				getline(str, value, ',');
 				bmho.endTime = stoi(value);
+
+				nSplinners++;
+			} else {
+				nHitcircles++;
 			}
 
 			// extras
 			getline(str, value, ':');
-			bmho.extras.sampleSet = stoi(value);
-			getline(str, value, ':');
-			bmho.extras.additionSet = stoi(value);
-			getline(str, value, ':');
-			bmho.extras.customIndex = stoi(value);
-			getline(str, value, ':');
-			bmho.extras.sampleVolume = stoi(value);
-			getline(str, value, ':');
-			bmho.extras.filename = value;
+			if (value != "") {
+				bmho.extras.sampleSet = stoi(value);
+				getline(str, value, ':');
+				bmho.extras.additionSet = stoi(value);
+				getline(str, value, ':');
+				bmho.extras.customIndex = stoi(value);
+				getline(str, value, ':');
+				bmho.extras.sampleVolume = stoi(value);
+				getline(str, value, ':');
+				bmho.extras.filename = value;
+			}
 
 			HitObjects.push_back(bmho);
 			getline(bmFile, line);
