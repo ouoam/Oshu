@@ -16,7 +16,7 @@
 
 #include "Object/Animate/Animate.h"
 #include "Skin/Skin.h"
-
+#include "DB/beatmap.h"
 
 
 //#include "UI/Playfield.h"
@@ -44,6 +44,10 @@ void renderingThread(sf::RenderWindow* window)
 
 int main()
 {
+	beatmapDB aa;
+	std::cout << "Start Update Beatmap Database" << std::endl;
+	aa.update();
+	std::cout << "Finish Update" << std::endl;
 	
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
