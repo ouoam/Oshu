@@ -7,8 +7,11 @@
 =======
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> parent of a381f4a... Merge branch 'master' of https://github.com/ouoam/Oshu
 
+=======
+>>>>>>> parent of 1b77f04... before try to change cpp getline to c getline
 =======
 >>>>>>> parent of 1b77f04... before try to change cpp getline to c getline
 #include <SFML/Graphics.hpp>
