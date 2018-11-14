@@ -51,25 +51,23 @@ private:
 		sqlite3_bind_int(insertStmt, 22, bm.nSlider);
 		sqlite3_bind_int(insertStmt, 23, bm.nSplinners);
 
-		if ((rc = sqlite3_step(insertStmt)) != SQLITE_DONE) {
-			haveErr("inserted", false);
-		} else {
-			std::cout << "Add to DB : " << file << std::endl;
-		}
+		rc = sqlite3_step(insertStmt);
 		sqlite3_finalize(insertStmt);
-		
+
+		if (haveErr("prepair insert")) return 1;
+		std::cout << "Add to DB : " << file << std::endl;
 		return 0;
 	}
 
 public:
+
 	std::string path = "";
 
 	beatmapDB() {
 		openFile = "songs.db";
 		path = "D:/osu!/Songs/";
 		open();
-
-		if (!haveTable("songs")) create();
+		create();
 	}
 
 	int create() {

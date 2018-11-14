@@ -382,9 +382,8 @@ namespace Beatmap {
 				getline(str, value, ':');
 				bmho.extras.filename = value;
 			}
-			if (calcCurve) {
-				HitObjects.push_back(bmho);
-			}
+
+			HitObjects.push_back(bmho);
 			getline(bmFile, line);
 		}
 	}
