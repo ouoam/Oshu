@@ -18,9 +18,12 @@
 #include "Skin/Skin.h"
 #include "DB/beatmap.h"
 
+#include "UI/UI.h"
 
 //#include "UI/Playfield.h"
 #include "UI/testZone.h"
+
+UI *ui;
 
 
 void renderingThread(sf::RenderWindow* window)
@@ -29,11 +32,11 @@ void renderingThread(sf::RenderWindow* window)
 
 	while (window->isOpen())
 	{
-		UI::update();
+		ui->update();
 
 		window->clear();
 
-		UI::draw();
+		ui->draw();
 
 		window->display();
 	}
@@ -57,7 +60,7 @@ int main()
 	window.setKeyRepeatEnabled(false);
 
 	Skin::load();
-	UI::load(window);
+	ui = new testUI(window);
 
 	window.setActive(false);
 	sf::Thread thread(&renderingThread, &window);
@@ -88,19 +91,9 @@ int main()
 			case sf::Event::GainedFocus:
 				window.setFramerateLimit(120);
 				break;
-
-
-
-			case sf::Event::KeyPressed:
-			case sf::Event::MouseButtonPressed:
-				UI::OnPressed(event);
-				break;
-
-			case sf::Event::KeyReleased:
-			case sf::Event::MouseButtonReleased:
-				UI::OnReleased(event);
-				break;
 			}
+
+			ui->newEvent(event);
 		}
 	}
 
