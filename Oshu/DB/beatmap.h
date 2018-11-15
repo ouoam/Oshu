@@ -14,12 +14,12 @@ private:
 
 		sqlite3_stmt *insertStmt;
 
-		std::string insertSQL = "INSERT INTO songs (Title, TitleUnicode, Artist, ArtistUnicode, Creator, Version, Source, "
+		const char insertSQL[] = "INSERT INTO songs (Title, TitleUnicode, Artist, ArtistUnicode, Creator, Version, Source, "
 			"Tags, BeatmapID, BeatmapSetID, AudioFilename, AudioLeadIn, PreviewTime, HPDrainRate, CircleSize, "
 			"OverallDifficulty, ApproachRate, SliderMultiplier, OsuFile, OsuDir, nHitcircles, nSlider, "
 			"nSplinners) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
-		rc = sqlite3_prepare_v2(db, insertSQL.c_str(), insertSQL.size(), &insertStmt, nullptr);
+		rc = sqlite3_prepare_v2(db, insertSQL, strlen(insertSQL), &insertStmt, nullptr);
 		if (haveErr("prepair insert")) return 1;
 
 		Beatmap::Beatmap bm(beatmap.string(), false);
@@ -51,15 +51,14 @@ private:
 		sqlite3_bind_int(insertStmt, 22, bm.nSlider);
 		sqlite3_bind_int(insertStmt, 23, bm.nSplinners);
 
-		rc = sqlite3_step(insertStmt);
 		if ((rc = sqlite3_step(insertStmt)) != SQLITE_DONE) {
 			haveErr("inserted", false);
-		} else {
+		}
+		else {
 			std::cout << "Add to DB : " << file << std::endl;
 		}
 		sqlite3_finalize(insertStmt);
 
-		if (haveErr("prepair insert")) return 1;
 		return 0;
 	}
 
@@ -106,7 +105,7 @@ public:
 			");";
 		rc = sqlite3_exec(db, sqlCreateTable, NULL, NULL, &error);
 
-		if (haveErr("create")) return 1;
+		if (haveErr("create", false)) return 1;
 		return 0;
 	}
 
@@ -114,9 +113,9 @@ public:
 		if (!checkOpen()) return 2;
 
 		sqlite3_stmt *findStmt;
-		std::string findSQL = "SELECT id FROM songs WHERE OsuFile = ? AND OsuDir = ?;";
+		const char findSQL[] = "SELECT id FROM songs WHERE OsuFile = ? AND OsuDir = ?;";
 
-		rc = sqlite3_prepare_v2(db, findSQL.c_str(), findSQL.size(), &findStmt, nullptr);
+		rc = sqlite3_prepare_v2(db, findSQL, strlen(findSQL), &findStmt, nullptr);
 
 		if (haveErr("update prepare")) return 1;
 
@@ -131,29 +130,9 @@ public:
 					sqlite3_bind_text(findStmt, 1, file.c_str(), file.size(), 0);
 					sqlite3_bind_text(findStmt, 2, path.c_str(), path.size(), 0);
 
-					bool willAdd = true;
-					do {
-						rc = sqlite3_step(findStmt);
-						switch (rc) {
-						case SQLITE_DONE:
-							break;
-						case SQLITE_ROW:
-							willAdd = false;
-							break;
-						default:
-							sqlite3_finalize(findStmt);
-							break;
-						}
-						if (haveErr("update result")) return 1;
-					} while (rc == SQLITE_ROW);
-
-
-					if (willAdd) {
+					if (countRow(findStmt) == 0) {
 						addBeatmap(beatmap.path());
 					}
-
-					sqlite3_reset(findStmt);
-					sqlite3_clear_bindings(findStmt);
 				}
 			}
 		}

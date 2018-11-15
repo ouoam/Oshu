@@ -620,14 +620,16 @@ void AnimeShape::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 
 ////////////////////////////////////////////////////////////
 void AnimeShape::updateFillColors() {
-	for (std::size_t i = 0; i < m_vertices.getVertexCount(); ++i)
+	int n = m_vertices.getVertexCount();
+	for (std::size_t i = 0; i < n; ++i)
 		m_vertices[i].color = m_fillColor;
 }
 
 
 ////////////////////////////////////////////////////////////
 void AnimeShape::updateTexCoords() {
-	for (std::size_t i = 0; i < m_vertices.getVertexCount(); ++i) {
+	int n = m_vertices.getVertexCount();
+	for (std::size_t i = 0; i < n; ++i) {
 		float xratio = m_insideBounds.width > 0 ? (m_vertices[i].position.x - m_insideBounds.left) / m_insideBounds.width : 0;
 		float yratio = m_insideBounds.height > 0 ? (m_vertices[i].position.y - m_insideBounds.top) / m_insideBounds.height : 0;
 		m_vertices[i].texCoords.x = m_textureRect.left + m_textureRect.width * xratio;
@@ -690,7 +692,8 @@ void AnimeShape::updateOutline() {
 
 ////////////////////////////////////////////////////////////
 void AnimeShape::updateOutlineColors() {
-	for (std::size_t i = 0; i < m_outlineVertices.getVertexCount(); ++i)
+	int n = m_outlineVertices.getVertexCount();
+	for (std::size_t i = 0; i < n; ++i)
 		m_outlineVertices[i].color = m_outlineColor;
 }
 

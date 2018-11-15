@@ -31,7 +31,6 @@ void renderingThread(sf::RenderWindow* window)
 	{
 		UI::update();
 
-		//window->clear(sf::Color::Black);
 		window->clear();
 
 		UI::draw();
@@ -52,8 +51,8 @@ int main()
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
 	sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!", sf::Style::Titlebar | sf::Style::Close, settings);
-	window.setMouseCursorVisible(false);
-	window.setFramerateLimit(120);
+	//window.setMouseCursorVisible(false);
+	//window.setFramerateLimit(240);
 	//window.setVerticalSyncEnabled(true);
 	window.setKeyRepeatEnabled(false);
 
@@ -74,6 +73,24 @@ int main()
 				window.close();
 				break;
 
+			case sf::Event::MouseEntered:
+				window.setMouseCursorVisible(false);
+				break;
+
+			case sf::Event::MouseLeft:
+				window.setMouseCursorVisible(true);
+				break;
+
+			case sf::Event::LostFocus:
+				window.setFramerateLimit(60);
+				break;
+
+			case sf::Event::GainedFocus:
+				window.setFramerateLimit(120);
+				break;
+
+
+
 			case sf::Event::KeyPressed:
 			case sf::Event::MouseButtonPressed:
 				UI::OnPressed(event);
@@ -82,14 +99,6 @@ int main()
 			case sf::Event::KeyReleased:
 			case sf::Event::MouseButtonReleased:
 				UI::OnReleased(event);
-				break;
-
-			case sf::Event::MouseEntered:
-				window.setMouseCursorVisible(false);
-				break;
-
-			case sf::Event::MouseLeft:
-				window.setMouseCursorVisible(true);
 				break;
 			}
 		}

@@ -107,7 +107,8 @@ void OnPressed(sf::Event event) {
 	sf::Vector2f click = sf::Vector2f(sf::Mouse::getPosition(win->m_window));
 
 	std::deque<Object::Container*>::iterator it = objs.begin();
-	while (it != objs.end()) {
+	std::deque<Object::Container*>::iterator end = objs.end();
+	while (it != end) {
 		if ((*it)->canClick) {
 			sf::Vector2f offset = click - transform.transformPoint(sf::Vector2f((*it)->hitObject->position));
 
@@ -151,8 +152,10 @@ void update() {
 		}
 	}
 
+	int HOsize = bmPlay.HitObjects.size();
+
 	// set new hit obj to show
-	while (showHitObj.back < bmPlay.HitObjects.size()) {
+	while (showHitObj.back < HOsize) {
 		if (bmPlay.HitObjects[showHitObj.back].time - Beatmap::bmHitObjects::TimePreempt <= time) {
 			showHitObj.back++;
 
@@ -174,8 +177,8 @@ void update() {
 		}
 		else break;
 	}
-
-	while (showHitObj.front < bmPlay.HitObjects.size()) {
+	
+	while (showHitObj.front < HOsize ) {
 		int endTime = 0;
 		if (bmPlay.HitObjects[showHitObj.front].type & 1) { // circle
 			endTime = bmPlay.HitObjects[showHitObj.front].time + hitWinWidth.s50; /////////////////////////// 
@@ -221,8 +224,10 @@ void draw() {
 	for (int i = 0; i < 5; i++) {  //Loop for select layer
 		Object::Container::renderLayer = i;
 		std::deque<Object::Container*>::reverse_iterator rit = objs.rbegin();
-		for (rit = objs.rbegin(); rit != objs.rend(); ++rit) {
+		std::deque<Object::Container*>::reverse_iterator rend = objs.rend();
+		while (rit != rend) {
 			win->m_window.draw(**rit, transform);
+			++rit;
 		}
 	}
 	Mutex.unlock();
