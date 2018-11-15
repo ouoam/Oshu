@@ -58,7 +58,7 @@ private:
 
 		switch (renderLayer) {
 		case 0:
-			//target.draw(sliderBody, states);
+			target.draw(sliderBody, states);
 			break;
 		}
 	}

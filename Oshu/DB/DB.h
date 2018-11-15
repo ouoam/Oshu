@@ -2,6 +2,8 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
+#include <unordered_map>
 #include "sqlite3.h"
 
 class DB {
@@ -35,18 +37,22 @@ protected:
 
 	int countRow(sqlite3_stmt *stmt) {
 		int count = 0;
-		switch (rc = sqlite3_step(stmt)) {
-		case SQLITE_DONE:
-			break;
-		case SQLITE_ROW:
-			count++;
-			break;
-		default:
-			sqlite3_finalize(stmt);
-			haveErr("update result");
-			return 1;
-			break;
-		}
+		do {
+			rc = sqlite3_step(stmt);
+			switch (rc) {
+			case SQLITE_DONE:
+				break;
+			case SQLITE_ROW:
+				count++;
+				break;
+			default:
+				sqlite3_finalize(stmt);
+				haveErr("update result");
+				return 1;
+				break;
+			}
+		} while (rc == SQLITE_ROW);
+		
 
 		sqlite3_reset(stmt);
 		sqlite3_clear_bindings(stmt);
@@ -80,5 +86,22 @@ public:
 		isOpen = true;
 		openFile = dbFile;
 		return 0;
+	}
+
+	std::vector<std::unordered_map<std::string, std::string>> *getData(sqlite3_stmt *stmt) {
+		std::vector<std::unordered_map<std::string, std::string>> *Data;
+		while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+			std::unordered_map<std::string, std::string> row;
+			int num_cols = sqlite3_column_count(stmt);
+			for (int i = 0; i < num_cols; i++) {
+				row[sqlite3_column_name(stmt, i)] = (char *)sqlite3_column_text(stmt, i);
+			}
+			Data->push_back(row);
+		}
+
+		sqlite3_reset(stmt);
+		sqlite3_clear_bindings(stmt);
+
+		return Data;
 	}
 };

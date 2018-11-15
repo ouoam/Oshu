@@ -161,6 +161,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Skin\Skin.h" />
     <ClInclude Include="UI\Playfield.h" />
+    <ClInclude Include="UI\Select.h" />
     <ClInclude Include="UI\testZone.h" />
     <ClInclude Include="UI\UI.h" />
     <ClInclude Include="Utility\BezierApproximator.h" />

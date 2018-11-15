@@ -22,6 +22,7 @@
 
 //#include "UI/Playfield.h"
 #include "UI/testZone.h"
+#include "UI/Select.h"
 
 UI *ui;
 
@@ -47,20 +48,20 @@ void renderingThread(sf::RenderWindow* window)
 int main()
 {
 	beatmapDB aa;
-	std::cout << "Start Update Beatmap Database" << std::endl;
-	aa.update();
-	std::cout << "Finish Update" << std::endl;
+	//std::cout << "Start Update Beatmap Database" << std::endl;
+	//aa.update();
+	//std::cout << "Finish Update" << std::endl;
 	
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
-	sf::RenderWindow window(sf::VideoMode(800, 600), "SFML works!", sf::Style::Titlebar | sf::Style::Close, settings);
+	sf::RenderWindow window(sf::VideoMode(800, 600), "Oshu!", sf::Style::Titlebar | sf::Style::Close, settings);
 	//window.setMouseCursorVisible(false);
 	//window.setFramerateLimit(240);
 	//window.setVerticalSyncEnabled(true);
 	window.setKeyRepeatEnabled(false);
 
 	Skin::load();
-	ui = new testUI(window);
+	ui = new SelectUI(window, aa);
 
 	window.setActive(false);
 	sf::Thread thread(&renderingThread, &window);
@@ -89,7 +90,7 @@ int main()
 				break;
 
 			case sf::Event::GainedFocus:
-				window.setFramerateLimit(120);
+				window.setFramerateLimit(240);
 				break;
 			}
 
