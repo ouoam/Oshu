@@ -40,6 +40,9 @@
     <Filter Include="Header Files\DB">
       <UniqueIdentifier>{1adfd02f-af69-417c-a6a7-ee06b8889fd2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\UI\Select">
+      <UniqueIdentifier>{a730f5b1-dfe3-4b19-a3f9-8ec2db582e00}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -133,6 +136,9 @@
     </ClInclude>
     <ClInclude Include="UI\Select.h">
       <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Select\selectSong.h">
+      <Filter>Header Files\UI\Select</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

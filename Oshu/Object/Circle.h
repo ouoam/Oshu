@@ -12,14 +12,14 @@
 
 namespace Object {
 
-class Circle : public Container {
+class Circle : public ContainerHitObject {
 
 	Pieces::CirclePiece circle;
 	Pieces::ApproachCircle approach;
 	Pieces::CircleOverlay circleOverlay;
 
 public:
-	Circle(Beatmap::bmHitObjects *HitObject) : Container(HitObject) {
+	Circle(Beatmap::bmHitObjects *HitObject) : ContainerHitObject(HitObject) {
 		setPosition(sf::Vector2f(hitObject->position));
 		sf::Vector2u size = circle.getTexture()->getSize();
 		float scale = (float)hitObject->CR / (float)std::min(size.x, size.y);

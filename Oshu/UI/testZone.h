@@ -20,7 +20,7 @@ class testUI : public UI {
 
 	Object::Cursor cur;
 
-	std::deque<Object::Container*> objs;
+	std::deque<Object::ContainerHitObject*> objs;
 
 	sf::Mutex Mutex;
 
@@ -59,8 +59,8 @@ protected:
 
 		sf::Vector2f click = sf::Vector2f(sf::Mouse::getPosition(m_window));
 
-		std::deque<Object::Container*>::iterator it = objs.begin();
-		std::deque<Object::Container*>::iterator end = objs.end();
+		std::deque<Object::ContainerHitObject*>::iterator it = objs.begin();
+		std::deque<Object::ContainerHitObject*>::iterator end = objs.end();
 		while (it != end) {
 			if ((*it)->canClick) {
 				sf::Vector2f offset = click - transform.transformPoint(sf::Vector2f((*it)->hitObject->position));
@@ -201,7 +201,7 @@ public:
 		cur.update();
 
 		Mutex.lock();
-		std::deque<Object::Container*>::iterator it = objs.begin();
+		std::deque<Object::ContainerHitObject*>::iterator it = objs.begin();
 		while (it != objs.end()) {
 			(**it).update();
 
@@ -218,8 +218,8 @@ public:
 		Mutex.lock();
 		for (int i = 0; i < 5; i++) {  //Loop for select layer
 			Object::Container::renderLayer = i;
-			std::deque<Object::Container*>::reverse_iterator rit = objs.rbegin();
-			std::deque<Object::Container*>::reverse_iterator rend = objs.rend();
+			std::deque<Object::ContainerHitObject*>::reverse_iterator rit = objs.rbegin();
+			std::deque<Object::ContainerHitObject*>::reverse_iterator rend = objs.rend();
 			while (rit != rend) {
 				m_window.draw(**rit, transform);
 				++rit;

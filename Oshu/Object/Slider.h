@@ -13,13 +13,13 @@
 
 namespace Object {
 
-class Slider : public Container {
+class Slider : public ContainerHitObject {
 	Animate::AnimeShape sliderBody;
 
 	Circle *circle;
 
 public:
-	Slider(Beatmap::bmHitObjects *HitObject) : Container(HitObject) {
+	Slider(Beatmap::bmHitObjects *HitObject) : ContainerHitObject(HitObject) {
 		lineThinkness = GenerateTrianglesStrip(hitObject->sliders.curvePoints, hitObject->CR - 5);
 		sliderBody.setVertex(lineThinkness);
 

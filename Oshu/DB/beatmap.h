@@ -151,7 +151,7 @@ public:
 		}
 
 		sqlite3_stmt *searchStmt;
-		std::string searchSQL = "SELECT Title, Artist, Creator FROM songs ";
+		std::string searchSQL = "SELECT id, Title, Artist, Creator FROM songs ";
 		if (keyword != "") {
 			searchSQL += "WHERE Title like '%' || ? || '%' OR TitleUnicode like '%' || ? || '%' "
 							"OR Artist like '%' || ? || '%' OR ArtistUnicode like '%' || ? || '%' "

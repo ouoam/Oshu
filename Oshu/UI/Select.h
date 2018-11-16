@@ -2,6 +2,9 @@
 
 #include <vector>
 #include <unordered_map>
+#include <cmath>
+#include <chrono>
+#include <random>
 
 #include "UI.h"
 #include "../DB/beatmap.h"
@@ -12,8 +15,6 @@ class SelectUI : public UI {
 	Object::Cursor cur;
 	beatmapDB songDB;
 
-	int startShowData = 0;
-
 	sf::RenderTexture renderText;
 	bool updateText = true;
 	sf::Mutex updateTextMutex;
@@ -22,6 +23,14 @@ class SelectUI : public UI {
 	std::string searchKeyword = "";
 	std::string oldSearchKeyword = "..";
 	bool updateSearch = false;
+	float showDataCenter = 0;
+
+	sf::Sprite background;
+	sf::Texture backgroundTexture;
+
+	int selectSong = 20;
+
+	std::default_random_engine generator;
 
 protected:
 	void OnPressed(sf::Event event) {
@@ -30,6 +39,14 @@ protected:
 
 	void OnReleased(sf::Event event) {
 		cur.onMouseUp(event.key.code);
+	}
+
+	void randomSongs() {
+		int random;
+		while ((random = generator() % searchData->size()) == selectSong);
+		showDataCenter = random;
+		selectSong = random;
+		updateText = true;
 	}
 
 public:
@@ -43,6 +60,26 @@ public:
 		if (!renderText.create(800, 600)) {
 			std::cout << "Error create render text" << std::endl;
 		}
+
+		m_window.setKeyRepeatEnabled(true);
+
+		if (!backgroundTexture.loadFromFile("resource\\osu-resources-master\\osu.Game.Resources\\Textures\\Backgrounds\\bg2.jpg")) {
+			std::cout << "55" << std::endl;
+		}
+		background.setTexture(backgroundTexture);
+		
+		sf::Vector2u winSize = m_window.getSize();
+		sf::Vector2u bgSize = backgroundTexture.getSize();
+		double sx = (double)winSize.x / (double)bgSize.x;
+		double sy = (double)winSize.y / (double)bgSize.y;
+		
+		background.setScale(sf::Vector2f(std::max(sx,sy), std::max(sx, sy)));
+
+		background.setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
+		background.setPosition(winSize.x / 2.0, winSize.y / 2.0);
+
+		unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+		generator.seed(seed);
 	}
 
 	void update() {
@@ -59,20 +96,19 @@ public:
 				std::cout << "Use time : " << aa.getElapsedTime().asMilliseconds() << " ms." << std::endl;
 
 				updateText = true;
-				if (startShowData > (*searchData).size() - 1) startShowData = (*searchData).size() - 1;
-
-				
+				if (showDataCenter > (*searchData).size() - 1) showDataCenter = (*searchData).size() - 1;
 			}
 		}
 
 		updateTextMutex.lock();
 		if (updateText) {
-			renderText.clear();
+			renderText.clear(sf::Color(0,0,0,0));
 
 			sf::Text textTitle;
 			sf::Text textDetail;
+			sf::Text textSearch;
 			sf::Font font;
-			font.loadFromFile("arial.ttf");
+			font.loadFromFile("resource\\Chakra-Petch-master\\fonts\\ChakraPetch-SemiBoldItalic.ttf");
 
 			textTitle.setFont(font);
 			textTitle.setCharacterSize(16);
@@ -82,17 +118,36 @@ public:
 			textDetail.setCharacterSize(12);
 			textDetail.setFillColor(sf::Color::White);
 
-			int to = (*searchData).size();
-			if (to - startShowData > 8) to = startShowData + 8;
+			textSearch.setFont(font);
+			textSearch.setCharacterSize(16);
+			textSearch.setFillColor(sf::Color::White);
+			textSearch.setString(searchKeyword);
+			textSearch.setPosition(450, 40);
 
-			for (int i = startShowData; i < to; i++) {
+			renderText.draw(textSearch);
+
+			int from = showDataCenter - 6;
+			int to = showDataCenter + 6;
+
+			if (from < 0) from = 0;
+			if (to > (*searchData).size()) to = (*searchData).size();
+
+			for (int i = from; i < to; i++) {
 				std::unordered_map<std::string, std::string> row = *((*searchData)[i]);
+				float offset = i - showDataCenter;
+
+				sf::Vector2f position;
+				position.x = 500 - (100 * std::cos(offset / 5.0));
+				position.y = 300 + (offset * 65.0);
+
+				if (i == selectSong)
+					position.x -= 80;
 
 				textTitle.setString(row["Title"]);
-				textTitle.setPosition(10, 100 + (i - startShowData) * 60);
+				textTitle.setPosition(position);
 
 				textDetail.setString(row["Artist"] + " // " + row["Creator"]);
-				textDetail.setPosition(10, 120 + (i - startShowData) * 60);
+				textDetail.setPosition(position + sf::Vector2f(0, 20));
 
 				renderText.draw(textTitle);
 				renderText.draw(textDetail);
@@ -106,32 +161,49 @@ public:
 	}
 
 	void draw() {
+		m_window.draw(background);
+
 		const sf::Texture& texture = renderText.getTexture();
 		sf::Sprite sprite(texture);
 		m_window.draw(sprite);
+
 
 		m_window.draw(cur);
 	}
 
 	void newEvent(sf::Event event) {
+		int newSelectSong;
 		switch (event.type) {
-		case sf::Event::KeyPressed:
 		case sf::Event::MouseButtonPressed:
 			OnPressed(event);
+			if (event.mouseButton.button == sf::Mouse::Left) {
+				newSelectSong = ((event.mouseButton.y - 300) / 65.0) + showDataCenter;
+				if (0 <= newSelectSong && newSelectSong < searchData->size())
+					selectSong = newSelectSong;
+				updateText = true;
+			}
 			break;
 
-		case sf::Event::KeyReleased:
 		case sf::Event::MouseButtonReleased:
 			OnReleased(event);
 			break;
 
 		case sf::Event::MouseWheelMoved:
 			updateTextMutex.lock();
-			startShowData -= event.mouseWheel.delta;
-			if (startShowData < 0) startShowData = 0;
-			else if (startShowData > (*searchData).size() - 1) startShowData = (*searchData).size() - 1;
+			showDataCenter -= event.mouseWheel.delta / 2.5;
+			if (showDataCenter < 0) showDataCenter = 0;
+			else if (showDataCenter > (*searchData).size() - 1) showDataCenter = (*searchData).size() - 1;
 			updateText = true;
 			updateTextMutex.unlock();
+			break;
+
+		case sf::Event::KeyPressed:
+			if (event.key.code == sf::Keyboard::Escape) {
+				if (searchKeyword != "") searchKeyword = "";
+			}
+			else if (event.key.code == sf::Keyboard::F2) {
+				randomSongs();
+			}
 			break;
 
 		case sf::Event::TextEntered:

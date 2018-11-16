@@ -17,12 +17,12 @@ class Cursor : public Container {
 	sf::RenderWindow& m_window;
 
 	sf::Clock clock;
-	sf::Clock clock2;
+	//sf::Clock clock2;
 	sf::Vector2i oldLocation;
 
 public:
 
-	Cursor(sf::RenderWindow& window) : m_window(window) , Container(0){
+	Cursor(sf::RenderWindow& window) : m_window(window) {
 		sf::Vector2u size = Skin::Cursor::cursor.getSize();
 		mou.setTexture(Skin::Cursor::cursor);
 		mou.setOrigin(size.x / 2.0, size.y / 2.0);
@@ -70,7 +70,7 @@ public:
 		sf::Vector2i temp = sf::Mouse::getPosition(m_window);
 
 		if (temp != oldLocation) {
-			clock2.restart();
+			//clock2.restart();
 			mou.setPosition((sf::Vector2f) temp);
 			mou2.setPosition((sf::Vector2f) temp);
 			oldLocation = temp;

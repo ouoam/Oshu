@@ -19,10 +19,14 @@ public:
 	bool canClick = true;
 
 	static int renderLayer;
+};
 
+class ContainerHitObject : public Container {
+public:
 	Beatmap::bmHitObjects *hitObject;
 
-	Container(Beatmap::bmHitObjects *HitObject) : hitObject(HitObject) {}
+	ContainerHitObject(Beatmap::bmHitObjects *HitObject) : hitObject(HitObject) {}
+
 };
 
 }
