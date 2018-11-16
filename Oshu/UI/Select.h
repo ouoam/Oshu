@@ -12,6 +12,8 @@ class SelectUI : public UI {
 	Object::Cursor cur;
 	beatmapDB songDB;
 
+	std::vector<std::unordered_map<std::string, std::string>> *searchData;
+
 protected:
 	void OnPressed(sf::Event event) {
 		cur.onMouseDown(event.key.code);
@@ -23,7 +25,14 @@ protected:
 
 public:
 	SelectUI(sf::RenderWindow& window, beatmapDB DB) : UI(window), cur(window) , songDB(DB){
+		searchData = songDB.search("accel");
 
+		for (std::unordered_map<std::string, std::string> row : *searchData) {
+			for (std::pair<const std::string, std::string> field : row) {
+				std::cout << field.second << "\t";
+			}
+			std::cout << std::endl;
+		}
 	}
 
 	void update() {

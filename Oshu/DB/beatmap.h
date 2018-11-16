@@ -62,6 +62,8 @@ private:
 		return 0;
 	}
 
+	std::vector<std::unordered_map<std::string, std::string>> *searchData = nullptr;
+
 public:
 	std::string path = "";
 
@@ -137,5 +139,34 @@ public:
 			}
 		}
 		sqlite3_finalize(findStmt);
+	}
+
+	std::vector<std::unordered_map<std::string, std::string>> *search(std::string keyword = "") {
+		// Memory leak
+		if (searchData != nullptr) delete searchData;
+
+		sqlite3_stmt *searchStmt;
+		std::string searchSQL = "SELECT Title, Artist, Creator FROM songs ";
+		if (keyword != "") {
+			searchSQL += "WHERE Title like '%' || ? || '%' OR TitleUnicode like '%' || ? || '%' "
+							"OR Artist like '%' || ? || '%' OR ArtistUnicode like '%' || ? || '%' "
+							"OR Creator like '%' || ? || '%' OR Version like '%' || ? || '%' "
+							"OR Source like '%' || ? || '%' OR Tags like '%' || ? || '%' ";
+		}
+		searchSQL += " GROUP BY OsuDir ORDER BY Title;";
+
+		rc = sqlite3_prepare_v2(db, searchSQL.c_str(), searchSQL.size(), &searchStmt, nullptr);
+
+		if (haveErr("search prepare")) return searchData;
+
+		if (keyword != "") {
+			for (int i = 1; i <= 8; i++) {
+				sqlite3_bind_text(searchStmt, i, keyword.c_str(), keyword.size(), 0);
+			}
+		}
+
+		searchData = getData(searchStmt);
+
+		return searchData;
 	}
 };

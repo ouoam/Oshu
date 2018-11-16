@@ -90,6 +90,7 @@ public:
 
 	std::vector<std::unordered_map<std::string, std::string>> *getData(sqlite3_stmt *stmt) {
 		std::vector<std::unordered_map<std::string, std::string>> *Data;
+		Data = new std::vector<std::unordered_map<std::string, std::string>>;
 		while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
 			std::unordered_map<std::string, std::string> row;
 			int num_cols = sqlite3_column_count(stmt);
