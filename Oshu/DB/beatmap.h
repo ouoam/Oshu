@@ -62,7 +62,7 @@ private:
 		return 0;
 	}
 
-	std::vector<std::unordered_map<std::string, std::string>> *searchData = nullptr;
+	std::vector<std::unordered_map<std::string, std::string>*> *searchData = nullptr;
 
 public:
 	std::string path = "";
@@ -141,9 +141,14 @@ public:
 		sqlite3_finalize(findStmt);
 	}
 
-	std::vector<std::unordered_map<std::string, std::string>> *search(std::string keyword = "") {
+	std::vector<std::unordered_map<std::string, std::string>*> *search(std::string keyword = "") {
 		// Memory leak
-		if (searchData != nullptr) delete searchData;
+		if (searchData != nullptr) {
+			for (std::unordered_map<std::string, std::string>* row : *searchData) {
+				delete row;
+			}
+			delete searchData;
+		}
 
 		sqlite3_stmt *searchStmt;
 		std::string searchSQL = "SELECT Title, Artist, Creator FROM songs ";
@@ -153,7 +158,7 @@ public:
 							"OR Creator like '%' || ? || '%' OR Version like '%' || ? || '%' "
 							"OR Source like '%' || ? || '%' OR Tags like '%' || ? || '%' ";
 		}
-		searchSQL += " GROUP BY OsuDir ORDER BY Title;";
+		searchSQL += " GROUP BY OsuDir ORDER BY lower(Title);";
 
 		rc = sqlite3_prepare_v2(db, searchSQL.c_str(), searchSQL.size(), &searchStmt, nullptr);
 

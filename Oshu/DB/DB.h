@@ -88,14 +88,17 @@ public:
 		return 0;
 	}
 
-	std::vector<std::unordered_map<std::string, std::string>> *getData(sqlite3_stmt *stmt) {
-		std::vector<std::unordered_map<std::string, std::string>> *Data;
-		Data = new std::vector<std::unordered_map<std::string, std::string>>;
+	std::vector<std::unordered_map<std::string, std::string>*> *getData(sqlite3_stmt *stmt) {
+		std::vector<std::unordered_map<std::string, std::string>*> *Data;
+		Data = new std::vector<std::unordered_map<std::string, std::string>*>;
+
 		while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
-			std::unordered_map<std::string, std::string> row;
+			std::unordered_map<std::string, std::string> *row;
+			row = new std::unordered_map<std::string, std::string>;
 			int num_cols = sqlite3_column_count(stmt);
+
 			for (int i = 0; i < num_cols; i++) {
-				row[sqlite3_column_name(stmt, i)] = (char *)sqlite3_column_text(stmt, i);
+				(*row)[sqlite3_column_name(stmt, i)] = (char *)sqlite3_column_text(stmt, i);
 			}
 			Data->push_back(row);
 		}
