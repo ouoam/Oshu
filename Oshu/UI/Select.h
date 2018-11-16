@@ -29,6 +29,7 @@ class SelectUI : public UI {
 	sf::Texture backgroundTexture;
 
 	int selectSong = 20;
+	std::vector<std::unordered_map<std::string, std::string>*> *beatmapSetData;
 
 	std::default_random_engine generator;
 
@@ -45,8 +46,24 @@ protected:
 		int random;
 		while ((random = generator() % searchData->size()) == selectSong);
 		showDataCenter = random;
-		selectSong = random;
+		selectNewSongs(random);
 		updateText = true;
+	}
+
+	void selectNewSongs(int newSong) {
+		if (selectSong != newSong) {
+			selectSong = newSong;
+			updateText = true;
+
+			int beatmapID = stoi((*((*searchData)[newSong]))["id"]);
+
+			beatmapSetData = songDB.getBeatmapSet(beatmapID);
+
+			for (auto v : *beatmapSetData) {
+				std::cout << (*v)["OsuFile"] << std::endl;
+			}
+		}
+		
 	}
 
 public:
@@ -179,8 +196,7 @@ public:
 			if (event.mouseButton.button == sf::Mouse::Left) {
 				newSelectSong = ((event.mouseButton.y - 300) / 65.0) + showDataCenter;
 				if (0 <= newSelectSong && newSelectSong < searchData->size())
-					selectSong = newSelectSong;
-				updateText = true;
+					selectNewSongs(newSelectSong);
 			}
 			break;
 

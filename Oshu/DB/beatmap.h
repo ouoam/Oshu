@@ -63,6 +63,7 @@ private:
 	}
 
 	std::vector<std::unordered_map<std::string, std::string>*> *searchData = nullptr;
+	std::vector<std::unordered_map<std::string, std::string>*> *beatmapSetData = nullptr;
 
 public:
 	std::string path = "";
@@ -173,5 +174,28 @@ public:
 		searchData = getData(searchStmt);
 
 		return searchData;
+	}
+
+	std::vector<std::unordered_map<std::string, std::string>*> *getBeatmapSet(int id) {
+		// Memory leak
+		if (beatmapSetData != nullptr) {
+			for (std::unordered_map<std::string, std::string>* row : *beatmapSetData) {
+				delete row;
+			}
+			delete beatmapSetData;
+		}
+
+		sqlite3_stmt *getBeatmapSetStmt;
+		std::string getSQL = "SELECT * FROM songs WHERE OsuDir = (SELECT OsuDir FROM songs WHERE id = ?)";
+
+		rc = sqlite3_prepare_v2(db, getSQL.c_str(), getSQL.size(), &getBeatmapSetStmt, nullptr);
+
+		if (haveErr("getBeatmapSet prepare")) return beatmapSetData;
+
+		sqlite3_bind_int(getBeatmapSetStmt, 1, id);
+
+		beatmapSetData = getData(getBeatmapSetStmt);
+
+		return beatmapSetData;
 	}
 };
