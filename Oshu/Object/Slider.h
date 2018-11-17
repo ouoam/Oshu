@@ -54,13 +54,14 @@ public:
 private:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const {
 		states.transform *= getTransform();
-		target.draw(*circle, states);
+		
 
 		switch (renderLayer) {
-		case 0:
+		case 1:
 			target.draw(sliderBody, states);
 			break;
 		}
+		target.draw(*circle, states);
 	}
 
 	sf::VertexArray lineThinkness;

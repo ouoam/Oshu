@@ -79,12 +79,19 @@ private:
 		states.transform *= getTransform();
 		switch (renderLayer) {
 		case 0:
-			target.draw(circle, states);
+			
 			break;
 		case 1:
-			target.draw(circleOverlay, states);
+			if (canClick) {
+				target.draw(circle, states);
+				target.draw(circleOverlay, states);
+			}
 			break;
 		case 2:
+			if (!canClick) {
+				target.draw(circle, states);
+				target.draw(circleOverlay, states);
+			}
 			target.draw(approach, states);
 			break;
 		}

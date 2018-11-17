@@ -33,9 +33,9 @@ void renderingThread(sf::RenderWindow* window)
 
 	while (window->isOpen())
 	{
-		ui->update();
-
 		ui = ui->nowUI();
+
+		ui->update();
 
 		window->clear();
 

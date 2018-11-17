@@ -200,13 +200,14 @@ protected:
 	}
 
 	virtual void gotoUI(UI *ui) {
-		playSong.stop();
 		UI::gotoUI(ui);
+
+		playSong.stop();
 	}
 
 	virtual void onComeBack() {
 		UI::onComeBack();
-
+		m_window.setKeyRepeatEnabled(true);
 		//playSong.play();
 	}
 
@@ -335,7 +336,8 @@ public:
 				randomSongs();
 			}
 			else if (event.key.code == sf::Keyboard::F9) {
-				gotoUI(new testUI(m_window, this));
+
+				gotoUI(new testUI(m_window, this, *((*beatmapSetData)[0]), &playSong));
 			}
 			break;
 

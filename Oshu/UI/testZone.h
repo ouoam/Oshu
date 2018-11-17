@@ -6,6 +6,7 @@
 
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
+#include <sfeMovie/Movie.hpp>
 
 #include "../Beatmap/Beatmap.h"
 #include "../Audio/hitsound.h"
@@ -21,6 +22,9 @@ class testUI : public UI {
 	Object::Cursor cur;
 
 	std::deque<Object::ContainerHitObject*> objs;
+
+	std::unordered_map<std::string, std::string> beatmapData;
+	sfe::Movie *playSong;
 
 	sf::Mutex Mutex;
 
@@ -46,7 +50,7 @@ class testUI : public UI {
 		int back = 0;
 	} showHitObj;
 
-	sf::Music *music;
+	//sf::Music *music;
 	Beatmap::Beatmap bmPlay;
 
 protected:
@@ -86,14 +90,16 @@ protected:
 
 public:
 
-	testUI(sf::RenderWindow& window, UI *from) : UI(window, from) , cur(window){
+	testUI(sf::RenderWindow& window, UI *from, std::unordered_map<std::string, std::string> bmData, sfe::Movie *playSong) :
+		UI(window, from) , cur(window), beatmapData(bmData), playSong(playSong)
+	{
+		//std::string base_dir = "resource/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/";
+		//bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [ReFaller's Hard].osu");
 
-		//std::string base_dir = "resource/150945 Knife Party - Centipede/";
-		//bmPlay.load(base_dir + "Knife Party - Centipede (Sugoi-_-Desu) [This isn't a map, just a simple visualisation].osu");
-	
+		std::string base_dir = "D:/osu!/Songs/";
+		base_dir += beatmapData["OsuDir"] + "/";
 
-		std::string base_dir = "resource/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/";
-		bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [ReFaller's Hard].osu");
+		bmPlay.load(base_dir + beatmapData["OsuFile"]);
 
 		loadHitSound(&bmPlay, base_dir);
 
@@ -118,19 +124,26 @@ public:
 
 		transform.translate(80, 60);
 
-		music = new sf::Music;
-		if (!music->openFromFile("resource/audio.wav"))
-			return; // error
-		music->setVolume(50);
-		music->play();
+		//music = new sf::Music;
+		//if (!music->openFromFile("resource/audio.wav"))
+		//	return; // error
+		//music->setVolume(50);
+		//music->play();
 
 
 		//music.setPlayingOffset(sf::seconds(40));
+
+		playSong->stop();
+		//playSong.setPlayingOffset(sf::Time::Zero);
+		
+		m_window.setKeyRepeatEnabled(false);
 	}
 
 	virtual ~testUI() {
-		music->stop();
-		delete music;
+		//music->stop();
+		//delete music;
+
+		playSong->stop();
 
 		for (auto obj : objs)
 			delete obj;
@@ -140,7 +153,14 @@ public:
 
 
 	void update() {
-		int64_t time = music->getPlayingOffset().asMilliseconds();
+		cur.update();
+
+		if (playSong->getStatus() == sfe::Status::Paused || playSong->getStatus() == sfe::Status::Stopped)
+			return;
+		//int64_t time = music->getPlayingOffset().asMilliseconds();
+		int64_t time = playSong->getPlayingOffset().asMilliseconds();
+
+		std::cout << time << std::endl;
 
 		// set volume of sound effect
 		if (bmPlay.iTimingPoints < bmPlay.TimingPoints.size()) {
@@ -209,7 +229,7 @@ public:
 		}
 
 
-		cur.update();
+		
 
 		Mutex.lock();
 		std::deque<Object::ContainerHitObject*>::iterator it = objs.begin();
@@ -248,6 +268,10 @@ public:
 		case sf::Event::KeyPressed:
 			if (event.key.code == sf::Keyboard::F10) {
 				gobackUI();
+			}
+			else if (event.key.code == sf::Keyboard::F11) {
+				playSong->stop();
+				playSong->play();
 			}
 		case sf::Event::MouseButtonPressed:
 			OnPressed(event);
