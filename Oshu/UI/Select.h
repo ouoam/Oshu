@@ -6,12 +6,41 @@
 #include <chrono>
 #include <random>
 
+#include <SFML/System.hpp>
 #include <sfeMovie/Movie.hpp>
 
 #include "UI.h"
+#include "testZone.h"
 #include "../DB/beatmap.h"
 
 #include "../Object/Cursor.h"
+
+#include <windows.h>
+
+class myMutex : sf::NonCopyable {
+public:
+	myMutex() {
+		InitializeCriticalSection(&m_mutex);
+	}
+	~myMutex() {
+		DeleteCriticalSection(&m_mutex);
+	}
+	void lock() {
+		EnterCriticalSection(&m_mutex);
+	}
+
+	void unlock() {
+		LeaveCriticalSection(&m_mutex);
+	}
+
+	bool tryLock() {
+		// https://docs.microsoft.com/th-th/windows/desktop/api/synchapi/nf-synchapi-tryentercriticalsection
+		return TryEnterCriticalSection(&m_mutex);
+	}
+
+private:
+	CRITICAL_SECTION m_mutex;
+};
 
 class SelectUI : public UI {
 	Object::Cursor cur;
@@ -19,7 +48,8 @@ class SelectUI : public UI {
 
 	sf::RenderTexture renderText;
 	bool updateText = true;
-	sf::Mutex updateTextMutex;
+	myMutex updateTextMutex;
+	sf::Thread updateTextThread;
 
 	std::vector<std::unordered_map<std::string, std::string>*> *searchData;
 	std::string searchKeyword = "";
@@ -32,12 +62,13 @@ class SelectUI : public UI {
 
 	int selectSong = -1;
 	std::vector<std::unordered_map<std::string, std::string>*> *beatmapSetData;
-	sf::Mutex beatmapSetDataMutex;
+	myMutex beatmapSetDataMutex;
 
 	std::default_random_engine generator;
 
 	sfe::Movie playSong;
-	sf::Mutex playSongMutex;
+	myMutex playSongMutex;
+	sf::Thread updatePlaySongThread;
 
 protected:
 	void OnPressed(sf::Event event) {
@@ -86,8 +117,104 @@ protected:
 		
 	}
 
+	void updateTextFunc() {
+		updateTextMutex.lock();
+
+		this->renderText.setActive(true);
+
+		this->renderText.clear(sf::Color(0, 0, 0, 0));
+
+		sf::Text textTitle;
+		sf::Text textDetail;
+		sf::Text textSearch;
+		sf::Font font;
+		font.loadFromFile("resource\\Chakra-Petch-master\\fonts\\ChakraPetch-SemiBoldItalic.ttf");
+
+		textTitle.setFont(font);
+		textTitle.setCharacterSize(16);
+		textTitle.setFillColor(sf::Color::White);
+
+		textDetail.setFont(font);
+		textDetail.setCharacterSize(12);
+		textDetail.setFillColor(sf::Color::White);
+
+		textSearch.setFont(font);
+		textSearch.setCharacterSize(16);
+		textSearch.setFillColor(sf::Color::White);
+		textSearch.setString(searchKeyword);
+		textSearch.setPosition(450, 40);
+
+		this->renderText.draw(textSearch);
+
+		int from = showDataCenter - 6;
+		int to = showDataCenter + 6;
+
+		if (from < 0) from = 0;
+		if (to > (*searchData).size()) to = (*searchData).size();
+
+		for (int i = from; i < to; i++) {
+			std::unordered_map<std::string, std::string> row = *((*searchData)[i]);
+			float offset = i - showDataCenter;
+
+			sf::Vector2f position;
+			position.x = 500 - (100 * std::cos(offset / 5.0));
+			position.y = 300 + (offset * 65.0);
+
+			if (i == selectSong)
+				position.x -= 80;
+
+			textTitle.setString(row["Title"]);
+			textTitle.setPosition(position);
+
+			textDetail.setString(row["Artist"] + " // " + row["Creator"]);
+			textDetail.setPosition(position + sf::Vector2f(0, 20));
+			
+			this->renderText.draw(textTitle);
+			this->renderText.draw(textDetail);
+		}
+		
+		this->renderText.display();
+		updateText = false;
+
+		//this->renderText.setActive(false);
+
+		updateTextMutex.unlock();
+	}
+
+	void updatePlaySong() {
+		playSongMutex.lock();
+		if (beatmapSetDataMutex.tryLock()) {
+			int time = stoi((*((*beatmapSetData)[0]))["PreviewTime"]);
+			beatmapSetDataMutex.unlock();
+
+			// some song block by seek and some song can not seek
+			if (playSong.getDuration() > sf::milliseconds(time) && time > 0) {
+				if (!playSong.setPlayingOffset(sf::milliseconds(time))) {
+					playSong.setPlayingOffset(sf::milliseconds(0));
+				}
+			}
+			if (isUIshow())
+				playSong.play();
+		}
+		playSongMutex.unlock();
+	}
+
+	virtual void gotoUI(UI *ui) {
+		playSong.stop();
+		UI::gotoUI(ui);
+	}
+
+	virtual void onComeBack() {
+		UI::onComeBack();
+
+		//playSong.play();
+	}
+
 public:
-	SelectUI(sf::RenderWindow& window, beatmapDB DB) : UI(window), cur(window) , songDB(DB) {
+	SelectUI(sf::RenderWindow& window, UI *from, beatmapDB DB) : UI(window, from), cur(window), songDB(DB),
+		updateTextThread(&SelectUI::updateTextFunc, this),
+		updatePlaySongThread(&SelectUI::updatePlaySong, this)
+	{
 		updateSearch = true;
 		if (!renderText.create(800, 600)) {
 			std::cout << "Error create render text" << std::endl;
@@ -112,9 +239,19 @@ public:
 
 		unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 		generator.seed(seed);
+
+		renderText.setActive(false);
 	}
 
-	void update() {
+	virtual ~SelectUI() {
+	}
+
+	virtual void update() {
+		UI::update();
+
+		if (!isUIshow())
+			return;
+		
 		cur.update();
 
 		if (updateSearch) {
@@ -136,79 +273,23 @@ public:
 			randomSongs();
 		}
 
-		updateTextMutex.lock();
-		if (updateText) {
-			renderText.clear(sf::Color(0,0,0,0));
-
-			sf::Text textTitle;
-			sf::Text textDetail;
-			sf::Text textSearch;
-			sf::Font font;
-			font.loadFromFile("resource\\Chakra-Petch-master\\fonts\\ChakraPetch-SemiBoldItalic.ttf");
-
-			textTitle.setFont(font);
-			textTitle.setCharacterSize(16);
-			textTitle.setFillColor(sf::Color::White);
-
-			textDetail.setFont(font);
-			textDetail.setCharacterSize(12);
-			textDetail.setFillColor(sf::Color::White);
-
-			textSearch.setFont(font);
-			textSearch.setCharacterSize(16);
-			textSearch.setFillColor(sf::Color::White);
-			textSearch.setString(searchKeyword);
-			textSearch.setPosition(450, 40);
-
-			renderText.draw(textSearch);
-
-			int from = showDataCenter - 6;
-			int to = showDataCenter + 6;
-
-			if (from < 0) from = 0;
-			if (to > (*searchData).size()) to = (*searchData).size();
-
-			for (int i = from; i < to; i++) {
-				std::unordered_map<std::string, std::string> row = *((*searchData)[i]);
-				float offset = i - showDataCenter;
-
-				sf::Vector2f position;
-				position.x = 500 - (100 * std::cos(offset / 5.0));
-				position.y = 300 + (offset * 65.0);
-
-				if (i == selectSong)
-					position.x -= 80;
-
-				textTitle.setString(row["Title"]);
-				textTitle.setPosition(position);
-
-				textDetail.setString(row["Artist"] + " // " + row["Creator"]);
-				textDetail.setPosition(position + sf::Vector2f(0, 20));
-
-				renderText.draw(textTitle);
-				renderText.draw(textDetail);
+		if (updateTextMutex.tryLock()) {
+			updateTextMutex.unlock();
+			if (updateText) {
+				updateTextFunc();
+				//updateTextThread.launch();
 			}
-
-			renderText.display();
-			updateText = false;
 		}
-		updateTextMutex.unlock();
 		
-		playSongMutex.lock();
-		if (playSong.getStatus() == sfe::Status::Stopped) {
-			beatmapSetDataMutex.lock();
-			int time = stoi((*((*beatmapSetData)[0]))["PreviewTime"]);
-			beatmapSetDataMutex.unlock();
-
-			if (playSong.getDuration() > sf::milliseconds(time) && time > 0) {
-				if (!playSong.setPlayingOffset(sf::milliseconds(time))) {
-					playSong.setPlayingOffset(sf::milliseconds(0));
-				}
+		
+		if (playSongMutex.tryLock()) {
+			playSongMutex.unlock();
+			if (playSong.getStatus() == sfe::Status::Stopped) {
+				//updatePlaySong();
+				updatePlaySongThread.launch();
 			}
-			playSong.play();
+			playSong.update();
 		}
-		playSong.update();
-		playSongMutex.unlock();
 	}
 
 	void draw() {
@@ -218,11 +299,10 @@ public:
 		sf::Sprite sprite(texture);
 		m_window.draw(sprite);
 
-
 		m_window.draw(cur);
 	}
 
-	void newEvent(sf::Event event) {
+	void onEvent(sf::Event event) {
 		int newSelectSong;
 		switch (event.type) {
 		case sf::Event::MouseButtonPressed:
@@ -253,6 +333,9 @@ public:
 			}
 			else if (event.key.code == sf::Keyboard::F2) {
 				randomSongs();
+			}
+			else if (event.key.code == sf::Keyboard::F9) {
+				gotoUI(new testUI(m_window, this));
 			}
 			break;
 

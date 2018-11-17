@@ -35,6 +35,8 @@ void renderingThread(sf::RenderWindow* window)
 	{
 		ui->update();
 
+		ui = ui->nowUI();
+
 		window->clear();
 
 		ui->draw();
@@ -61,7 +63,7 @@ int main()
 	window.setKeyRepeatEnabled(false);
 
 	Skin::load();
-	ui = new SelectUI(window, aa);
+	ui = new SelectUI(window, nullptr, aa);
 
 	window.setActive(false);
 	sf::Thread thread(&renderingThread, &window);
@@ -94,7 +96,7 @@ int main()
 				break;
 			}
 
-			ui->newEvent(event);
+			ui->onEvent(event);
 		}
 	}
 

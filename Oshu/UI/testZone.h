@@ -46,7 +46,7 @@ class testUI : public UI {
 		int back = 0;
 	} showHitObj;
 
-	sf::Music music;
+	sf::Music *music;
 	Beatmap::Beatmap bmPlay;
 
 protected:
@@ -86,7 +86,7 @@ protected:
 
 public:
 
-	testUI(sf::RenderWindow& window) : UI(window) , cur(window){
+	testUI(sf::RenderWindow& window, UI *from) : UI(window, from) , cur(window){
 
 		//std::string base_dir = "resource/150945 Knife Party - Centipede/";
 		//bmPlay.load(base_dir + "Knife Party - Centipede (Sugoi-_-Desu) [This isn't a map, just a simple visualisation].osu");
@@ -118,18 +118,29 @@ public:
 
 		transform.translate(80, 60);
 
-		if (!music.openFromFile("resource/audio.wav"))
+		music = new sf::Music;
+		if (!music->openFromFile("resource/audio.wav"))
 			return; // error
-		music.setVolume(50);
-		music.play();
+		music->setVolume(50);
+		music->play();
 
 
 		//music.setPlayingOffset(sf::seconds(40));
 	}
 
+	virtual ~testUI() {
+		music->stop();
+		delete music;
+
+		for (auto obj : objs)
+			delete obj;
+
+		UI::~UI();
+	}
+
 
 	void update() {
-		int64_t time = music.getPlayingOffset().asMilliseconds();
+		int64_t time = music->getPlayingOffset().asMilliseconds();
 
 		// set volume of sound effect
 		if (bmPlay.iTimingPoints < bmPlay.TimingPoints.size()) {
@@ -232,9 +243,12 @@ public:
 
 	}
 
-	void newEvent(sf::Event event) {
+	void onEvent(sf::Event event) {
 		switch (event.type) {
 		case sf::Event::KeyPressed:
+			if (event.key.code == sf::Keyboard::F10) {
+				gobackUI();
+			}
 		case sf::Event::MouseButtonPressed:
 			OnPressed(event);
 			break;
