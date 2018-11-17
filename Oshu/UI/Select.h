@@ -32,6 +32,7 @@ class SelectUI : public UI {
 
 	int selectSong = -1;
 	std::vector<std::unordered_map<std::string, std::string>*> *beatmapSetData;
+	sf::Mutex beatmapSetDataMutex;
 
 	std::default_random_engine generator;
 
@@ -62,7 +63,9 @@ protected:
 
 			int beatmapID = stoi((*((*searchData)[newSong]))["id"]);
 
+			beatmapSetDataMutex.lock();
 			beatmapSetData = songDB.getBeatmapSet(beatmapID);
+			beatmapSetDataMutex.unlock();
 
 			for (auto v : *beatmapSetData) {
 				std::cout << (*v)["OsuFile"] << std::endl;
@@ -193,9 +196,11 @@ public:
 		
 		playSongMutex.lock();
 		if (playSong.getStatus() == sfe::Status::Stopped) {
+			beatmapSetDataMutex.lock();
 			int time = stoi((*((*beatmapSetData)[0]))["PreviewTime"]);
-			//if (time < 0) time = 0;
-			if (playSong.getDuration() > sf::milliseconds(time)) {
+			beatmapSetDataMutex.unlock();
+
+			if (playSong.getDuration() > sf::milliseconds(time) && time > 0) {
 				if (!playSong.setPlayingOffset(sf::milliseconds(time))) {
 					playSong.setPlayingOffset(sf::milliseconds(0));
 				}
