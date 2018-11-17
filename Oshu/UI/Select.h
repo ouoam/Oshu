@@ -6,6 +6,8 @@
 #include <chrono>
 #include <random>
 
+#include <sfeMovie/Movie.hpp>
+
 #include "UI.h"
 #include "../DB/beatmap.h"
 
@@ -28,10 +30,13 @@ class SelectUI : public UI {
 	sf::Sprite background;
 	sf::Texture backgroundTexture;
 
-	int selectSong = 20;
+	int selectSong = -1;
 	std::vector<std::unordered_map<std::string, std::string>*> *beatmapSetData;
 
 	std::default_random_engine generator;
+
+	sfe::Movie playSong;
+	sf::Mutex playSongMutex;
 
 protected:
 	void OnPressed(sf::Event event) {
@@ -62,17 +67,24 @@ protected:
 			for (auto v : *beatmapSetData) {
 				std::cout << (*v)["OsuFile"] << std::endl;
 			}
+
+			std::string path = "D:/osu!/Songs/";
+			path += (*((*beatmapSetData)[0]))["OsuDir"] + "/";
+			path += (*((*beatmapSetData)[0]))["AudioFilename"];
+
+			playSongMutex.lock();
+			if (!playSong.openFromFile(path)) {
+				std::cout << "Error open media" << std::endl;
+				playSongMutex.unlock();
+				return;
+			}
+			playSongMutex.unlock();
 		}
 		
 	}
 
 public:
 	SelectUI(sf::RenderWindow& window, beatmapDB DB) : UI(window), cur(window) , songDB(DB) {
-		//test Memory leak
-		//for (int i = 0; i < 500; i++) {
-		//	songDB.search(searchKeyword);
-		//	std::cout << i << std::endl;
-		//}
 		updateSearch = true;
 		if (!renderText.create(800, 600)) {
 			std::cout << "Error create render text" << std::endl;
@@ -115,6 +127,10 @@ public:
 				updateText = true;
 				if (showDataCenter > (*searchData).size() - 1) showDataCenter = (*searchData).size() - 1;
 			}
+		}
+
+		if (selectSong == -1) {
+			randomSongs();
 		}
 
 		updateTextMutex.lock();
@@ -175,6 +191,19 @@ public:
 		}
 		updateTextMutex.unlock();
 		
+		playSongMutex.lock();
+		if (playSong.getStatus() == sfe::Status::Stopped) {
+			int time = stoi((*((*beatmapSetData)[0]))["PreviewTime"]);
+			//if (time < 0) time = 0;
+			if (playSong.getDuration() > sf::milliseconds(time)) {
+				if (!playSong.setPlayingOffset(sf::milliseconds(time))) {
+					playSong.setPlayingOffset(sf::milliseconds(0));
+				}
+			}
+			playSong.play();
+		}
+		playSong.update();
+		playSongMutex.unlock();
 	}
 
 	void draw() {
