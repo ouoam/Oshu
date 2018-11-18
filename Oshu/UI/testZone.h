@@ -160,7 +160,7 @@ public:
 		//int64_t time = music->getPlayingOffset().asMilliseconds();
 		int64_t time = playSong->getPlayingOffset().asMilliseconds();
 
-		std::cout << time << std::endl;
+		//std::cout << time << std::endl;
 
 		// set volume of sound effect
 		if (bmPlay.iTimingPoints < bmPlay.TimingPoints.size()) {

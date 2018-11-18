@@ -215,6 +215,9 @@ namespace Beatmap {
 				Difficulty.SliderTickRate = stod(value);
 			}
 
+			if (Difficulty.ApproachRate == -1)
+				Difficulty.ApproachRate = Difficulty.OverallDifficulty;
+
 			Difficulty.CircleRadius = 128.0 * (1.0 - 0.7 * (Difficulty.CircleSize - 5.0) / 5.0) / 2.0;
 
 			//Scale = (1.0f - 0.7f * (difficulty.CircleSize - 5) / 5) / 2;

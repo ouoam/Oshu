@@ -15,41 +15,42 @@ private:
 		sqlite3_stmt *insertStmt;
 
 		const char insertSQL[] = "INSERT INTO songs (Title, TitleUnicode, Artist, ArtistUnicode, Creator, Version, Source, "
-			"Tags, BeatmapID, BeatmapSetID, AudioFilename, AudioLeadIn, PreviewTime, HPDrainRate, CircleSize, "
+			"Tags, BeatmapID, BeatmapSetID, AudioFilename, AudioLeadIn, PreviewTime, Mode, HPDrainRate, CircleSize, "
 			"OverallDifficulty, ApproachRate, SliderMultiplier, OsuFile, OsuDir, nHitcircles, nSlider, "
-			"nSplinners) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+			"nSplinners) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 		rc = sqlite3_prepare_v2(db, insertSQL, strlen(insertSQL), &insertStmt, nullptr);
 		if (haveErr("prepair insert")) return 1;
 
 		Beatmap::Beatmap bm(beatmap.string(), false);
 
-		sqlite3_bind_text(insertStmt, 1, bm.Metadata.Title.c_str(), bm.Metadata.Title.size(), 0);
-		sqlite3_bind_text(insertStmt, 2, bm.Metadata.TitleUnicode.c_str(), bm.Metadata.TitleUnicode.size(), 0);
-		sqlite3_bind_text(insertStmt, 3, bm.Metadata.Artist.c_str(), bm.Metadata.Artist.size(), 0);
-		sqlite3_bind_text(insertStmt, 4, bm.Metadata.ArtistUnicode.c_str(), bm.Metadata.ArtistUnicode.size(), 0);
-		sqlite3_bind_text(insertStmt, 5, bm.Metadata.Creator.c_str(), bm.Metadata.Creator.size(), 0);
-		sqlite3_bind_text(insertStmt, 6, bm.Metadata.Version.c_str(), bm.Metadata.Version.size(), 0);
-		sqlite3_bind_text(insertStmt, 7, bm.Metadata.Source.c_str(), bm.Metadata.Source.size(), 0);
-		sqlite3_bind_text(insertStmt, 8, bm.Metadata.Tags.c_str(), bm.Metadata.Tags.size(), 0);
-		sqlite3_bind_int(insertStmt, 9, bm.Metadata.BeatmapID);
-		sqlite3_bind_int(insertStmt, 10, bm.Metadata.BeatmapSetID);
+		sqlite3_bind(insertStmt, 1, &bm.Metadata.Title);
+		sqlite3_bind(insertStmt, 2, &bm.Metadata.TitleUnicode);
+		sqlite3_bind(insertStmt, 3, &bm.Metadata.Artist);
+		sqlite3_bind(insertStmt, 4, &bm.Metadata.ArtistUnicode);
+		sqlite3_bind(insertStmt, 5, &bm.Metadata.Creator);
+		sqlite3_bind(insertStmt, 6, &bm.Metadata.Version);
+		sqlite3_bind(insertStmt, 7, &bm.Metadata.Source);
+		sqlite3_bind(insertStmt, 8, &bm.Metadata.Tags);
+		sqlite3_bind(insertStmt, 9, bm.Metadata.BeatmapID);
+		sqlite3_bind(insertStmt, 10, bm.Metadata.BeatmapSetID);
 
-		sqlite3_bind_text(insertStmt, 11, bm.General.AudioFilename.c_str(), bm.General.AudioFilename.size(), 0);
-		sqlite3_bind_int(insertStmt, 12, bm.General.AudioLeadIn);
-		sqlite3_bind_int(insertStmt, 13, bm.General.PreviewTime);
+		sqlite3_bind(insertStmt, 11, &bm.General.AudioFilename);
+		sqlite3_bind(insertStmt, 12, bm.General.AudioLeadIn);
+		sqlite3_bind(insertStmt, 13, bm.General.PreviewTime);
+		sqlite3_bind(insertStmt, 14, bm.General.Mode);
 
-		sqlite3_bind_double(insertStmt, 14, bm.Difficulty.HPDrainRate);
-		sqlite3_bind_double(insertStmt, 15, bm.Difficulty.CircleSize);
-		sqlite3_bind_double(insertStmt, 16, bm.Difficulty.OverallDifficulty);
-		sqlite3_bind_double(insertStmt, 17, bm.Difficulty.ApproachRate);
-		sqlite3_bind_double(insertStmt, 18, bm.Difficulty.SliderMultiplier);
+		sqlite3_bind(insertStmt, 15, bm.Difficulty.HPDrainRate);
+		sqlite3_bind(insertStmt, 16, bm.Difficulty.CircleSize);
+		sqlite3_bind(insertStmt, 17, bm.Difficulty.OverallDifficulty);
+		sqlite3_bind(insertStmt, 18, bm.Difficulty.ApproachRate);
+		sqlite3_bind(insertStmt, 19, bm.Difficulty.SliderMultiplier);
 
-		sqlite3_bind_text(insertStmt, 19, file.c_str(), file.size(), 0);
-		sqlite3_bind_text(insertStmt, 20, path.c_str(), path.size(), 0);
-		sqlite3_bind_int(insertStmt, 21, bm.nHitcircles);
-		sqlite3_bind_int(insertStmt, 22, bm.nSlider);
-		sqlite3_bind_int(insertStmt, 23, bm.nSplinners);
+		sqlite3_bind(insertStmt, 20, &file);
+		sqlite3_bind(insertStmt, 21, &path);
+		sqlite3_bind(insertStmt, 22, bm.nHitcircles);
+		sqlite3_bind(insertStmt, 23, bm.nSlider);
+		sqlite3_bind(insertStmt, 24, bm.nSplinners);
 
 		if ((rc = sqlite3_step(insertStmt)) != SQLITE_DONE) {
 			haveErr("inserted", false);
@@ -81,30 +82,31 @@ public:
 
 		const char *sqlCreateTable =
 			"CREATE TABLE songs ("
-			"id	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,"
-			"Title	TEXT,"
-			"TitleUnicode	TEXT,"
-			"Artist	TEXT,"
-			"ArtistUnicode	TEXT,"
-			"Creator	TEXT,"
-			"Version	TEXT,"
-			"Source	TEXT,"
-			"Tags	TEXT,"
-			"BeatmapID	NUMERIC,"
-			"BeatmapSetID	NUMERIC,"
-			"AudioFilename	TEXT,"
-			"AudioLeadIn	NUMERIC,"
-			"PreviewTime	NUMERIC,"
-			"HPDrainRate	REAL,"
-			"CircleSize	REAL,"
-			"OverallDifficulty	REAL,"
-			"ApproachRate	REAL,"
-			"SliderMultiplier	REAL,"
-			"OsuFile	TEXT,"
-			"OsuDir	TEXT,"
-			"nHitcircles	NUMERIC,"
-			"nSlider	NUMERIC,"
-			"nSplinners	NUMERIC"
+				"id					INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,"
+				"Title				TEXT,"
+				"TitleUnicode		TEXT,"
+				"Artist				TEXT,"
+				"ArtistUnicode		TEXT,"
+				"Creator			TEXT,"
+				"Version			TEXT,"
+				"Source				TEXT,"
+				"Tags				TEXT,"
+				"BeatmapID			INTEGER,"
+				"BeatmapSetID		INTEGER,"
+				"AudioFilename		TEXT,"
+				"AudioLeadIn		INTEGER,"
+				"PreviewTime		INTEGER,"
+				"Mode				INTEGER,"
+				"HPDrainRate		REAL,"
+				"CircleSize			REAL,"
+				"OverallDifficulty	REAL,"
+				"ApproachRate		REAL,"
+				"SliderMultiplier	REAL,"
+				"OsuFile			TEXT,"
+				"OsuDir				TEXT,"
+				"nHitcircles		NUMERIC,"
+				"nSlider			NUMERIC,"
+				"nSplinners			NUMERIC"
 			");";
 		rc = sqlite3_exec(db, sqlCreateTable, NULL, NULL, &error);
 
@@ -130,8 +132,8 @@ public:
 					std::string path = beatmapSet.path().filename().string();
 					std::string file = beatmap.path().filename().string();
 
-					sqlite3_bind_text(findStmt, 1, file.c_str(), file.size(), 0);
-					sqlite3_bind_text(findStmt, 2, path.c_str(), path.size(), 0);
+					sqlite3_bind(findStmt, 1, &file);
+					sqlite3_bind(findStmt, 2, &path);
 
 					if (countRow(findStmt) == 0) {
 						addBeatmap(beatmap.path());
@@ -152,22 +154,25 @@ public:
 		}
 
 		sqlite3_stmt *searchStmt;
-		std::string searchSQL = "SELECT id, Title, Artist, Creator FROM songs ";
+		std::string searchSQL = "SELECT id, Title, Artist, Creator FROM songs WHERE Mode = 0 ";
 		if (keyword != "") {
-			searchSQL += "WHERE Title like '%' || ? || '%' OR TitleUnicode like '%' || ? || '%' "
+			searchSQL += "AND (Title like '%' || ? || '%' OR TitleUnicode like '%' || ? || '%' "
 							"OR Artist like '%' || ? || '%' OR ArtistUnicode like '%' || ? || '%' "
 							"OR Creator like '%' || ? || '%' OR Version like '%' || ? || '%' "
-							"OR Source like '%' || ? || '%' OR Tags like '%' || ? || '%' ";
+							"OR Source like '%' || ? || '%' OR Tags like '%' || ? || '%') ";
 		}
 		searchSQL += " GROUP BY OsuDir ORDER BY lower(Title);";
 
 		rc = sqlite3_prepare_v2(db, searchSQL.c_str(), searchSQL.size(), &searchStmt, nullptr);
 
-		if (haveErr("search prepare")) return searchData;
+		if (haveErr("search prepare")) {
+			searchData = new std::vector<std::unordered_map<std::string, std::string>*>;
+			return searchData;
+		}
 
 		if (keyword != "") {
 			for (int i = 1; i <= 8; i++) {
-				sqlite3_bind_text(searchStmt, i, keyword.c_str(), keyword.size(), 0);
+				sqlite3_bind(searchStmt, i, &keyword);
 			}
 		}
 
@@ -192,7 +197,7 @@ public:
 
 		if (haveErr("getBeatmapSet prepare")) return beatmapSetData;
 
-		sqlite3_bind_int(getBeatmapSetStmt, 1, id);
+		sqlite3_bind(getBeatmapSetStmt, 1, id);
 
 		beatmapSetData = getData(getBeatmapSetStmt);
 

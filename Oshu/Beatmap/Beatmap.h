@@ -12,26 +12,26 @@ namespace Beatmap {
 
 	struct bmGeneral {
 		std::string AudioFilename;
-		int AudioLeadIn;
-		int PreviewTime;
-		bool Countdown;
+		int AudioLeadIn = 0;
+		int PreviewTime = 0;
+		bool Countdown = false;
 		std::string SampleSet;
-		float StackLeniency;
-		int Mode;
-		bool LetterboxInBreaks;
-		bool WidescreenStoryboard;
-		bool StoryFireInFront;
-		bool SpecialStyle;
-		bool EpilepsyWarning;
-		bool UseSkinSprites;
+		float StackLeniency = 0;
+		int Mode = 0;
+		bool LetterboxInBreaks = false;
+		bool WidescreenStoryboard = false;
+		bool StoryFireInFront = false;
+		bool SpecialStyle = false;
+		bool EpilepsyWarning = false;
+		bool UseSkinSprites = false;
 	};
 
 	struct bmEditor {
 		std::vector<int> Bookmarks;
-		float DistanceSpacing;
-		int BeatDivisor;
-		int GridSize;
-		int TimelineZoom;
+		float DistanceSpacing = 1;
+		int BeatDivisor = 4;
+		int GridSize = 4;
+		int TimelineZoom = 1;
 	};
 
 	struct bmMetadata {
@@ -43,19 +43,19 @@ namespace Beatmap {
 		std::string Version;
 		std::string Source;
 		std::string Tags;
-		int BeatmapID;
-		int BeatmapSetID;
+		int BeatmapID = -1;
+		int BeatmapSetID = -1;
 	};
 
 	struct bmDifficulty {
-		double HPDrainRate;
-		double CircleSize;
-		double OverallDifficulty;
-		double ApproachRate;
-		double SliderMultiplier;
-		double SliderTickRate;
+		double HPDrainRate = 5;
+		double CircleSize = 5;
+		double OverallDifficulty = 5;
+		double ApproachRate = -1;
+		double SliderMultiplier = 1;
+		double SliderTickRate = 1;
 
-		double CircleRadius;
+		double CircleRadius = 0;
 	};
 
 	struct nmEvents {

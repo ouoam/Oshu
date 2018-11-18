@@ -67,9 +67,26 @@ protected:
 		rc = sqlite3_prepare_v2(db, sqlCheckTable, strlen(sqlCheckTable), &checkStmt, nullptr);
 		if (haveErr("check table")) return 1;
 
-		sqlite3_bind_text(checkStmt, 1, table.c_str(), table.size(), 0);
+		sqlite3_bind(checkStmt, 1, &table);
 
 		return countRow(checkStmt) >= 1;
+	}
+
+	inline int sqlite3_bind(sqlite3_stmt* stmt, int n, double value) {
+		return sqlite3_bind_double(stmt, n, value);
+	}
+
+	inline int sqlite3_bind(sqlite3_stmt* stmt, int n, int32_t value) {
+		return sqlite3_bind_int(stmt, n, value);
+	}
+
+	inline int sqlite3_bind(sqlite3_stmt* stmt, int n, int64_t value) {
+		return sqlite3_bind_int64(stmt, n, value);
+	}
+
+	inline int sqlite3_bind(sqlite3_stmt* stmt, int n, std::string *value) {
+		if (*value == "") return sqlite3_bind_null(stmt, n);
+		return sqlite3_bind_text(stmt, n, value->c_str(), value->size(), 0);
 	}
 
 public:
@@ -98,7 +115,9 @@ public:
 			int num_cols = sqlite3_column_count(stmt);
 
 			for (int i = 0; i < num_cols; i++) {
-				(*row)[sqlite3_column_name(stmt, i)] = (char *)sqlite3_column_text(stmt, i);
+				const char *value = (char *)sqlite3_column_text(stmt, i);
+				if (value == nullptr) continue;
+				(*row)[sqlite3_column_name(stmt, i)] = value;
 			}
 			Data->push_back(row);
 		}
