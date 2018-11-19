@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="Audio\hitsound.h" />
     <ClInclude Include="Beatmap\Beatmap.h" />
+    <ClInclude Include="Beatmap\Difficulty.h" />
     <ClInclude Include="DB\beatmap.h" />
     <ClInclude Include="DB\DB.h" />
     <ClInclude Include="Object\Animate\Animate.h" />
@@ -155,14 +156,17 @@
     <ClInclude Include="Object\Circle.h" />
     <ClInclude Include="Object\Cursor.h" />
     <ClInclude Include="Object\Container.h" />
+    <ClInclude Include="Object\HitWindows.h" />
     <ClInclude Include="Object\Pieces.h" />
     <ClInclude Include="Object\Slider.h" />
     <ClInclude Include="Overlay\hitwindows.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Scoring\HitResult.h" />
     <ClInclude Include="Skin\Skin.h" />
     <ClInclude Include="UI\Playfield.h" />
     <ClInclude Include="UI\Select.h" />
     <ClInclude Include="UI\Select\selectSong.h" />
+    <ClInclude Include="UI\testtest.h" />
     <ClInclude Include="UI\testZone.h" />
     <ClInclude Include="UI\UI.h" />
     <ClInclude Include="Utility\BezierApproximator.h" />

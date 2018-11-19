@@ -9,6 +9,7 @@
 #include <sfeMovie/Movie.hpp>
 
 #include "../Beatmap/Beatmap.h"
+#include "../Beatmap/Difficulty.h"
 #include "../Audio/hitsound.h"
 #include "../Object/Container.h"
 #include "../Object/Cursor.h"
@@ -42,7 +43,7 @@ class testUI : public UI {
 	int dist = 0;
 
 	struct {
-		int s50, s100, s300;
+		double s50, s100, s300;
 	} hitWinWidth;
 
 	struct {
@@ -103,21 +104,17 @@ public:
 
 		loadHitSound(&bmPlay, base_dir);
 
-		hitWinWidth.s50 = 150 - 50 * (5 - bmPlay.Difficulty.OverallDifficulty) / 5;
-		hitWinWidth.s100 = 100 - 40 * (5 - bmPlay.Difficulty.OverallDifficulty) / 5;
-		hitWinWidth.s300 = 50 - 30 * (5 - bmPlay.Difficulty.OverallDifficulty) / 5;
+		hitWinWidth.s50 = Beatmap::Difficulty::Range(bmPlay.Difficulty.OverallDifficulty, 400, 300, 200);
+		hitWinWidth.s100 = Beatmap::Difficulty::Range(bmPlay.Difficulty.OverallDifficulty, 280, 200, 120);
+		hitWinWidth.s300 = Beatmap::Difficulty::Range(bmPlay.Difficulty.OverallDifficulty, 160, 100, 40);
+
+		std::cout << hitWinWidth.s50 << "\t" << hitWinWidth.s100 << "\t" << hitWinWidth.s300 << std::endl;
 
 		// Calc For Hit Object
 		int AR = bmPlay.Difficulty.ApproachRate;
 
-		if (AR < 5) {
-			Beatmap::bmHitObjects::TimePreempt = 1200 + 600 * (5 - AR) / 5;
-			Beatmap::bmHitObjects::TimeFadeIn = 800 + 400 * (5 - AR) / 5;
-		}
-		else if (AR > 5) {
-			Beatmap::bmHitObjects::TimePreempt = 1200 - 750 * (AR - 5) / 5;
-			Beatmap::bmHitObjects::TimeFadeIn = 800 - 500 * (AR - 5) / 5;
-		}
+		Beatmap::bmHitObjects::TimePreempt = Beatmap::Difficulty::Range(AR, 1800, 1200, 450);
+		Beatmap::bmHitObjects::TimeFadeIn = Beatmap::Difficulty::Range(AR, 1200, 800, 300);
 
 		Beatmap::bmHitObjects::CR = bmPlay.Difficulty.CircleRadius;
 		// End Calc For Hit Object

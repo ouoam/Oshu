@@ -61,6 +61,7 @@ class SelectUI : public UI {
 	sf::Texture backgroundTexture;
 
 	int selectSong = -1;
+	int selectSongId = -1;
 	std::vector<std::unordered_map<std::string, std::string>*> *beatmapSetData;
 	myMutex beatmapSetDataMutex;
 
@@ -90,12 +91,13 @@ protected:
 	void selectNewSongs(int newSong) {
 		if (selectSong != newSong) {
 			selectSong = newSong;
+
 			updateText = true;
 
-			int beatmapID = stoi((*((*searchData)[newSong]))["id"]);
+			selectSongId = stoi((*((*searchData)[newSong]))["id"]);
 
 			beatmapSetDataMutex.lock();
-			beatmapSetData = songDB.getBeatmapSet(beatmapID);
+			beatmapSetData = songDB.getBeatmapSet(selectSongId);
 			beatmapSetDataMutex.unlock();
 
 			for (auto v : *beatmapSetData) {
@@ -266,12 +268,38 @@ public:
 				std::cout << "Use time : " << aa.getElapsedTime().asMilliseconds() << " ms." << std::endl;
 
 				updateText = true;
-				if (showDataCenter > (*searchData).size() - 1) showDataCenter = (*searchData).size() - 1;
-			}
-		}
+				
 
-		if (selectSong == -1) {
-			randomSongs();
+				if (selectSong == -1) {
+					randomSongs();
+				} else {
+					float oldTextCenterOffset = selectSong - showDataCenter;
+
+					int i = 0;
+
+					for (std::unordered_map<std::string, std::string>* row : *searchData) {
+						if (std::stoi((*row)["id"]) == selectSongId) {
+							selectSong = i;
+							if (selectSong == -2) {
+								showDataCenter = selectSong;
+							}
+							else {
+								showDataCenter = selectSong - oldTextCenterOffset;
+							}
+							
+							break;
+						}
+						i++;
+					}
+
+					if (i == (*searchData).size()) {
+						std::cout << "Not Found" << std::endl;
+						selectSong = -2;
+					}
+				}
+				if (showDataCenter < 0) showDataCenter = 0;
+				else if (showDataCenter > (*searchData).size() - 1) showDataCenter = (*searchData).size() - 1;
+			}
 		}
 
 		if (updateTextMutex.tryLock()) {

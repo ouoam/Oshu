@@ -12,8 +12,8 @@
 
 namespace Beatmap {
 
-	int bmHitObjects::TimePreempt = 600;
-	int bmHitObjects::TimeFadeIn = 400;
+	double bmHitObjects::TimePreempt = 600;
+	double bmHitObjects::TimeFadeIn = 400;
 	int bmHitObjects::CR = 5;
 
 	void Beatmap::load(std::string file, bool calcCurve) {

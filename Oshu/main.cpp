@@ -23,6 +23,7 @@
 //#include "UI/Playfield.h"
 #include "UI/testZone.h"
 #include "UI/Select.h"
+#include "UI/testtest.h"
 
 UI *ui;
 
@@ -57,6 +58,7 @@ int main()
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
 	sf::RenderWindow window(sf::VideoMode(800, 600), "Oshu!", sf::Style::Titlebar | sf::Style::Close, settings);
+	//sf::RenderWindow window(sf::VideoMode(800, 600), "Oshu!", sf::Style::None, settings);
 	//window.setMouseCursorVisible(false);
 	//window.setFramerateLimit(240);
 	//window.setVerticalSyncEnabled(true);
@@ -64,6 +66,7 @@ int main()
 
 	Skin::load();
 	ui = new SelectUI(window, nullptr, aa);
+	//ui = new testtest(window, nullptr);
 
 	window.setActive(false);
 	sf::Thread thread(&renderingThread, &window);

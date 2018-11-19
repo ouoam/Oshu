@@ -102,8 +102,8 @@ namespace Beatmap {
 
 		int endTime;
 
-		static int TimePreempt;
-		static int TimeFadeIn;
+		static double TimePreempt;
+		static double TimeFadeIn;
 		static int CR;
 	};
 
