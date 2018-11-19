@@ -134,6 +134,7 @@ public:
 		//playSong.setPlayingOffset(sf::Time::Zero);
 		
 		m_window.setKeyRepeatEnabled(false);
+		m_window.setMouseCursorGrabbed(true);
 	}
 
 	virtual ~testUI() {

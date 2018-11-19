@@ -12,33 +12,6 @@
 
 #include "UI.h"
 
-namespace {
-bool setShape(HWND hWnd, const sf::Image& image) {
-	const sf::Uint8* pixelData = image.getPixelsPtr();
-	HRGN hRegion = CreateRectRgn(0, 0, image.getSize().x, image.getSize().y);
-
-	// Determine the visible region
-	for (unsigned int y = 0; y < image.getSize().y; y++) {
-		for (unsigned int x = 0; x < image.getSize().x; x++) {
-			if (pixelData[y * image.getSize().x * 4 + x * 4 + 3] <= 100) {
-				HRGN hRegionPixel = CreateRectRgn(x, y, x + 1, y + 1);
-				CombineRgn(hRegion, hRegion, hRegionPixel, RGN_XOR);
-				DeleteObject(hRegionPixel);
-			}
-		}
-	}
-
-	SetWindowRgn(hWnd, hRegion, true);
-	DeleteObject(hRegion);
-	return true;
-}
-
-bool setTransparency(HWND hWnd, unsigned char alpha) {
-	SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
-	SetLayeredWindowAttributes(hWnd, 0, alpha, LWA_ALPHA);
-	return true;
-}
-}
 
 class testtest : public UI {
 
@@ -47,6 +20,8 @@ class testtest : public UI {
 	sf::Image image;
 	sf::Texture texture;
 	sf::Sprite sprite;
+
+	sf::Shader shader;
 
 protected:
 	void OnPressed(sf::Event event) {
@@ -67,12 +42,16 @@ public:
 			system("pause");
 		}
 
-		setShape(window.getSystemHandle(), image);
-		setTransparency(window.getSystemHandle(), 255);
-
 		texture.loadFromImage(image);
 		sprite.setTexture(texture);
 		//sprite.setScale(0.5, 0.5);
+
+
+		if (!shader.loadFromFile("blur.frag", sf::Shader::Fragment)) {
+			std::cout << "Error GLSL" << std::endl;
+		}
+
+		shader.setUniform("texture", sf::Shader::CurrentTexture);
 	}
 
 	virtual ~testtest() {
@@ -82,11 +61,23 @@ public:
 
 	void update() {
 		cur.update();
+
+		shader.setUniform("alpha", 0.7f);
 	}
 
 	void draw() {
-		m_window.draw(sprite);
-		//m_window.draw(cur);
+		m_window.draw(cur);
+
+		sf::BlendMode blendmode;
+		blendmode.colorSrcFactor = sf::BlendMode::SrcAlpha;
+		blendmode.colorDstFactor = sf::BlendMode::OneMinusSrcAlpha;
+		blendmode.colorEquation = sf::BlendMode::Add;
+		sf::RenderStates states;
+		states.shader = &shader;
+		states.texture = sprite.getTexture();
+		states.blendMode = blendmode;
+		m_window.draw(sprite, states);
+		
 	}
 
 	void onEvent(sf::Event event) {

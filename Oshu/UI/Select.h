@@ -210,6 +210,7 @@ protected:
 	virtual void onComeBack() {
 		UI::onComeBack();
 		m_window.setKeyRepeatEnabled(true);
+		m_window.setMouseCursorGrabbed(false);
 		//playSong.play();
 	}
 
@@ -267,36 +268,31 @@ public:
 				searchData = songDB.search(searchKeyword);
 				std::cout << "Use time : " << aa.getElapsedTime().asMilliseconds() << " ms." << std::endl;
 
-				updateText = true;
-				
-
 				if (selectSong == -1) {
 					randomSongs();
 				} else {
-					float oldTextCenterOffset = selectSong - showDataCenter;
-
-					int i = 0;
-
-					for (std::unordered_map<std::string, std::string>* row : *searchData) {
-						if (std::stoi((*row)["id"]) == selectSongId) {
-							selectSong = i;
-							if (selectSong == -2) {
-								showDataCenter = selectSong;
+					if ((*searchData).size() == 1 && searchKeyword.size() > 6) {
+						selectNewSongs(0);
+					} else {
+						int i = 0;
+						for (std::unordered_map<std::string, std::string>* row : *searchData) {
+							if (std::stoi((*row)["id"]) == selectSongId) {
+								showDataCenter = i - (selectSong != -2 ? (selectSong - showDataCenter) : 0);
+								selectSong = i;
+								break;
 							}
-							else {
-								showDataCenter = selectSong - oldTextCenterOffset;
-							}
-							
-							break;
+							i++;
 						}
-						i++;
-					}
 
-					if (i == (*searchData).size()) {
-						std::cout << "Not Found" << std::endl;
-						selectSong = -2;
+						if (i == (*searchData).size()) {
+							std::cout << "Not Found" << std::endl;
+							selectSong = -2;
+						}
 					}
 				}
+
+				updateText = true;
+
 				if (showDataCenter < 0) showDataCenter = 0;
 				else if (showDataCenter > (*searchData).size() - 1) showDataCenter = (*searchData).size() - 1;
 			}
