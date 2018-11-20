@@ -92,6 +92,8 @@ protected:
 	}
 
 	void selectNewBeatmapSet(int newBeatmapIndex) {
+		if (0 > newBeatmapIndex || newBeatmapIndex >= searchData->size())
+			return;
 		if (selectBeatmapSet != newBeatmapIndex) {
 			selectBeatmapSet = newBeatmapIndex;
 
@@ -103,10 +105,6 @@ protected:
 
 			updateText = true;
 			selectBeatmapIndex = 0;
-
-			for (auto v : *beatmapSetData) {
-				std::cout << (*v)["OsuFile"] << std::endl;
-			}
 
 			std::string path = "D:/osu!/Songs/";
 			path += (*((*beatmapSetData)[0]))["OsuDir"] + "/";
@@ -379,8 +377,7 @@ public:
 						updateText = true;
 					}
 				}
-				if (0 <= newselectBeatmapSet && newselectBeatmapSet < searchData->size())
-					selectNewBeatmapSet(newselectBeatmapSet);
+				selectNewBeatmapSet(newselectBeatmapSet);
 			}
 			break;
 
@@ -396,15 +393,62 @@ public:
 			break;
 
 		case sf::Event::KeyPressed:
-			if (event.key.code == sf::Keyboard::Escape) {
+			switch (event.key.code) {
+			case sf::Keyboard::Escape:
 				if (searchKeyword != "") searchKeyword = "";
-			}
-			else if (event.key.code == sf::Keyboard::F2) {
+				break;
+			case sf::Keyboard::F2:
 				randomSongs();
-			}
-			else if (event.key.code == sf::Keyboard::F9) {
-
+				break;
+			case sf::Keyboard::Enter:
 				gotoUI(new testUI(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), &playSong));
+				break;
+
+			case sf::Keyboard::Left:
+				selectNewBeatmapSet(selectBeatmapSet - 1);
+				showDataCenter = selectBeatmapSet;
+				updateText = true;
+				break;
+			case sf::Keyboard::Right:
+				selectNewBeatmapSet(selectBeatmapSet + 1);
+				showDataCenter = selectBeatmapSet;
+				updateText = true;
+				break;
+
+			case sf::Keyboard::Up:
+				if (selectBeatmapIndex == 0) {
+					if (selectBeatmapSet != 0) {
+						selectNewBeatmapSet(selectBeatmapSet - 1);
+						showDataCenter = selectBeatmapSet;
+						selectBeatmapIndex = (*beatmapSetData).size() - 1;
+						std::cout << " -- "<< selectBeatmapIndex << std::endl;
+					}
+				} else {
+					selectBeatmapIndex--;
+				}
+				updateText = true;
+				break;
+			case sf::Keyboard::Down:
+				if (selectBeatmapIndex == (*beatmapSetData).size() - 1) {
+					if (selectBeatmapSet != (*searchData).size() - 1) {
+						selectNewBeatmapSet(selectBeatmapSet + 1);
+						showDataCenter = selectBeatmapSet;
+					}
+				}
+				else {
+					selectBeatmapIndex++;
+				}
+				updateText = true;
+				break;
+
+			case sf::Keyboard::PageUp:
+				showDataCenter -= 8;
+				updateText = true;
+				break;
+			case sf::Keyboard::PageDown:
+				showDataCenter += 8;
+				updateText = true;
+				break;
 			}
 			break;
 
