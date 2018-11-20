@@ -5,6 +5,9 @@
 #include <cctype>
 #include <locale>
 #include <functional>
+#include <vector>
+#include <sstream>
+#include <utility>
 
 // From https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
 
@@ -44,4 +47,15 @@ static inline std::string rtrim_copy(std::string s) {
 static inline std::string trim_copy(std::string s) {
 	trim(s);
 	return s;
+}
+
+static inline std::vector<std::string> explode(std::string const & s, char delim) {
+	std::vector<std::string> result;
+	std::istringstream iss(s);
+
+	for (std::string token; std::getline(iss, token, delim); ) {
+		result.push_back(std::move(token));
+	}
+
+	return result;
 }

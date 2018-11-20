@@ -16,6 +16,9 @@
 #include "../Object/Circle.h"
 #include "../Object/Slider.h"
 
+#include "../Object/HitWindows.h"
+#include "../Scoring/HitResult.h"
+
 #include "UI.h"
 
 class testUI : public UI {
@@ -42,16 +45,14 @@ class testUI : public UI {
 	int lastDelay = 0;
 	int dist = 0;
 
-	struct {
-		double s50, s100, s300;
-	} hitWinWidth;
+	Object::HitWindows hitwindows;
 
 	struct {
 		int front = 0;
 		int back = 0;
 	} showHitObj;
 
-	//sf::Music *music;
+	
 	Beatmap::Beatmap bmPlay;
 
 protected:
@@ -94,21 +95,12 @@ public:
 	testUI(sf::RenderWindow& window, UI *from, std::unordered_map<std::string, std::string> bmData, sfe::Movie *playSong) :
 		UI(window, from) , cur(window), beatmapData(bmData), playSong(playSong)
 	{
-		//std::string base_dir = "resource/499488 Kana Nishino - Sweet Dreams (11t dnb mix)/";
-		//bmPlay.load(base_dir + "Kana Nishino - Sweet Dreams (11t dnb mix) (Ascendance) [ReFaller's Hard].osu");
-
 		std::string base_dir = "D:/osu!/Songs/";
 		base_dir += beatmapData["OsuDir"] + "/";
 
 		bmPlay.load(base_dir + beatmapData["OsuFile"]);
 
 		loadHitSound(&bmPlay, base_dir);
-
-		hitWinWidth.s50 = Beatmap::Difficulty::Range(bmPlay.Difficulty.OverallDifficulty, 400, 300, 200);
-		hitWinWidth.s100 = Beatmap::Difficulty::Range(bmPlay.Difficulty.OverallDifficulty, 280, 200, 120);
-		hitWinWidth.s300 = Beatmap::Difficulty::Range(bmPlay.Difficulty.OverallDifficulty, 160, 100, 40);
-
-		std::cout << hitWinWidth.s50 << "\t" << hitWinWidth.s100 << "\t" << hitWinWidth.s300 << std::endl;
 
 		// Calc For Hit Object
 		int AR = bmPlay.Difficulty.ApproachRate;
@@ -121,17 +113,9 @@ public:
 
 		transform.translate(80, 60);
 
-		//music = new sf::Music;
-		//if (!music->openFromFile("resource/audio.wav"))
-		//	return; // error
-		//music->setVolume(50);
-		//music->play();
-
-
-		//music.setPlayingOffset(sf::seconds(40));
-
 		playSong->stop();
-		//playSong.setPlayingOffset(sf::Time::Zero);
+
+		hitwindows.SetDifficulty(bmPlay.Difficulty.OverallDifficulty);
 		
 		m_window.setKeyRepeatEnabled(false);
 		m_window.setMouseCursorGrabbed(true);
@@ -155,10 +139,8 @@ public:
 
 		if (playSong->getStatus() == sfe::Status::Paused || playSong->getStatus() == sfe::Status::Stopped)
 			return;
-		//int64_t time = music->getPlayingOffset().asMilliseconds();
-		int64_t time = playSong->getPlayingOffset().asMilliseconds();
 
-		//std::cout << time << std::endl;
+		int64_t time = playSong->getPlayingOffset().asMilliseconds();
 
 		// set volume of sound effect
 		if (bmPlay.iTimingPoints < bmPlay.TimingPoints.size()) {
@@ -207,11 +189,11 @@ public:
 		while (showHitObj.front < HOsize ) {
 			int endTime = 0;
 			if (bmPlay.HitObjects[showHitObj.front].type & 1) { // circle
-				endTime = bmPlay.HitObjects[showHitObj.front].time + hitWinWidth.s50; /////////////////////////// 
+				endTime = bmPlay.HitObjects[showHitObj.front].time + hitwindows.HalfWindowFor(Scoring::HitResult::Miss);
 			}
 			else if (bmPlay.HitObjects[showHitObj.front].type & 2) { // slider
 				int duration = bmPlay.HitObjects[showHitObj.front].sliders.pixelLength / (100.0 * bmPlay.Difficulty.SliderMultiplier) * mspb;
-				endTime = bmPlay.HitObjects[showHitObj.front].time + duration * bmPlay.HitObjects[showHitObj.front].sliders.repeat + hitWinWidth.s50;
+				endTime = bmPlay.HitObjects[showHitObj.front].time + duration * bmPlay.HitObjects[showHitObj.front].sliders.repeat + hitwindows.HalfWindowFor(Scoring::HitResult::Miss);
 			}
 			else if (bmPlay.HitObjects[showHitObj.front].type & 8) { // spinner
 				endTime = bmPlay.HitObjects[showHitObj.front].endTime;

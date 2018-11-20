@@ -4,8 +4,8 @@
 #include "../Beatmap/Difficulty.h"
 #include "../Scoring/HitResult.h"
 
-using namespace Scoring;
-using namespace Beatmap;
+//using namespace Scoring;
+//using namespace Beatmap;
 
 namespace Object {
 
@@ -18,42 +18,42 @@ protected:
 
 public:
 	void SetDifficulty(double difficulty) {
-		Great = Difficulty::Range(difficulty, 160, 100, 40);
-		Good = Difficulty::Range(difficulty, 280, 200, 120);
-		Meh = Difficulty::Range(difficulty, 400, 300, 200);
-		Miss = Difficulty::Range(difficulty, 400, 400, 400);
+		Great = Beatmap::Difficulty::Range(difficulty, 160, 100, 40);
+		Good = Beatmap::Difficulty::Range(difficulty, 280, 200, 120);
+		Meh = Beatmap::Difficulty::Range(difficulty, 400, 300, 200);
+		Miss = Beatmap::Difficulty::Range(difficulty, 400, 400, 400);
 	}
 
-	HitResult ResultFor(double timeOffset) {
+	Scoring::HitResult ResultFor(double timeOffset) {
 		timeOffset = std::abs(timeOffset);
 
-		if (timeOffset <= HalfWindowFor(HitResult::Great))
-			return HitResult::Great;
-		if (timeOffset <= HalfWindowFor(HitResult::Good))
-			return HitResult::Good;
-		if (timeOffset <= HalfWindowFor(HitResult::Meh))
-			return HitResult::Meh;
-		if (timeOffset <= HalfWindowFor(HitResult::Miss))
-			return HitResult::Miss;
+		if (timeOffset <= HalfWindowFor(Scoring::HitResult::Great))
+			return Scoring::HitResult::Great;
+		if (timeOffset <= HalfWindowFor(Scoring::HitResult::Good))
+			return Scoring::HitResult::Good;
+		if (timeOffset <= HalfWindowFor(Scoring::HitResult::Meh))
+			return Scoring::HitResult::Meh;
+		if (timeOffset <= HalfWindowFor(Scoring::HitResult::Miss))
+			return Scoring::HitResult::Miss;
 
-		return HitResult::None;
+		return Scoring::HitResult::None;
 	}
 
-	double HalfWindowFor(HitResult result) {
+	double HalfWindowFor(Scoring::HitResult result) {
 		switch (result) {
-		case HitResult::Great:
+		case Scoring::HitResult::Great:
 			return Great / 2;
-		case HitResult::Good:
+		case Scoring::HitResult::Good:
 			return Good / 2;
-		case HitResult::Meh:
+		case Scoring::HitResult::Meh:
 			return Meh / 2;
-		case HitResult::Miss:
+		case Scoring::HitResult::Miss:
 			return Miss / 2;
 		}
 	}
 
 	bool CanBeHit(double timeOffset) {
-		return timeOffset <= HalfWindowFor(HitResult::Meh);
+		return timeOffset <= HalfWindowFor(Scoring::HitResult::Meh);
 	}
 };
 

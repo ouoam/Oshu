@@ -2,6 +2,8 @@
 
 #include <filesystem>
 
+#include "../Utility/string.h"
+
 #include "DB.h"
 #include "../Beatmap/Beatmap.h"
 
@@ -153,15 +155,20 @@ public:
 			delete searchData;
 		}
 
+		std::vector<std::string> split = explode(keyword, ' ');
+
 		sqlite3_stmt *searchStmt;
 		std::string searchSQL = "SELECT id, Title, Artist, Creator FROM songs WHERE Mode = 0 ";
 		if (keyword != "") {
-			searchSQL += "AND (Title like '%' || ? || '%' OR TitleUnicode like '%' || ? || '%' "
-							"OR Artist like '%' || ? || '%' OR ArtistUnicode like '%' || ? || '%' "
-							"OR Creator like '%' || ? || '%' OR Version like '%' || ? || '%' "
-							"OR Source like '%' || ? || '%' OR Tags like '%' || ? || '%') ";
+			for (int i = 0; i < split.size(); i++) {
+				searchSQL += "AND (Title like '%' || ? || '%' OR TitleUnicode like '%' || ? || '%' "
+					"OR Artist like '%' || ? || '%' OR ArtistUnicode like '%' || ? || '%' "
+					"OR Creator like '%' || ? || '%' OR Version like '%' || ? || '%' "
+					"OR Source like '%' || ? || '%' OR Tags like '%' || ? || '%') ";
+			}
+			
 		}
-		searchSQL += " GROUP BY OsuDir ORDER BY lower(Title);";
+		searchSQL += "GROUP BY OsuDir ORDER BY lower(Title);";
 
 		rc = sqlite3_prepare_v2(db, searchSQL.c_str(), searchSQL.size(), &searchStmt, nullptr);
 
@@ -171,8 +178,10 @@ public:
 		}
 
 		if (keyword != "") {
-			for (int i = 1; i <= 8; i++) {
-				sqlite3_bind(searchStmt, i, &keyword);
+			for (int i = 0; i < split.size(); i++) {
+				for (int j = 0; j < 8; j++) {
+					sqlite3_bind(searchStmt, i * 8 + j + 1, &split[i]);
+				}
 			}
 		}
 

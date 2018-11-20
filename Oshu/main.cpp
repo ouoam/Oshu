@@ -60,7 +60,7 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(800, 600), "Oshu!", sf::Style::Titlebar | sf::Style::Close, settings);
 	//sf::RenderWindow window(sf::VideoMode(800, 600), "Oshu!", sf::Style::None, settings);
 	//window.setMouseCursorVisible(false);
-	//window.setFramerateLimit(240);
+	window.setFramerateLimit(240);
 	//window.setVerticalSyncEnabled(true);
 	window.setKeyRepeatEnabled(false);
 
