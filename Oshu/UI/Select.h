@@ -60,16 +60,19 @@ class SelectUI : public UI {
 	sf::Sprite background;
 	sf::Texture backgroundTexture;
 
-	int selectSong = -1;
-	int selectSongId = -1;
+	int selectBeatmapSet = -1;
+	int selectBeatmapSetId = -1;
 	std::vector<std::unordered_map<std::string, std::string>*> *beatmapSetData;
 	myMutex beatmapSetDataMutex;
+	int selectBeatmapIndex = 0;
 
 	std::default_random_engine generator;
 
 	sfe::Movie playSong;
 	myMutex playSongMutex;
 	sf::Thread updatePlaySongThread;
+
+	sf::Font font;
 
 protected:
 	void OnPressed(sf::Event event) {
@@ -82,23 +85,24 @@ protected:
 
 	void randomSongs() {
 		int random;
-		while ((random = generator() % searchData->size()) == selectSong);
+		while ((random = generator() % searchData->size()) == selectBeatmapSet);
 		showDataCenter = random;
-		selectNewSongs(random);
+		selectNewBeatmapSet(random);
 		updateText = true;
 	}
 
-	void selectNewSongs(int newSong) {
-		if (selectSong != newSong) {
-			selectSong = newSong;
+	void selectNewBeatmapSet(int newBeatmapIndex) {
+		if (selectBeatmapSet != newBeatmapIndex) {
+			selectBeatmapSet = newBeatmapIndex;
 
-			updateText = true;
-
-			selectSongId = stoi((*((*searchData)[newSong]))["id"]);
+			selectBeatmapSetId = stoi((*((*searchData)[newBeatmapIndex]))["id"]);
 
 			beatmapSetDataMutex.lock();
-			beatmapSetData = songDB.getBeatmapSet(selectSongId);
+			beatmapSetData = songDB.getBeatmapSet(selectBeatmapSetId);
 			beatmapSetDataMutex.unlock();
+
+			updateText = true;
+			selectBeatmapIndex = 0;
 
 			for (auto v : *beatmapSetData) {
 				std::cout << (*v)["OsuFile"] << std::endl;
@@ -129,9 +133,7 @@ protected:
 		sf::Text textTitle;
 		sf::Text textDetail;
 		sf::Text textSearch;
-		sf::Font font;
-		font.loadFromFile("resource\\Chakra-Petch-master\\fonts\\ChakraPetch-SemiBoldItalic.ttf");
-
+		
 		textTitle.setFont(font);
 		textTitle.setCharacterSize(16);
 		textTitle.setFillColor(sf::Color::White);
@@ -151,6 +153,8 @@ protected:
 		int from = showDataCenter - 6;
 		int to = showDataCenter + 6;
 
+		if (from > selectBeatmapSet) from -= (*beatmapSetData).size() * 0.6;
+
 		if (from < 0) from = 0;
 		if (to > (*searchData).size()) to = (*searchData).size();
 
@@ -158,12 +162,37 @@ protected:
 			std::unordered_map<std::string, std::string> row = *((*searchData)[i]);
 			float offset = i - showDataCenter;
 
+			if (i > selectBeatmapSet && selectBeatmapSet != -2) {
+				offset += (*beatmapSetData).size() * 0.6;
+			}
+
 			sf::Vector2f position;
 			position.x = 500 - (100 * std::cos(offset / 5.0));
 			position.y = 300 + (offset * 65.0);
 
-			if (i == selectSong)
+			if (i == selectBeatmapSet) {
+				sf::Text textVersion;
+				textVersion.setFont(font);
+				textVersion.setCharacterSize(12);
+				textVersion.setFillColor(sf::Color::White);
+				for (int j = 0; j < (*beatmapSetData).size(); j++) {
+					float offset = i - showDataCenter + j * 0.6 + 1;
+					sf::Vector2f position;
+					position.x = 500 - (100 * std::cos(offset / 5.0)) - 20;
+					position.y = 300 + (offset * 65.0);
+
+					if (j == selectBeatmapIndex) {
+						position.x -= 40;
+					}
+
+					textVersion.setString((*((*beatmapSetData)[j]))["Version"]);
+					textVersion.setPosition(position);
+
+					this->renderText.draw(textVersion);
+				}
 				position.x -= 80;
+			}
+				
 
 			textTitle.setString(row["Title"]);
 			textTitle.setPosition(position);
@@ -245,6 +274,8 @@ public:
 		generator.seed(seed);
 
 		renderText.setActive(false);
+
+		font.loadFromFile("resource\\Chakra-Petch-master\\fonts\\ChakraPetch-SemiBoldItalic.ttf");
 	}
 
 	virtual ~SelectUI() {
@@ -268,17 +299,17 @@ public:
 				searchData = songDB.search(searchKeyword);
 				std::cout << "Use time : " << aa.getElapsedTime().asMilliseconds() << " ms." << std::endl;
 
-				if (selectSong == -1) {
+				if (selectBeatmapSet == -1) {
 					randomSongs();
 				} else {
 					if ((*searchData).size() == 1 && searchKeyword.size() > 6) {
-						selectNewSongs(0);
+						selectNewBeatmapSet(0);
 					} else {
 						int i = 0;
 						for (std::unordered_map<std::string, std::string>* row : *searchData) {
-							if (std::stoi((*row)["id"]) == selectSongId) {
-								showDataCenter = i - (selectSong != -2 ? (selectSong - showDataCenter) : 0);
-								selectSong = i;
+							if (std::stoi((*row)["id"]) == selectBeatmapSetId) {
+								showDataCenter = i - (selectBeatmapSet != -2 ? (selectBeatmapSet - showDataCenter) : 0);
+								selectBeatmapSet = i;
 								break;
 							}
 							i++;
@@ -286,16 +317,22 @@ public:
 
 						if (i == (*searchData).size()) {
 							std::cout << "Not Found" << std::endl;
-							selectSong = -2;
+							selectBeatmapSet = -2;
 						}
 					}
 				}
 
 				updateText = true;
-
-				if (showDataCenter < 0) showDataCenter = 0;
-				else if (showDataCenter > (*searchData).size() - 1) showDataCenter = (*searchData).size() - 1;
 			}
+		}
+
+		if (showDataCenter < 0) showDataCenter = 0;
+		else {
+			float limit = (*searchData).size() - 1;
+			if (selectBeatmapSet != -2)
+				limit += (*beatmapSetData).size() * 0.6;
+			if (showDataCenter > limit)
+				showDataCenter = limit;
 		}
 
 		if (updateTextMutex.tryLock()) {
@@ -328,14 +365,22 @@ public:
 	}
 
 	void onEvent(sf::Event event) {
-		int newSelectSong;
 		switch (event.type) {
 		case sf::Event::MouseButtonPressed:
 			OnPressed(event);
 			if (event.mouseButton.button == sf::Mouse::Left) {
-				newSelectSong = ((event.mouseButton.y - 300) / 65.0) + showDataCenter;
-				if (0 <= newSelectSong && newSelectSong < searchData->size())
-					selectNewSongs(newSelectSong);
+				float newselectBeatmapSet;
+				newselectBeatmapSet = ((event.mouseButton.y - 300) / 65.0) + showDataCenter;
+				if (selectBeatmapSet != -2 && newselectBeatmapSet > selectBeatmapSet) {
+					newselectBeatmapSet -= (*beatmapSetData).size() * 0.6;
+					if (newselectBeatmapSet <= selectBeatmapSet + 1) {
+						newselectBeatmapSet = selectBeatmapSet;
+						selectBeatmapIndex = (((event.mouseButton.y - 300) / 65.0) + showDataCenter - selectBeatmapSet - 1) / 0.6;
+						updateText = true;
+					}
+				}
+				if (0 <= newselectBeatmapSet && newselectBeatmapSet < searchData->size())
+					selectNewBeatmapSet(newselectBeatmapSet);
 			}
 			break;
 
@@ -346,8 +391,6 @@ public:
 		case sf::Event::MouseWheelMoved:
 			updateTextMutex.lock();
 			showDataCenter -= event.mouseWheel.delta / 2.5;
-			if (showDataCenter < 0) showDataCenter = 0;
-			else if (showDataCenter > (*searchData).size() - 1) showDataCenter = (*searchData).size() - 1;
 			updateText = true;
 			updateTextMutex.unlock();
 			break;
@@ -361,7 +404,7 @@ public:
 			}
 			else if (event.key.code == sf::Keyboard::F9) {
 
-				gotoUI(new testUI(m_window, this, *((*beatmapSetData)[0]), &playSong));
+				gotoUI(new testUI(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), &playSong));
 			}
 			break;
 

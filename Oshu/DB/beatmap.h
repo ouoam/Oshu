@@ -158,7 +158,7 @@ public:
 		std::vector<std::string> split = explode(keyword, ' ');
 
 		sqlite3_stmt *searchStmt;
-		std::string searchSQL = "SELECT id, Title, Artist, Creator FROM songs WHERE Mode = 0 ";
+		std::string searchSQL = "SELECT min(id) as id, Title, Artist, Creator FROM songs WHERE Mode = 0 ";
 		if (keyword != "") {
 			for (int i = 0; i < split.size(); i++) {
 				searchSQL += "AND (Title like '%' || ? || '%' OR TitleUnicode like '%' || ? || '%' "
