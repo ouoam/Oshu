@@ -52,6 +52,22 @@ class SelectUI : public UI {
 protected:
 	void OnPressed(sf::Event event) {
 		cur.onMouseDown(event.key.code);
+
+		if (event.mouseButton.button == sf::Mouse::Left) {
+			if (event.mouseButton.x + 40 >= 500 - (100 * std::cos((event.mouseButton.x - 300) / 325.0))) {
+				float newselectBeatmapSet;
+				newselectBeatmapSet = ((event.mouseButton.y - 300) / 65.0) + showDataCenter;
+				if (selectBeatmapSet != -2 && newselectBeatmapSet > selectBeatmapSet) {
+					newselectBeatmapSet -= (*beatmapSetData).size() * 0.6;
+					if (newselectBeatmapSet <= selectBeatmapSet + 1) {
+						newselectBeatmapSet = selectBeatmapSet;
+						selectBeatmapIndex = (((event.mouseButton.y - 300) / 65.0) + showDataCenter - selectBeatmapSet - 1) / 0.6;
+						updateText = true;
+					}
+				}
+				selectNewBeatmapSet(newselectBeatmapSet);
+			}
+		}
 	}
 
 	void OnReleased(sf::Event event) {
@@ -303,19 +319,6 @@ protected:
 		switch (event.type) {
 		case sf::Event::MouseButtonPressed:
 			OnPressed(event);
-			if (event.mouseButton.button == sf::Mouse::Left) {
-				float newselectBeatmapSet;
-				newselectBeatmapSet = ((event.mouseButton.y - 300) / 65.0) + showDataCenter;
-				if (selectBeatmapSet != -2 && newselectBeatmapSet > selectBeatmapSet) {
-					newselectBeatmapSet -= (*beatmapSetData).size() * 0.6;
-					if (newselectBeatmapSet <= selectBeatmapSet + 1) {
-						newselectBeatmapSet = selectBeatmapSet;
-						selectBeatmapIndex = (((event.mouseButton.y - 300) / 65.0) + showDataCenter - selectBeatmapSet - 1) / 0.6;
-						updateText = true;
-					}
-				}
-				selectNewBeatmapSet(newselectBeatmapSet);
-			}
 			break;
 
 		case sf::Event::MouseButtonReleased:
@@ -339,6 +342,12 @@ protected:
 				break;
 			case sf::Keyboard::Enter:
 				gotoUI(new testUI(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), &playSong));
+				break;
+
+			case sf::Keyboard::F5:
+				std::cout << "Start Update DB" << std::endl;
+				songDB.update();
+				std::cout << "Finish" << std::endl;
 				break;
 
 			case sf::Keyboard::Left:

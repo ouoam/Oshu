@@ -92,11 +92,6 @@ protected:
 
 
 	void onDelete() {
-		//music->stop();
-		//delete music;
-
-		//playSong->stop();
-
 		for (auto obj : objs)
 			delete obj;
 	}
@@ -207,9 +202,7 @@ protected:
 		}
 		Mutex.unlock();
 
-
 		m_window.draw(cur);
-
 	}
 
 	void onEvent(sf::Event event) {

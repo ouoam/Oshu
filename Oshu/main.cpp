@@ -1,32 +1,17 @@
-#include <Time.h>
 #include <string>
-#include <fstream>
-//#include <deque>
-#include <cmath>
-#include <sys/stat.h>
-
 #include <iostream>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
-//#include <SFML/Audio.hpp>
 
-//#include "Beatmap/Beatmap.h"
-//#include "Audio/hitsound.h"
-
-#include "Object/Animate/Animate.h"
 #include "Skin/Skin.h"
 #include "DB/beatmap.h"
 
 #include "UI/UI.h"
-
-//#include "UI/Playfield.h"
-#include "UI/testZone.h"
 #include "UI/Select.h"
 #include "UI/testtest.h"
 
 UI *ui;
-
 
 void renderingThread(sf::RenderWindow* window)
 {
@@ -47,26 +32,18 @@ void renderingThread(sf::RenderWindow* window)
 }
 
 
-
 int main()
 {
 	beatmapDB aa;
-	//std::cout << "Start Update Beatmap Database" << std::endl;
-	//aa.update();
-	//std::cout << "Finish Update" << std::endl;
 	
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
 	sf::RenderWindow window(sf::VideoMode(800, 600), "Oshu!", sf::Style::Titlebar | sf::Style::Close, settings);
-	//sf::RenderWindow window(sf::VideoMode(800, 600), "Oshu!", sf::Style::None, settings);
-	//window.setMouseCursorVisible(false);
-	window.setFramerateLimit(240);
-	//window.setVerticalSyncEnabled(true);
+	window.setFramerateLimit(60);
 	window.setKeyRepeatEnabled(false);
 
 	Skin::load();
 	ui = new SelectUI(window, nullptr, aa);
-	//ui = new testtest(window, nullptr);
 
 	window.setActive(false);
 	sf::Thread thread(&renderingThread, &window);
