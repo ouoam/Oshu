@@ -90,51 +90,19 @@ protected:
 		cur.onMouseUp(event.key.code);
 	}
 
-public:
 
-	testUI(sf::RenderWindow& window, UI *from, std::unordered_map<std::string, std::string> bmData, sfe::Movie *playSong) :
-		UI(window, from) , cur(window), beatmapData(bmData), playSong(playSong)
-	{
-		std::string base_dir = "D:/osu!/Songs/";
-		base_dir += beatmapData["OsuDir"] + "/";
-
-		bmPlay.load(base_dir + beatmapData["OsuFile"]);
-
-		loadHitSound(&bmPlay, base_dir);
-
-		// Calc For Hit Object
-		int AR = bmPlay.Difficulty.ApproachRate;
-
-		Beatmap::bmHitObjects::TimePreempt = Beatmap::Difficulty::Range(AR, 1800, 1200, 450);
-		Beatmap::bmHitObjects::TimeFadeIn = Beatmap::Difficulty::Range(AR, 1200, 800, 300);
-
-		Beatmap::bmHitObjects::CR = bmPlay.Difficulty.CircleRadius;
-		// End Calc For Hit Object
-
-		transform.translate(80, 60);
-
-		playSong->stop();
-
-		hitwindows.SetDifficulty(bmPlay.Difficulty.OverallDifficulty);
-		
-		m_window.setKeyRepeatEnabled(false);
-		m_window.setMouseCursorGrabbed(true);
-	}
-
-	virtual ~testUI() {
+	void onDelete() {
 		//music->stop();
 		//delete music;
 
-		playSong->stop();
+		//playSong->stop();
 
 		for (auto obj : objs)
 			delete obj;
-
-		UI::~UI();
 	}
 
 
-	void update() {
+	void onUpdate() {
 		cur.update();
 
 		if (playSong->getStatus() == sfe::Status::Paused || playSong->getStatus() == sfe::Status::Stopped)
@@ -174,7 +142,8 @@ public:
 					Mutex.lock();
 					objs.push_back(newCircle);
 					Mutex.unlock();
-				} else if (bmPlay.HitObjects[showHitObj.front].type & 2) { // slider
+				}
+				else if (bmPlay.HitObjects[showHitObj.front].type & 2) { // slider
 					Object::Slider *newSlider = new Object::Slider(&bmPlay.HitObjects[showHitObj.front]);
 					newSlider->StartPreemptState();
 
@@ -185,8 +154,8 @@ public:
 			}
 			else break;
 		}
-	
-		while (showHitObj.front < HOsize ) {
+
+		while (showHitObj.front < HOsize) {
 			int endTime = 0;
 			if (bmPlay.HitObjects[showHitObj.front].type & 1) { // circle
 				endTime = bmPlay.HitObjects[showHitObj.front].time + hitwindows.HalfWindowFor(Scoring::HitResult::Miss);
@@ -209,7 +178,7 @@ public:
 		}
 
 
-		
+
 
 		Mutex.lock();
 		std::deque<Object::ContainerHitObject*>::iterator it = objs.begin();
@@ -225,7 +194,7 @@ public:
 		Mutex.unlock();
 	}
 
-	void draw() {
+	void onDraw() {
 		Mutex.lock();
 		for (int i = 0; i < 5; i++) {  //Loop for select layer
 			Object::Container::renderLayer = i;
@@ -264,4 +233,35 @@ public:
 		}
 	}
 
+
+public:
+
+	testUI(sf::RenderWindow& window, UI *from, std::unordered_map<std::string, std::string> bmData, sfe::Movie *playSong) :
+		UI(window, from) , cur(window), beatmapData(bmData), playSong(playSong)
+	{
+		std::string base_dir = "D:/osu!/Songs/";
+		base_dir += beatmapData["OsuDir"] + "/";
+
+		bmPlay.load(base_dir + beatmapData["OsuFile"]);
+
+		loadHitSound(&bmPlay, base_dir);
+
+		// Calc For Hit Object
+		int AR = bmPlay.Difficulty.ApproachRate;
+
+		Beatmap::bmHitObjects::TimePreempt = Beatmap::Difficulty::Range(AR, 1800, 1200, 450);
+		Beatmap::bmHitObjects::TimeFadeIn = Beatmap::Difficulty::Range(AR, 1200, 800, 300);
+
+		Beatmap::bmHitObjects::CR = bmPlay.Difficulty.CircleRadius;
+		// End Calc For Hit Object
+
+		transform.translate(80, 60);
+
+		playSong->stop();
+
+		hitwindows.SetDifficulty(bmPlay.Difficulty.OverallDifficulty);
+		
+		m_window.setKeyRepeatEnabled(false);
+		m_window.setMouseCursorGrabbed(true);
+	}
 };

@@ -155,6 +155,9 @@
     <ClInclude Include="Scoring\HitResult.h">
       <Filter>Header Files\Scoring</Filter>
     </ClInclude>
+    <ClInclude Include="Utility\Mutex.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">

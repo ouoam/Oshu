@@ -99,7 +99,7 @@ int main()
 				break;
 			}
 
-			ui->onEvent(event);
+			ui->newEvent(event);
 		}
 	}
 

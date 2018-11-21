@@ -15,32 +15,7 @@
 
 #include "../Object/Cursor.h"
 
-#include <windows.h>
-
-class myMutex : sf::NonCopyable {
-public:
-	myMutex() {
-		InitializeCriticalSection(&m_mutex);
-	}
-	~myMutex() {
-		DeleteCriticalSection(&m_mutex);
-	}
-	void lock() {
-		EnterCriticalSection(&m_mutex);
-	}
-
-	void unlock() {
-		LeaveCriticalSection(&m_mutex);
-	}
-
-	bool tryLock() {
-		// https://docs.microsoft.com/th-th/windows/desktop/api/synchapi/nf-synchapi-tryentercriticalsection
-		return TryEnterCriticalSection(&m_mutex);
-	}
-
-private:
-	CRITICAL_SECTION m_mutex;
-};
+#include "../Utility/Mutex.h"
 
 class SelectUI : public UI {
 	Object::Cursor cur;
@@ -241,50 +216,10 @@ protected:
 		//playSong.play();
 	}
 
-public:
-	SelectUI(sf::RenderWindow& window, UI *from, beatmapDB DB) : UI(window, from), cur(window), songDB(DB),
-		updateTextThread(&SelectUI::updateTextFunc, this),
-		updatePlaySongThread(&SelectUI::updatePlaySong, this)
-	{
-		updateSearch = true;
-		if (!renderText.create(800, 600)) {
-			std::cout << "Error create render text" << std::endl;
-		}
-
-		m_window.setKeyRepeatEnabled(true);
-
-		if (!backgroundTexture.loadFromFile("resource\\osu-resources-master\\osu.Game.Resources\\Textures\\Backgrounds\\bg2.jpg")) {
-			std::cout << "55" << std::endl;
-		}
-		background.setTexture(backgroundTexture);
-		
-		sf::Vector2u winSize = m_window.getSize();
-		sf::Vector2u bgSize = backgroundTexture.getSize();
-		double sx = (double)winSize.x / (double)bgSize.x;
-		double sy = (double)winSize.y / (double)bgSize.y;
-		
-		background.setScale(sf::Vector2f(std::max(sx,sy), std::max(sx, sy)));
-
-		background.setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
-		background.setPosition(winSize.x / 2.0, winSize.y / 2.0);
-
-		unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-		generator.seed(seed);
-
-		renderText.setActive(false);
-
-		font.loadFromFile("resource\\Chakra-Petch-master\\fonts\\ChakraPetch-SemiBoldItalic.ttf");
-	}
-
-	virtual ~SelectUI() {
-	}
-
-	virtual void update() {
-		UI::update();
-
+	virtual void onUpdate() {
 		if (!isUIshow())
 			return;
-		
+
 		cur.update();
 
 		if (updateSearch) {
@@ -299,10 +234,12 @@ public:
 
 				if (selectBeatmapSet == -1) {
 					randomSongs();
-				} else {
+				}
+				else {
 					if ((*searchData).size() == 1 && searchKeyword.size() > 6) {
 						selectNewBeatmapSet(0);
-					} else {
+					}
+					else {
 						int i = 0;
 						for (std::unordered_map<std::string, std::string>* row : *searchData) {
 							if (std::stoi((*row)["id"]) == selectBeatmapSetId) {
@@ -340,8 +277,8 @@ public:
 				//updateTextThread.launch();
 			}
 		}
-		
-		
+
+
 		if (playSongMutex.tryLock()) {
 			playSongMutex.unlock();
 			if (playSong.getStatus() == sfe::Status::Stopped) {
@@ -352,7 +289,7 @@ public:
 		}
 	}
 
-	void draw() {
+	void onDraw() {
 		m_window.draw(background);
 
 		const sf::Texture& texture = renderText.getTexture();
@@ -421,9 +358,10 @@ public:
 						selectNewBeatmapSet(selectBeatmapSet - 1);
 						showDataCenter = selectBeatmapSet;
 						selectBeatmapIndex = (*beatmapSetData).size() - 1;
-						std::cout << " -- "<< selectBeatmapIndex << std::endl;
+						std::cout << " -- " << selectBeatmapIndex << std::endl;
 					}
-				} else {
+				}
+				else {
 					selectBeatmapIndex--;
 				}
 				updateText = true;
@@ -456,11 +394,47 @@ public:
 			if (event.text.unicode == '\b') {
 				if (searchKeyword.size() > 0)
 					searchKeyword.pop_back();
-			} else if (32 <= event.text.unicode && event.text.unicode <= 126) {
+			}
+			else if (32 <= event.text.unicode && event.text.unicode <= 126) {
 				searchKeyword.push_back(event.text.unicode);
 			}
 			updateSearch = true;
 			break;
 		}
+	}
+
+public:
+	SelectUI(sf::RenderWindow& window, UI *from, beatmapDB DB) : UI(window, from), cur(window), songDB(DB),
+		updateTextThread(&SelectUI::updateTextFunc, this),
+		updatePlaySongThread(&SelectUI::updatePlaySong, this)
+	{
+		updateSearch = true;
+		if (!renderText.create(800, 600)) {
+			std::cout << "Error create render text" << std::endl;
+		}
+
+		m_window.setKeyRepeatEnabled(true);
+
+		if (!backgroundTexture.loadFromFile("resource\\osu-resources-master\\osu.Game.Resources\\Textures\\Backgrounds\\bg2.jpg")) {
+			std::cout << "55" << std::endl;
+		}
+		background.setTexture(backgroundTexture);
+		
+		sf::Vector2u winSize = m_window.getSize();
+		sf::Vector2u bgSize = backgroundTexture.getSize();
+		double sx = (double)winSize.x / (double)bgSize.x;
+		double sy = (double)winSize.y / (double)bgSize.y;
+		
+		background.setScale(sf::Vector2f(std::max(sx,sy), std::max(sx, sy)));
+
+		background.setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
+		background.setPosition(winSize.x / 2.0, winSize.y / 2.0);
+
+		unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+		generator.seed(seed);
+
+		renderText.setActive(false);
+
+		font.loadFromFile("resource\\Chakra-Petch-master\\fonts\\ChakraPetch-SemiBoldItalic.ttf");
 	}
 };

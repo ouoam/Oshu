@@ -173,6 +173,7 @@
     <ClInclude Include="Utility\CircularArc.h" />
     <ClInclude Include="Utility\file.h" />
     <ClInclude Include="Utility\lineThinkness.h" />
+    <ClInclude Include="Utility\Mutex.h" />
     <ClInclude Include="Utility\string.h" />
   </ItemGroup>
   <ItemGroup>
