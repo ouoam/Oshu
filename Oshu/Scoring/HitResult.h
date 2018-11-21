@@ -7,8 +7,7 @@ enum HitResult {
 	Miss,
 	Meh,
 	Good,
-	Great,
-	Perfect
+	Great
 };
 
 }

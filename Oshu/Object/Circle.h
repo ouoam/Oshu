@@ -59,14 +59,14 @@ public:
 		circleOverlay.fadeTo(255, hitObject->TimePreempt).then();
 		circleOverlay.fadeTo(0, 500).expire();
 
-		approach.fadeTo(255, std::min(hitObject->TimeFadeIn, hitObject->TimePreempt));
+		approach.fadeTo(255, std::min(hitObject->TimeFadeIn * 2, hitObject->TimePreempt));
 		approach.scaleTo(1.1, hitObject->TimePreempt).then();
 		approach.fadeTo(255, hitObject->TimePreempt).then();
 		approach.fadeTo(0, 500).expire();
 	}
 
 	void onMouseClick(uint8_t key) {
-		approach.fadeTo(1).fadeTo(0, 50).then().expire();
+		approach.fadeTo(255).fadeTo(0, 50).then().expire();
 		circle.fadeTo(0, 500).scaleTo(1)
 			.scaleTo(1.5f, 250, Object::Animate::Easing::OutQuad).then().expire();
 		circleOverlay.fadeTo(0, 500).scaleTo(1)

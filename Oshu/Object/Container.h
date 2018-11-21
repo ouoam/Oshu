@@ -26,7 +26,6 @@ public:
 	Beatmap::bmHitObjects *hitObject;
 
 	ContainerHitObject(Beatmap::bmHitObjects *HitObject) : hitObject(HitObject) {}
-
 };
 
 }

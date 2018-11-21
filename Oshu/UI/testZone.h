@@ -19,6 +19,8 @@
 #include "../Object/HitWindows.h"
 #include "../Scoring/HitResult.h"
 
+#include "../Scoring/HitResult.h"
+
 #include "UI.h"
 
 class testUI : public UI {
@@ -52,37 +54,47 @@ class testUI : public UI {
 		int back = 0;
 	} showHitObj;
 
+	bool haveStart = false;
 	
 	Beatmap::Beatmap bmPlay;
+
+
+	int aaa = 0;
+	int64_t oldTime = 0;
 
 protected:
 
 
 	void OnPressed(sf::Event event) {
+		if (event.type == sf::Event::KeyPressed) {
+			if (event.key.code != sf::Keyboard::A && event.key.code != sf::Keyboard::S)
+				return;
+		}
 		cur.onMouseDown(event.key.code);
 
 		Mutex.lock();
 
+		int64_t time = playSong->getPlayingOffset().asMilliseconds();
 		sf::Vector2f click = sf::Vector2f(sf::Mouse::getPosition(m_window));
+		//sf::Vector2f click = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
 
-		std::deque<Object::ContainerHitObject*>::iterator it = objs.begin();
-		std::deque<Object::ContainerHitObject*>::iterator end = objs.end();
-		while (it != end) {
-			if ((*it)->canClick) {
-				sf::Vector2f offset = click - transform.transformPoint(sf::Vector2f((*it)->hitObject->position));
-
-				std::cout << offset.x << "\t" << offset.y << std::endl;
+		for (Object::ContainerHitObject* obj : objs) {
+			
+			if (obj->canClick) {
+				sf::Vector2f offset = click - transform.transformPoint(sf::Vector2f(obj->hitObject->position));
 
 				float dist = sqrt(offset.x * offset.x + offset.y * offset.y);
 
-				if (dist <= ((*it)->hitObject->CR) / 2) {
-					std::cout << (int)dist << "hit\n";
-					(*it)->onMouseClick(event.key.code);
+				if (dist <= (obj->hitObject->CR) / 2) {
+					std::cout << hitwindows.ResultFor(time - obj->hitObject->time) << "\t" << time << "\t" << obj->hitObject->time << "\t" << Beatmap::bmHitObjects::TimePreempt << "hit\n";
+					obj->onMouseClick(event.key.code);
+					oldTime = obj->hitObject->time;
+
 					break;
 				}
 			}
-			++it;
 		}
+
 		Mutex.unlock();
 	}
 
@@ -99,6 +111,12 @@ protected:
 
 	void onUpdate() {
 		cur.update();
+
+		if (!haveStart) {
+			playSong->stop();
+			playSong->play();
+			haveStart = true;
+		}
 
 		if (playSong->getStatus() == sfe::Status::Paused || playSong->getStatus() == sfe::Status::Stopped)
 			return;
@@ -126,9 +144,9 @@ protected:
 		int HOsize = bmPlay.HitObjects.size();
 
 		// set new hit obj to show
-		while (showHitObj.back < HOsize) {
-			if (bmPlay.HitObjects[showHitObj.back].time - Beatmap::bmHitObjects::TimePreempt <= time) {
-				showHitObj.back++;
+		while (showHitObj.front + 1 < HOsize) {
+			if (bmPlay.HitObjects[showHitObj.front + 1].time - Beatmap::bmHitObjects::TimePreempt <= time) {
+				showHitObj.front++;
 
 				if (bmPlay.HitObjects[showHitObj.front].type & 1) { // circle
 					Object::Circle *newCircle = new Object::Circle(&bmPlay.HitObjects[showHitObj.front]);
@@ -150,29 +168,27 @@ protected:
 			else break;
 		}
 
-		while (showHitObj.front < HOsize) {
-			int endTime = 0;
-			if (bmPlay.HitObjects[showHitObj.front].type & 1) { // circle
-				endTime = bmPlay.HitObjects[showHitObj.front].time + hitwindows.HalfWindowFor(Scoring::HitResult::Miss);
-			}
-			else if (bmPlay.HitObjects[showHitObj.front].type & 2) { // slider
-				int duration = bmPlay.HitObjects[showHitObj.front].sliders.pixelLength / (100.0 * bmPlay.Difficulty.SliderMultiplier) * mspb;
-				endTime = bmPlay.HitObjects[showHitObj.front].time + duration * bmPlay.HitObjects[showHitObj.front].sliders.repeat + hitwindows.HalfWindowFor(Scoring::HitResult::Miss);
-			}
-			else if (bmPlay.HitObjects[showHitObj.front].type & 8) { // spinner
-				endTime = bmPlay.HitObjects[showHitObj.front].endTime;
-			}
+		//while (showHitObj.front < HOsize) {
+		//	int endTime = 0;
+		//	if (bmPlay.HitObjects[showHitObj.front].type & 1) { // circle
+		//		endTime = bmPlay.HitObjects[showHitObj.front].time + hitwindows.HalfWindowFor(Scoring::HitResult::Miss);
+		//	}
+		//	else if (bmPlay.HitObjects[showHitObj.front].type & 2) { // slider
+		//		int duration = bmPlay.HitObjects[showHitObj.front].sliders.pixelLength / (100.0 * bmPlay.Difficulty.SliderMultiplier) * mspb;
+		//		endTime = bmPlay.HitObjects[showHitObj.front].time + duration * bmPlay.HitObjects[showHitObj.front].sliders.repeat + hitwindows.HalfWindowFor(Scoring::HitResult::Miss);
+		//	}
+		//	else if (bmPlay.HitObjects[showHitObj.front].type & 8) { // spinner
+		//		endTime = bmPlay.HitObjects[showHitObj.front].endTime;
+		//	}
 
-			if (time > endTime) {
-				showHitObj.front++;
-				combo = 0;
-			}
-			else {
-				break;
-			}
-		}
-
-
+		//	if (time > endTime) {
+		//		showHitObj.front++;
+		//		combo = 0;
+		//	}
+		//	else {
+		//		break;
+		//	}
+		//}
 
 
 		Mutex.lock();
@@ -208,13 +224,11 @@ protected:
 	void onEvent(sf::Event event) {
 		switch (event.type) {
 		case sf::Event::KeyPressed:
-			if (event.key.code == sf::Keyboard::F10) {
+			if (event.key.code == sf::Keyboard::Escape)
 				gobackUI();
-			}
-			else if (event.key.code == sf::Keyboard::F11) {
-				playSong->stop();
-				playSong->play();
-			}
+			if (event.key.alt && event.key.control)
+				m_window.setMouseCursorGrabbed(false);
+
 		case sf::Event::MouseButtonPressed:
 			OnPressed(event);
 			break;
@@ -222,6 +236,10 @@ protected:
 		case sf::Event::KeyReleased:
 		case sf::Event::MouseButtonReleased:
 			OnReleased(event);
+			break;
+
+		case sf::Event::GainedFocus:
+			m_window.setMouseCursorGrabbed(true);
 			break;
 		}
 	}
@@ -253,6 +271,11 @@ public:
 		playSong->stop();
 
 		hitwindows.SetDifficulty(bmPlay.Difficulty.OverallDifficulty);
+
+		std::cout << hitwindows.HalfWindowFor(Scoring::HitResult::Great) << "\t"
+			<< hitwindows.HalfWindowFor(Scoring::HitResult::Good) << "\t"
+			<< hitwindows.HalfWindowFor(Scoring::HitResult::Meh) << "\t"
+			<< hitwindows.HalfWindowFor(Scoring::HitResult::Miss) << std::endl;
 		
 		m_window.setKeyRepeatEnabled(false);
 		m_window.setMouseCursorGrabbed(true);
