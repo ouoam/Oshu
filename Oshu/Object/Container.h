@@ -25,6 +25,16 @@ class ContainerHitObject : public Container {
 public:
 	Beatmap::bmHitObjects *hitObject;
 
+	bool isMiss = false;
+
+	void miss() {
+		if(!isMiss)
+			onMiss();
+		isMiss = true;
+	}
+
+	virtual void onMiss() {};
+
 	ContainerHitObject(Beatmap::bmHitObjects *HitObject) : hitObject(HitObject) {}
 };
 

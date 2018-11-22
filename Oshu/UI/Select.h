@@ -76,8 +76,9 @@ protected:
 
 	void randomSongs() {
 		int random;
+		if (searchData->size() <= 1) return;
 		while ((random = generator() % searchData->size()) == selectBeatmapSet);
-		showDataCenter = random;
+		showDataCenter = random + 2;
 		selectNewBeatmapSet(random);
 		updateText = true;
 	}

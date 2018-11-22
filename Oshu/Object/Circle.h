@@ -51,18 +51,11 @@ public:
 	}
 
 	void StartPreemptState() {
-		circle.fadeTo(255, hitObject->TimeFadeIn).then();
-		circle.fadeTo(255, hitObject->TimePreempt).then();
-		circle.fadeTo(0,500).expire();
-
-		circleOverlay.fadeTo(255, hitObject->TimeFadeIn).then();
-		circleOverlay.fadeTo(255, hitObject->TimePreempt).then();
-		circleOverlay.fadeTo(0, 500).expire();
-
+		circle.fadeTo(255, hitObject->TimeFadeIn);
+		circleOverlay.fadeTo(255, hitObject->TimeFadeIn);
 		approach.fadeTo(255, std::min(hitObject->TimeFadeIn * 2, hitObject->TimePreempt));
-		approach.scaleTo(1.1, hitObject->TimePreempt).then();
-		approach.fadeTo(255, hitObject->TimePreempt).then();
-		approach.fadeTo(0, 500).expire();
+		approach.scaleTo(1.1, hitObject->TimePreempt);
+		
 	}
 
 	void onMouseClick(uint8_t key) {
@@ -72,6 +65,12 @@ public:
 		circleOverlay.fadeTo(0, 500).scaleTo(1)
 			.scaleTo(1.5f, 250, Object::Animate::Easing::OutQuad).then().expire();
 		canClick = false;
+	}
+
+	void onMiss() {
+		circle.fadeTo(0, 500).then().expire();
+		circleOverlay.fadeTo(0, 500).then().expire();
+		approach.fadeTo(0, 500).then().expire();
 	}
 
 private:

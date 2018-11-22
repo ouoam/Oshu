@@ -36,9 +36,6 @@ class testUI : public UI {
 
 	sf::Transform transform;
 
-	float mspb = 0;
-	float oldmspb = 0;
-
 	int lastTimePass = 0;
 	int nextHit = -1;
 	int lastHit = -1;
@@ -54,13 +51,10 @@ class testUI : public UI {
 		int back = 0;
 	} showHitObj;
 
-	bool haveStart = false;
+	int haveStart = 0;
+	sf::Clock aaaaa;
 	
 	Beatmap::Beatmap bmPlay;
-
-
-	int aaa = 0;
-	int64_t oldTime = 0;
 
 protected:
 
@@ -76,7 +70,6 @@ protected:
 
 		int64_t time = playSong->getPlayingOffset().asMilliseconds();
 		sf::Vector2f click = sf::Vector2f(sf::Mouse::getPosition(m_window));
-		//sf::Vector2f click = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
 
 		for (Object::ContainerHitObject* obj : objs) {
 			
@@ -88,7 +81,16 @@ protected:
 				if (dist <= (obj->hitObject->CR) / 2) {
 					std::cout << hitwindows.ResultFor(time - obj->hitObject->time) << "\t" << time << "\t" << obj->hitObject->time << "\t" << Beatmap::bmHitObjects::TimePreempt << "hit\n";
 					obj->onMouseClick(event.key.code);
-					oldTime = obj->hitObject->time;
+
+					int sampleset = bmPlay.TimingPoints[bmPlay.iTimingPoints - 1].SampleSet;
+					int sound_id = obj->hitObject->hitSound;
+					int index = bmPlay.TimingPoints[bmPlay.iTimingPoints - 1].SampleIndex;
+					sound_id = (sound_id & 8) ? 3 : ((sound_id & 4) ? 2 : ((sound_id & 2) ? 1 : 0));
+					sound[iSound % 10].setBuffer(hitSoundList[sampleset][sound_id][index]);
+					sound[iSound % 10].play();
+					sound[iSound % 10].setPlayingOffset(sf::seconds(0));
+					iSound++;
+
 
 					break;
 				}
@@ -112,10 +114,17 @@ protected:
 	void onUpdate() {
 		cur.update();
 
-		if (!haveStart) {
+		if (haveStart == 0) {
+			aaaaa.restart();
+			haveStart++;
+		} else if (haveStart == 1) {
+			if (aaaaa.getElapsedTime().asMilliseconds() > 2000) {
+				haveStart++;
+			}
+		} else if (haveStart == 2) {
 			playSong->stop();
 			playSong->play();
-			haveStart = true;
+			haveStart++;
 		}
 
 		if (playSong->getStatus() == sfe::Status::Paused || playSong->getStatus() == sfe::Status::Stopped)
@@ -123,23 +132,7 @@ protected:
 
 		int64_t time = playSong->getPlayingOffset().asMilliseconds();
 
-		// set volume of sound effect
-		if (bmPlay.iTimingPoints < bmPlay.TimingPoints.size()) {
-			if (bmPlay.TimingPoints[bmPlay.iTimingPoints].Offset <= time) {
-				for (int i = 0; i < 10; i++) {
-					sound[i].setVolume(bmPlay.TimingPoints[bmPlay.iTimingPoints].Volume);
-				}
-				if (bmPlay.TimingPoints[bmPlay.iTimingPoints].mspb > 0) {
-					mspb = bmPlay.TimingPoints[bmPlay.iTimingPoints].mspb;
-					oldmspb = mspb;
-				}
-				else {
-					mspb = oldmspb * -(bmPlay.TimingPoints[bmPlay.iTimingPoints].mspb) / 100;
-				}
-
-				bmPlay.iTimingPoints++;
-			}
-		}
+		updateHitsound(&bmPlay, time);
 
 		int HOsize = bmPlay.HitObjects.size();
 
@@ -149,6 +142,7 @@ protected:
 				showHitObj.front++;
 
 				if (bmPlay.HitObjects[showHitObj.front].type & 1) { // circle
+					bmPlay.HitObjects[showHitObj.front].endTime = bmPlay.HitObjects[showHitObj.front].time + hitwindows.HalfWindowFor(Scoring::HitResult::Miss);
 					Object::Circle *newCircle = new Object::Circle(&bmPlay.HitObjects[showHitObj.front]);
 					newCircle->StartPreemptState();
 
@@ -157,6 +151,9 @@ protected:
 					Mutex.unlock();
 				}
 				else if (bmPlay.HitObjects[showHitObj.front].type & 2) { // slider
+					int duration = bmPlay.HitObjects[showHitObj.front].sliders.pixelLength / (100.0 * bmPlay.Difficulty.SliderMultiplier) * mspb;
+					bmPlay.HitObjects[showHitObj.front].endTime = bmPlay.HitObjects[showHitObj.front].time + duration * bmPlay.HitObjects[showHitObj.front].sliders.repeat + hitwindows.HalfWindowFor(Scoring::HitResult::Miss);
+
 					Object::Slider *newSlider = new Object::Slider(&bmPlay.HitObjects[showHitObj.front]);
 					newSlider->StartPreemptState();
 
@@ -195,6 +192,10 @@ protected:
 		std::deque<Object::ContainerHitObject*>::iterator it = objs.begin();
 		while (it != objs.end()) {
 			(**it).update();
+
+			if ((**it).hitObject->endTime <= time && (**it).canClick) {
+				(**it).miss();
+			}
 
 			if ((**it).willBeRemove) {
 				delete *it;  // Because I use new for Object::Circle

@@ -39,16 +39,22 @@ public:
 	}
 
 	void StartPreemptState() {
-		sliderBody.fadeTo(255, hitObject->TimeFadeIn).then();
-		sliderBody.fadeTo(255, hitObject->TimePreempt).then();
-		sliderBody.fadeTo(0, 500).expire();
-
 		circle->StartPreemptState();
+
+		sliderBody.fadeTo(255, hitObject->TimeFadeIn);
 	}
 
 	void onMouseClick(uint8_t key) {
 		circle->onMouseClick(key);
 		canClick = circle->canClick;
+
+		sliderBody.fadeTo(0, 500).then().expire(); /////////
+	}
+
+	void onMiss() {
+		circle->miss();
+
+		sliderBody.fadeTo(0, 500).then().expire();
 	}
 
 private:

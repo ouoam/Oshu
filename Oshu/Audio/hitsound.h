@@ -12,7 +12,7 @@
 sf::Sound sound[10];
 int iSound = 0;
 
-std::vector <std::vector<std::vector<sf::SoundBuffer>>> hitSoundList(4, std::vector<std::vector<sf::SoundBuffer>>(4, std::vector<sf::SoundBuffer>(100)));
+std::vector <std::vector<std::vector<sf::SoundBuffer>>> hitSoundList(4, std::vector<std::vector<sf::SoundBuffer>>(4, std::vector<sf::SoundBuffer>(101)));
 
 std::string hitNum2String(int sampleset, int sound) {
 	std::string out = "";
@@ -75,6 +75,30 @@ void loadHitSound(Beatmap::Beatmap *bmPlay, std::string base_dir) {
 			else {
 				hitSoundList[sampleset][sound][index].loadFromFile("resource/soft-hitnormal.wav");
 			}
+		}
+	}
+}
+
+float mspb = 0;
+float oldmspb = 0;
+
+
+void updateHitsound(Beatmap::Beatmap *bmPlay, int64_t time) {
+	// set volume of sound effect
+	if (bmPlay->iTimingPoints < bmPlay->TimingPoints.size()) {
+		if (bmPlay->TimingPoints[bmPlay->iTimingPoints].Offset <= time) {
+			for (int i = 0; i < 10; i++) {
+				sound[i].setVolume(bmPlay->TimingPoints[bmPlay->iTimingPoints].Volume);
+			}
+			if (bmPlay->TimingPoints[bmPlay->iTimingPoints].mspb > 0) {
+				mspb = bmPlay->TimingPoints[bmPlay->iTimingPoints].mspb;
+				oldmspb = mspb;
+			}
+			else {
+				mspb = oldmspb * -(bmPlay->TimingPoints[bmPlay->iTimingPoints].mspb) / 100;
+			}
+
+			bmPlay->iTimingPoints++;
 		}
 	}
 }

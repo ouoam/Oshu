@@ -332,7 +332,7 @@ namespace Beatmap {
 				bmho.sliders.endPoint = curvePoints[curvePoints.getVertexCount() - 1].position;
 
 				if (calcCurve) {
-					if (bmho.sliders.sliderType == "L") {
+					if (bmho.sliders.sliderType == "L" || curvePoints.getVertexCount() == 2) {
 						sf::VertexArray line(sf::LineStrip, 2);
 						line[0].position = sf::Vector2f(curvePoints[0].position);
 						if (curvePoints.getVertexCount() == 1) {
