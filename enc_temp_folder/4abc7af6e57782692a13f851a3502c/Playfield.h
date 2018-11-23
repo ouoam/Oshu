@@ -344,6 +344,8 @@ public:
 		drawMutex.lock();
 		updateMutex.lock();
 
+		Mutex.lock();
+
 		playSong.stop();
 
 		onDelete();
