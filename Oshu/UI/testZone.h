@@ -17,9 +17,7 @@
 #include "../Object/Slider.h"
 
 #include "../Object/HitWindows.h"
-#include "../Scoring/HitResult.h"
-
-#include "../Scoring/HitResult.h"
+#include "../Scoring/ScoreProcessor.h"
 
 #include "UI.h"
 
@@ -36,14 +34,6 @@ class testUI : public UI {
 
 	sf::Transform transform;
 
-	int lastTimePass = 0;
-	int nextHit = -1;
-	int lastHit = -1;
-	int hit = 0;
-	int combo = 0;
-	int lastDelay = 0;
-	int dist = 0;
-
 	Object::HitWindows hitwindows;
 
 	struct {
@@ -55,6 +45,12 @@ class testUI : public UI {
 	sf::Clock aaaaa;
 	
 	Beatmap::Beatmap bmPlay;
+
+	int combo = 0;
+	int score = 0;
+	int DifficultyMultiplier = 0;
+
+	Scoring::ScoreProcessor *scoreProcessor;
 
 protected:
 
@@ -75,24 +71,36 @@ protected:
 			
 			if (obj->canClick) {
 				sf::Vector2f offset = click - transform.transformPoint(sf::Vector2f(obj->hitObject->position));
+				int64_t offsetTime = time - obj->hitObject->time;
 
 				float dist = sqrt(offset.x * offset.x + offset.y * offset.y);
 
 				if (dist <= (obj->hitObject->CR) / 2) {
-					std::cout << hitwindows.ResultFor(time - obj->hitObject->time) << "\t" << time << "\t" << obj->hitObject->time << "\t" << Beatmap::bmHitObjects::TimePreempt << "hit\n";
-					obj->onMouseClick(event.key.code);
+					Scoring::HitResult::Enum result = hitwindows.ResultFor(offsetTime);
+					if (result == Scoring::HitResult::None) {
+						//  do shake
+						break;
+					} else {
+						obj->onMouseClick(event.key.code);
 
-					int sampleset = bmPlay.TimingPoints[bmPlay.iTimingPoints - 1].SampleSet;
-					int sound_id = obj->hitObject->hitSound;
-					int index = bmPlay.TimingPoints[bmPlay.iTimingPoints - 1].SampleIndex;
-					sound_id = (sound_id & 8) ? 3 : ((sound_id & 4) ? 2 : ((sound_id & 2) ? 1 : 0));
-					sound[iSound % 10].setBuffer(hitSoundList[sampleset][sound_id][index]);
-					sound[iSound % 10].play();
-					sound[iSound % 10].setPlayingOffset(sf::seconds(0));
-					iSound++;
+						int sampleset = bmPlay.TimingPoints[std::max(bmPlay.iTimingPoints - 1, 0)].SampleSet;
+						int sound_id = obj->hitObject->hitSound;
+						int index = bmPlay.TimingPoints[bmPlay.iTimingPoints - 1].SampleIndex;
+						sound_id = (sound_id & 8) ? 3 : ((sound_id & 4) ? 2 : ((sound_id & 2) ? 1 : 0));
+						sound[iSound % 10].setBuffer(hitSoundList[sampleset][sound_id][index]);
+						sound[iSound % 10].play();
+						sound[iSound % 10].setPlayingOffset(sf::seconds(0));
+						iSound++;
 
+						scoreProcessor->ApplyResult(Scoring::JudgementResult(result));
 
-					break;
+						//score += Scoring::NumericResultFor(result) + (Scoring::NumericResultFor(result) * ((std::max(combo - 1, 0) * DifficultyMultiplier) / 25.0));
+						//combo++;
+
+						std::cout << "S:" << scoreProcessor->TotalScore << "\tC:" << scoreProcessor->Combo << std::endl;
+
+						break;
+					}
 				}
 			}
 		}
@@ -195,6 +203,8 @@ protected:
 
 			if ((**it).hitObject->endTime <= time && (**it).canClick) {
 				(**it).miss();
+				(**it).canClick = false;
+				scoreProcessor->ApplyResult(Scoring::JudgementResult(Scoring::HitResult::Miss));
 			}
 
 			if ((**it).willBeRemove) {
@@ -273,6 +283,22 @@ public:
 
 		hitwindows.SetDifficulty(bmPlay.Difficulty.OverallDifficulty);
 
+		float DifficultyPoint = bmPlay.Difficulty.CircleSize + bmPlay.Difficulty.HPDrainRate + bmPlay.Difficulty.OverallDifficulty;
+		
+		DifficultyMultiplier = 0;
+		switch ((int)DifficultyPoint) {
+		case 25: case 26: case 27: case 28: case 29: case 30:
+			DifficultyMultiplier++;
+		case 18: case 19: case 20: case 21: case 22: case 23: case 24:
+			DifficultyMultiplier++;
+		case 13: case 14: case 15: case 16: case 17:
+			DifficultyMultiplier++;
+		case  6: case  7: case  8: case  9: case 10: case 11: case 12:
+			DifficultyMultiplier++;
+		case  0: case  1: case  2: case  3: case  4: case 5:
+			DifficultyMultiplier+=2;
+		}
+
 		std::cout << hitwindows.HalfWindowFor(Scoring::HitResult::Great) << "\t"
 			<< hitwindows.HalfWindowFor(Scoring::HitResult::Good) << "\t"
 			<< hitwindows.HalfWindowFor(Scoring::HitResult::Meh) << "\t"
@@ -280,5 +306,7 @@ public:
 		
 		m_window.setKeyRepeatEnabled(false);
 		m_window.setMouseCursorGrabbed(true);
+
+		scoreProcessor = new Scoring::ScoreProcessor(&bmPlay);
 	}
 };

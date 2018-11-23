@@ -161,7 +161,11 @@
     <ClInclude Include="Object\Slider.h" />
     <ClInclude Include="Overlay\hitwindows.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="Scoring\HitResult.h" />
+    <ClInclude Include="Scoring\enum.h" />
+    <ClInclude Include="Scoring\Judgement.h" />
+    <ClInclude Include="Scoring\JudgementResult.h" />
+    <ClInclude Include="Scoring\Score.h" />
+    <ClInclude Include="Scoring\ScoreProcessor.h" />
     <ClInclude Include="Skin\Skin.h" />
     <ClInclude Include="UI\Playfield.h" />
     <ClInclude Include="UI\Select.h" />
@@ -174,6 +178,7 @@
     <ClInclude Include="Utility\file.h" />
     <ClInclude Include="Utility\lineThinkness.h" />
     <ClInclude Include="Utility\Mutex.h" />
+    <ClInclude Include="Utility\stl.h" />
     <ClInclude Include="Utility\string.h" />
   </ItemGroup>
   <ItemGroup>

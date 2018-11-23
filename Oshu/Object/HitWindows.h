@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include "../Beatmap/Difficulty.h"
-#include "../Scoring/HitResult.h"
+#include "../Scoring/enum.h"
 
 //using namespace Scoring;
 //using namespace Beatmap;
@@ -24,7 +24,7 @@ public:
 		Miss = Beatmap::Difficulty::Range(difficulty, 400, 400, 400);
 	}
 
-	Scoring::HitResult ResultFor(double timeOffset) {
+	Scoring::HitResult::Enum ResultFor(double timeOffset) {
 		timeOffset = std::abs(timeOffset);
 
 		if (timeOffset <= HalfWindowFor(Scoring::HitResult::Great))
@@ -39,7 +39,7 @@ public:
 		return Scoring::HitResult::None;
 	}
 
-	double HalfWindowFor(Scoring::HitResult result) {
+	double HalfWindowFor(Scoring::HitResult::Enum result) {
 		switch (result) {
 		case Scoring::HitResult::Great:
 			return Great / 2;

@@ -68,7 +68,7 @@ int main()
 				break;
 
 			case sf::Event::LostFocus:
-				window.setFramerateLimit(60);
+				window.setFramerateLimit(30);
 				break;
 
 			case sf::Event::GainedFocus:

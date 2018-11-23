@@ -152,11 +152,26 @@
     <ClInclude Include="Object\HitWindows.h">
       <Filter>Header Files\Object</Filter>
     </ClInclude>
-    <ClInclude Include="Scoring\HitResult.h">
-      <Filter>Header Files\Scoring</Filter>
-    </ClInclude>
     <ClInclude Include="Utility\Mutex.h">
       <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Scoring\Score.h">
+      <Filter>Header Files\Scoring</Filter>
+    </ClInclude>
+    <ClInclude Include="Scoring\enum.h">
+      <Filter>Header Files\Scoring</Filter>
+    </ClInclude>
+    <ClInclude Include="Scoring\ScoreProcessor.h">
+      <Filter>Header Files\Scoring</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\stl.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Scoring\Judgement.h">
+      <Filter>Header Files\Scoring</Filter>
+    </ClInclude>
+    <ClInclude Include="Scoring\JudgementResult.h">
+      <Filter>Header Files\Scoring</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
