@@ -11,7 +11,7 @@
 
 #include "UI.h"
 #include "Playfield.h"
-#include "../DB/beatmapDB.h"
+#include "../DB/gameDB.h"
 
 #include "../Object/Cursor.h"
 
@@ -19,7 +19,7 @@
 
 class SelectUI : public UI {
 	Object::Cursor cur;
-	beatmapDB songDB;
+	DB::gameDB gameDB;
 
 	sf::RenderTexture renderText;
 	bool updateText = true;
@@ -40,6 +40,7 @@ class SelectUI : public UI {
 	std::vector<std::unordered_map<std::string, std::string>*> *beatmapSetData;
 	myMutex beatmapSetDataMutex;
 	int selectBeatmapIndex = 0;
+	std::vector<Scoring::Score*> *beatmapScore;
 
 	std::default_random_engine generator;
 
@@ -61,8 +62,8 @@ protected:
 					newselectBeatmapSet -= (*beatmapSetData).size() * 0.6;
 					if (newselectBeatmapSet <= selectBeatmapSet + 1) {
 						newselectBeatmapSet = selectBeatmapSet;
-						selectBeatmapIndex = (((event.mouseButton.y - 300) / 65.0) + showDataCenter - selectBeatmapSet - 1) / 0.6;
-						updateText = true;
+						selectNewBeatmapIndex((((event.mouseButton.y - 300) / 65.0) + showDataCenter - selectBeatmapSet - 1) / 0.6);
+						
 					}
 				}
 				selectNewBeatmapSet(newselectBeatmapSet);
@@ -83,20 +84,34 @@ protected:
 		updateText = true;
 	}
 
+	void selectNewBeatmapIndex(int index) {
+		if (0 > index || index >= beatmapSetData->size())
+			return;
+		if (selectBeatmapIndex != index) {
+			selectBeatmapIndex = index;
+
+			int selectBeatmapId = std::stoi((*((*beatmapSetData)[selectBeatmapIndex]))["id"]);
+
+			beatmapScore = gameDB.getBeatmapScore(selectBeatmapId);
+
+			updateText = true;
+		}
+	}
+
 	void selectNewBeatmapSet(int newBeatmapIndex) {
 		if (0 > newBeatmapIndex || newBeatmapIndex >= searchData->size())
 			return;
 		if (selectBeatmapSet != newBeatmapIndex) {
 			selectBeatmapSet = newBeatmapIndex;
 
-			selectBeatmapSetId = stoi((*((*searchData)[newBeatmapIndex]))["id"]);
+			selectBeatmapSetId = std::stoi((*((*searchData)[newBeatmapIndex]))["id"]);
 
 			beatmapSetDataMutex.lock();
-			beatmapSetData = songDB.getBeatmapSet(selectBeatmapSetId);
+			beatmapSetData = gameDB.getBeatmapSet(selectBeatmapSetId);
 			beatmapSetDataMutex.unlock();
 
 			updateText = true;
-			selectBeatmapIndex = 0;
+			selectNewBeatmapIndex(0);
 
 			std::string path = "D:/osu!/Songs/";
 			path += (*((*beatmapSetData)[0]))["OsuDir"] + "/";
@@ -246,14 +261,14 @@ protected:
 
 				sf::Clock aa;
 				std::cout << "Search : " << searchKeyword << std::endl;
-				searchData = songDB.search(searchKeyword);
+				searchData = gameDB.searchSong(searchKeyword);
 				std::cout << "Use time : " << aa.getElapsedTime().asMilliseconds() << " ms." << std::endl;
 
 				if (selectBeatmapSet == -1) {
 					randomSongs();
 				}
 				else {
-					if ((*searchData).size() == 1 && searchKeyword.size() > 6) {
+					if ((*searchData).size() == 1 && searchKeyword.size() > 4) {
 						selectNewBeatmapSet(0);
 					}
 					else {
@@ -277,6 +292,8 @@ protected:
 				updateText = true;
 			}
 		}
+
+		if ((*searchData).size() == 0) return;
 
 		if (showDataCenter < 0) showDataCenter = 0;
 		else {
@@ -342,13 +359,15 @@ protected:
 				randomSongs();
 				break;
 			case sf::Keyboard::Enter:
-				gotoUI(new Playfield(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), &playSong));
+				playSong.stop();
+				gotoUI(new Playfield(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), playSong, gameDB));
 				break;
 
 			case sf::Keyboard::F5:
 				std::cout << "Start Update DB" << std::endl;
-				songDB.update();
+				gameDB.updateSong();
 				std::cout << "Finish" << std::endl;
+				updateSearch = true;
 				break;
 
 			case sf::Keyboard::Left:
@@ -367,14 +386,12 @@ protected:
 					if (selectBeatmapSet != 0) {
 						selectNewBeatmapSet(selectBeatmapSet - 1);
 						showDataCenter = selectBeatmapSet;
-						selectBeatmapIndex = (*beatmapSetData).size() - 1;
-						std::cout << " -- " << selectBeatmapIndex << std::endl;
+						selectNewBeatmapIndex((*beatmapSetData).size() - 1);
 					}
 				}
 				else {
-					selectBeatmapIndex--;
+					selectNewBeatmapIndex(selectBeatmapIndex - 1);
 				}
-				updateText = true;
 				break;
 			case sf::Keyboard::Down:
 				if (selectBeatmapIndex == (*beatmapSetData).size() - 1) {
@@ -384,9 +401,8 @@ protected:
 					}
 				}
 				else {
-					selectBeatmapIndex++;
+					selectNewBeatmapIndex(selectBeatmapIndex + 1);
 				}
-				updateText = true;
 				break;
 
 			case sf::Keyboard::PageUp:
@@ -414,7 +430,7 @@ protected:
 	}
 
 public:
-	SelectUI(sf::RenderWindow& window, UI *from, beatmapDB DB) : UI(window, from), cur(window), songDB(DB),
+	SelectUI(sf::RenderWindow& window, UI *from, DB::gameDB DB) : UI(window, from), cur(window), gameDB(DB),
 		updateTextThread(&SelectUI::updateTextFunc, this),
 		updatePlaySongThread(&SelectUI::updatePlaySong, this)
 	{

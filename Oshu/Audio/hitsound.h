@@ -64,7 +64,11 @@ void loadHitSound(Beatmap::Beatmap *bmPlay, std::string base_dir) {
 			std::string file = hitNum2String(sampleset, sound);
 			std::string end = (index != 0 ? std::to_string(index) : "") + ".wav";
 			if (file_exists(base_dir + file + end)) {
-				hitSoundList[sampleset][sound][index].loadFromFile(base_dir + file + end);
+				sf::FileInputStream stream;
+				if (stream.open(base_dir + file + end))
+					if (stream.getSize() > 64) 
+					//std::cout << "ddddddddd" << stream.getSize() << std::endl;
+						hitSoundList[sampleset][sound][index].loadFromFile(base_dir + file + end);
 			}
 			else if (file_exists("resource/Modify/" + file + ".wav")) {
 				hitSoundList[sampleset][sound][index].loadFromFile("resource/Modify/" + file + ".wav");

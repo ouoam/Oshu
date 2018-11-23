@@ -23,12 +23,14 @@
 
 class Playfield : public UI {
 
+	DB::gameDB gameDB;
+
 	Object::Cursor cur;
 
 	std::deque<Object::ContainerHitObject*> objs;
 
 	std::unordered_map<std::string, std::string> beatmapData;
-	sfe::Movie *playSong;
+	sfe::Movie playSong;
 
 	sf::Mutex Mutex;
 
@@ -46,11 +48,10 @@ class Playfield : public UI {
 	
 	Beatmap::Beatmap bmPlay;
 
-	int combo = 0;
-	int score = 0;
-	int DifficultyMultiplier = 0;
-
 	Scoring::ScoreProcessor *scoreProcessor;
+	bool haveStoreScore = false;
+
+	
 
 protected:
 
@@ -64,21 +65,22 @@ protected:
 
 		Mutex.lock();
 
-		int64_t time = playSong->getPlayingOffset().asMilliseconds();
+		int64_t time = playSong.getPlayingOffset().asMilliseconds();
 		sf::Vector2f click = sf::Vector2f(sf::Mouse::getPosition(m_window));
 
 		for (Object::ContainerHitObject* obj : objs) {
 			
 			if (obj->canClick) {
 				sf::Vector2f offset = click - transform.transformPoint(sf::Vector2f(obj->hitObject->position));
-				int64_t offsetTime = time - obj->hitObject->time;
 
 				float dist = sqrt(offset.x * offset.x + offset.y * offset.y);
 
 				if (dist <= (obj->hitObject->CR) / 2) {
+					int64_t offsetTime = time - obj->hitObject->time;
 					Scoring::HitResult::Enum result = hitwindows.ResultFor(offsetTime);
 					if (result == Scoring::HitResult::None) {
 						//  do shake
+						std::cout << offsetTime << "----------------------------------------------------------\n";
 						break;
 					} else {
 						obj->onMouseClick(event.key.code);
@@ -94,10 +96,7 @@ protected:
 
 						scoreProcessor->ApplyResult(Scoring::JudgementResult(result));
 
-						//score += Scoring::NumericResultFor(result) + (Scoring::NumericResultFor(result) * ((std::max(combo - 1, 0) * DifficultyMultiplier) / 25.0));
-						//combo++;
-
-						std::cout << "S:" << scoreProcessor->TotalScore << "\tC:" << scoreProcessor->Combo << std::endl;
+						std::cout << "R:" << result << "\tS:" << scoreProcessor->TotalScore << "\tC:" << scoreProcessor->Combo << "\tR:" << scoreProcessor->Rank << "\tA:" << scoreProcessor->Accuracy << std::endl;
 
 						break;
 					}
@@ -123,22 +122,39 @@ protected:
 		cur.update();
 
 		if (haveStart == 0) {
+			playSong.stop();
 			aaaaa.restart();
 			haveStart++;
 		} else if (haveStart == 1) {
-			if (aaaaa.getElapsedTime().asMilliseconds() > 2000) {
+			if (aaaaa.getElapsedTime().asMilliseconds() >= bmPlay.General.AudioLeadIn + 1000) {
 				haveStart++;
 			}
 		} else if (haveStart == 2) {
-			playSong->stop();
-			playSong->play();
+			playSong.play();
 			haveStart++;
 		}
 
-		if (playSong->getStatus() == sfe::Status::Paused || playSong->getStatus() == sfe::Status::Stopped)
-			return;
+		if ((*scoreProcessor).hasCompleted()) {
+			if (!haveStoreScore) {
+				std::cout << "END" << std::endl;
+				Scoring::Score record;
+				(*scoreProcessor).PopulateScore(&record);
 
-		int64_t time = playSong->getPlayingOffset().asMilliseconds();
+				record.BeatmapID = std::stoi(beatmapData["id"]);
+				record.User = "Oshu_test_user";
+				gameDB.addScoreToDB(record);
+				gobackUI();
+				haveStoreScore = true;
+			}
+		}
+
+		if (playSong.getStatus() == sfe::Status::Paused || playSong.getStatus() == sfe::Status::Stopped) {
+			
+			return;
+		}
+			
+
+		int64_t time = playSong.getPlayingOffset().asMilliseconds();
 
 		updateHitsound(&bmPlay, time);
 
@@ -150,7 +166,7 @@ protected:
 				showHitObj.front++;
 
 				if (bmPlay.HitObjects[showHitObj.front].type & 1) { // circle
-					bmPlay.HitObjects[showHitObj.front].endTime = bmPlay.HitObjects[showHitObj.front].time + hitwindows.HalfWindowFor(Scoring::HitResult::Miss);
+					bmPlay.HitObjects[showHitObj.front].endTime = bmPlay.HitObjects[showHitObj.front].time + hitwindows.HalfWindowFor(Scoring::HitResult::Meh);
 					Object::Circle *newCircle = new Object::Circle(&bmPlay.HitObjects[showHitObj.front]);
 					newCircle->StartPreemptState();
 
@@ -168,6 +184,9 @@ protected:
 					Mutex.lock();
 					objs.push_back(newSlider);
 					Mutex.unlock();
+				}
+				else {
+					scoreProcessor->ApplyResult(Scoring::HitResult::Great);
 				}
 			}
 			else break;
@@ -258,8 +277,8 @@ protected:
 
 public:
 
-	Playfield(sf::RenderWindow& window, UI *from, std::unordered_map<std::string, std::string> bmData, sfe::Movie *playSong) :
-		UI(window, from) , cur(window), beatmapData(bmData), playSong(playSong)
+	Playfield(sf::RenderWindow& window, UI *from, std::unordered_map<std::string, std::string> bmData, sfe::Movie playSong, DB::gameDB gameDB) :
+		UI(window, from) , cur(window), beatmapData(bmData), playSong(playSong), gameDB(gameDB)
 	{
 		std::string base_dir = "D:/osu!/Songs/";
 		base_dir += beatmapData["OsuDir"] + "/";
@@ -279,30 +298,7 @@ public:
 
 		transform.translate(80, 60);
 
-		playSong->stop();
-
 		hitwindows.SetDifficulty(bmPlay.Difficulty.OverallDifficulty);
-
-		float DifficultyPoint = bmPlay.Difficulty.CircleSize + bmPlay.Difficulty.HPDrainRate + bmPlay.Difficulty.OverallDifficulty;
-		
-		DifficultyMultiplier = 0;
-		switch ((int)DifficultyPoint) {
-		case 25: case 26: case 27: case 28: case 29: case 30:
-			DifficultyMultiplier++;
-		case 18: case 19: case 20: case 21: case 22: case 23: case 24:
-			DifficultyMultiplier++;
-		case 13: case 14: case 15: case 16: case 17:
-			DifficultyMultiplier++;
-		case  6: case  7: case  8: case  9: case 10: case 11: case 12:
-			DifficultyMultiplier++;
-		case  0: case  1: case  2: case  3: case  4: case 5:
-			DifficultyMultiplier+=2;
-		}
-
-		std::cout << hitwindows.HalfWindowFor(Scoring::HitResult::Great) << "\t"
-			<< hitwindows.HalfWindowFor(Scoring::HitResult::Good) << "\t"
-			<< hitwindows.HalfWindowFor(Scoring::HitResult::Meh) << "\t"
-			<< hitwindows.HalfWindowFor(Scoring::HitResult::Miss) << std::endl;
 		
 		m_window.setKeyRepeatEnabled(false);
 		m_window.setMouseCursorGrabbed(true);

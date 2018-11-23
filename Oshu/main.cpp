@@ -5,8 +5,7 @@
 #include <SFML/System.hpp>
 
 #include "Skin/Skin.h"
-#include "DB/DB.h"
-#include "DB/beatmapDB.h"
+#include "DB/gameDB.h"
 
 #include "UI/UI.h"
 #include "UI/Select.h"
@@ -35,7 +34,7 @@ void renderingThread(sf::RenderWindow* window)
 
 int main()
 {
-	beatmapDB aa;
+	DB::gameDB aa;
 	
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;

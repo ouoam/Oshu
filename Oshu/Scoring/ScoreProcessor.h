@@ -195,7 +195,6 @@ public:
 		UpdateFailed();
 	}
 
-public:
 	ScoreRank::Enum Rank;
 	ScoringMode::Enum Mode = ScoringMode::Standardised;
 	double TotalScore = 0;
@@ -204,7 +203,9 @@ public:
 	int HighestCombo = 0;
 	int Combo = 0;
 
-	bool hasCompleted = false;
+	bool hasCompleted() {
+		return JudgedHits + 1 >= MaxHits;  // ?????????
+	};
 	bool HasFailed = false;
 
 	void PopulateScore(Score *score) {

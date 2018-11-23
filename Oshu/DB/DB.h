@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include "sqlite3.h"
 
+namespace DB {
+
 class DB {
 protected:
 	sqlite3 *db;
@@ -52,7 +54,7 @@ protected:
 				break;
 			}
 		} while (rc == SQLITE_ROW);
-		
+
 
 		sqlite3_reset(stmt);
 		sqlite3_clear_bindings(stmt);
@@ -94,6 +96,12 @@ public:
 		sqlite3_close(db);
 	}
 
+	DB() {}
+
+	DB(std::string dbFile) {
+		open(dbFile);
+	}
+
 	int open(std::string dbFile = "") {
 		if (dbFile == "") dbFile = openFile;
 
@@ -128,3 +136,5 @@ public:
 		return Data;
 	}
 };
+
+}

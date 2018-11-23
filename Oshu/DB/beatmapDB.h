@@ -7,10 +7,12 @@
 #include "DB.h"
 #include "../Beatmap/Beatmap.h"
 
-class beatmapDB : public DB {
+namespace DB {
+
+class beatmapDB : public virtual DB {
 private:
 
-	bool addBeatmap(std::filesystem::path beatmap) {
+	bool addBeatmapToDB(std::filesystem::path beatmap) {
 		std::string path = beatmap.parent_path().filename().string();
 		std::string file = beatmap.filename().string();
 
@@ -65,50 +67,36 @@ private:
 		return 0;
 	}
 
-	std::vector<std::unordered_map<std::string, std::string>*> *searchData = nullptr;
-	std::vector<std::unordered_map<std::string, std::string>*> *beatmapSetData = nullptr;
-
-public:
-	std::string path = "";
-
-	beatmapDB() {
-		openFile = "songs.db";
-		path = "D:/osu!/Songs/";
-		open();
-
-		if (!haveTable("songs")) create();
-	}
-
-	int create() {
+	int createSongDB() {
 		if (!checkOpen()) return 2;
 
 		const char *sqlCreateTable =
 			"CREATE TABLE songs ("
-				"id					INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,"
-				"Title				TEXT,"
-				"TitleUnicode		TEXT,"
-				"Artist				TEXT,"
-				"ArtistUnicode		TEXT,"
-				"Creator			TEXT,"
-				"Version			TEXT,"
-				"Source				TEXT,"
-				"Tags				TEXT,"
-				"BeatmapID			INTEGER,"
-				"BeatmapSetID		INTEGER,"
-				"AudioFilename		TEXT,"
-				"AudioLeadIn		INTEGER,"
-				"PreviewTime		INTEGER,"
-				"Mode				INTEGER,"
-				"HPDrainRate		REAL,"
-				"CircleSize			REAL,"
-				"OverallDifficulty	REAL,"
-				"ApproachRate		REAL,"
-				"SliderMultiplier	REAL,"
-				"OsuFile			TEXT,"
-				"OsuDir				TEXT,"
-				"nHitcircles		NUMERIC,"
-				"nSlider			NUMERIC,"
-				"nSplinners			NUMERIC"
+			"id					INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,"
+			"Title				TEXT,"
+			"TitleUnicode		TEXT,"
+			"Artist				TEXT,"
+			"ArtistUnicode		TEXT,"
+			"Creator			TEXT,"
+			"Version			TEXT,"
+			"Source				TEXT,"
+			"Tags				TEXT,"
+			"BeatmapID			INTEGER,"
+			"BeatmapSetID		INTEGER,"
+			"AudioFilename		TEXT,"
+			"AudioLeadIn		INTEGER,"
+			"PreviewTime		INTEGER,"
+			"Mode				INTEGER,"
+			"HPDrainRate		REAL,"
+			"CircleSize			REAL,"
+			"OverallDifficulty	REAL,"
+			"ApproachRate		REAL,"
+			"SliderMultiplier	REAL,"
+			"OsuFile			TEXT,"
+			"OsuDir				TEXT,"
+			"nHitcircles		NUMERIC,"
+			"nSlider			NUMERIC,"
+			"nSplinners			NUMERIC"
 			");";
 		rc = sqlite3_exec(db, sqlCreateTable, NULL, NULL, &error);
 
@@ -116,7 +104,23 @@ public:
 		return 0;
 	}
 
-	int update() {
+	std::vector<std::unordered_map<std::string, std::string>*> *searchSongData = nullptr;
+	std::vector<std::unordered_map<std::string, std::string>*> *beatmapSetData = nullptr;
+
+public:
+	std::string songsPath = "D:/osu!/Songs/";
+
+	beatmapDB(std::string dbFile) : DB(dbFile) {
+		checkHaveTable();
+	}
+
+	beatmapDB() : beatmapDB("songs.db") {}
+
+	void checkHaveTable() {
+		if (!haveTable("songs")) createSongDB();
+	}
+
+	int updateSong() {
 		if (!checkOpen()) return 2;
 
 		sqlite3_stmt *findStmt;
@@ -128,7 +132,7 @@ public:
 
 		namespace fs = std::filesystem;
 
-		for (const auto & beatmapSet : fs::directory_iterator(path)) {
+		for (const auto & beatmapSet : fs::directory_iterator(songsPath)) {
 			for (const auto & beatmap : fs::directory_iterator(beatmapSet.path())) {
 				if (fs::is_regular_file(beatmap) && beatmap.path().extension() == ".osu") {
 					std::string path = beatmapSet.path().filename().string();
@@ -138,7 +142,7 @@ public:
 					sqlite3_bind(findStmt, 2, &path);
 
 					if (countRow(findStmt) == 0) {
-						addBeatmap(beatmap.path());
+						addBeatmapToDB(beatmap.path());
 					}
 				}
 			}
@@ -146,13 +150,13 @@ public:
 		sqlite3_finalize(findStmt);
 	}
 
-	std::vector<std::unordered_map<std::string, std::string>*> *search(std::string keyword = "") {
+	std::vector<std::unordered_map<std::string, std::string>*> *searchSong(std::string keyword = "") {
 		// Memory leak
-		if (searchData != nullptr) {
-			for (std::unordered_map<std::string, std::string>* row : *searchData) {
+		if (searchSongData != nullptr) {
+			for (std::unordered_map<std::string, std::string>* row : *searchSongData) {
 				delete row;
 			}
-			delete searchData;
+			delete searchSongData;
 		}
 
 		std::vector<std::string> split = explode(keyword, ' ');
@@ -166,15 +170,15 @@ public:
 					"OR Creator like '%' || ? || '%' OR Version like '%' || ? || '%' "
 					"OR Source like '%' || ? || '%' OR Tags like '%' || ? || '%') ";
 			}
-			
+
 		}
 		searchSQL += "GROUP BY OsuDir ORDER BY lower(Title);";
 
 		rc = sqlite3_prepare_v2(db, searchSQL.c_str(), searchSQL.size(), &searchStmt, nullptr);
 
 		if (haveErr("search prepare")) {
-			searchData = new std::vector<std::unordered_map<std::string, std::string>*>;
-			return searchData;
+			searchSongData = new std::vector<std::unordered_map<std::string, std::string>*>;
+			return searchSongData;
 		}
 
 		if (keyword != "") {
@@ -185,9 +189,9 @@ public:
 			}
 		}
 
-		searchData = getData(searchStmt);
+		searchSongData = getData(searchStmt);
 
-		return searchData;
+		return searchSongData;
 	}
 
 	std::vector<std::unordered_map<std::string, std::string>*> *getBeatmapSet(int id) {
@@ -200,7 +204,7 @@ public:
 		}
 
 		sqlite3_stmt *getBeatmapSetStmt;
-		std::string getSQL = "SELECT * FROM songs WHERE OsuDir = (SELECT OsuDir FROM songs WHERE id = ?)";
+		std::string getSQL = "SELECT * FROM songs WHERE OsuDir = (SELECT OsuDir FROM songs WHERE id = ?);";
 
 		rc = sqlite3_prepare_v2(db, getSQL.c_str(), getSQL.size(), &getBeatmapSetStmt, nullptr);
 
@@ -213,3 +217,5 @@ public:
 		return beatmapSetData;
 	}
 };
+
+}

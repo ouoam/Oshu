@@ -170,6 +170,12 @@
     <ClInclude Include="DB\beatmapDB.h">
       <Filter>Header Files\DB</Filter>
     </ClInclude>
+    <ClInclude Include="DB\ScoringDB.h">
+      <Filter>Header Files\DB</Filter>
+    </ClInclude>
+    <ClInclude Include="DB\gameDB.h">
+      <Filter>Header Files\DB</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">

@@ -151,6 +151,8 @@
     <ClInclude Include="Beatmap\Difficulty.h" />
     <ClInclude Include="DB\beatmapDB.h" />
     <ClInclude Include="DB\DB.h" />
+    <ClInclude Include="DB\gameDB.h" />
+    <ClInclude Include="DB\ScoringDB.h" />
     <ClInclude Include="Object\Animate\Animate.h" />
     <ClInclude Include="Object\Animate\Easing.h" />
     <ClInclude Include="Object\Circle.h" />
