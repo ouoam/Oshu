@@ -36,6 +36,7 @@ private:
 	}
 
 	std::vector<Scoring::Score*> *BeatmapScoreData = nullptr;
+	std::string *User = new std::string;
 
 public:
 	ScoringDB(std::string dbFile) : DB(dbFile) {
@@ -43,6 +44,12 @@ public:
 	}
 
 	ScoringDB() : ScoringDB("score.db") {}
+
+	void setUser(std::string usertochange) {
+		delete User;
+		User = new std::string;
+		(*User) = usertochange;
+	}
 
 	void checkHaveTable() {
 		if (!haveTable("score")) createSongDB();
@@ -106,7 +113,7 @@ public:
 		rc = sqlite3_prepare_v2(db, insertSQL, strlen(insertSQL), &insertStmt, nullptr);
 		if (haveErr("prepair insert")) return 1;
 
-		sqlite3_bind(insertStmt, 1, &score.User);
+		sqlite3_bind(insertStmt, 1, User);
 		sqlite3_bind(insertStmt, 2, score.BeatmapID);
 		sqlite3_bind(insertStmt, 3, score.Rank);
 		sqlite3_bind(insertStmt, 4, score.TotalScore);

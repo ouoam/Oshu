@@ -51,7 +51,10 @@ class Playfield : public UI {
 	Scoring::ScoreProcessor *scoreProcessor;
 	bool haveStoreScore = false;
 
-	
+	sf::Font font;
+	sf::Text textScore;
+	sf::Text textCombo;
+	sf::Text textAccuracy;
 
 protected:
 
@@ -141,12 +144,19 @@ protected:
 				(*scoreProcessor).PopulateScore(&record);
 
 				record.BeatmapID = std::stoi(beatmapData["id"]);
-				record.User = "Oshu_test_user";
 				gameDB.addScoreToDB(record);
 				gobackUI();
 				haveStoreScore = true;
 			}
 		}
+
+		char buff[100];
+		snprintf(buff, sizeof(buff), "%.02lf", scoreProcessor->Accuracy * 100);
+
+		textScore.setString(std::to_string((int)scoreProcessor->TotalScore));
+		textCombo.setString(std::to_string(scoreProcessor->Combo) + "x");
+		textAccuracy.setString(std::string(buff) + " %");
+
 
 		if (playSong.getStatus() == sfe::Status::Paused || playSong.getStatus() == sfe::Status::Stopped) {
 			
@@ -248,6 +258,10 @@ protected:
 		}
 		Mutex.unlock();
 
+		m_window.draw(textScore);
+		m_window.draw(textCombo);
+		m_window.draw(textAccuracy);
+
 		m_window.draw(cur);
 	}
 
@@ -304,5 +318,22 @@ public:
 		m_window.setMouseCursorGrabbed(true);
 
 		scoreProcessor = new Scoring::ScoreProcessor(&bmPlay);
+
+		font.loadFromFile("resource\\Chakra-Petch-master\\fonts\\ChakraPetch-SemiBoldItalic.ttf");
+
+		textScore.setFont(font);
+		textScore.setCharacterSize(30);
+		textScore.setFillColor(sf::Color::White);
+		textScore.setPosition(sf::Vector2f(600, 10));
+
+		textCombo.setFont(font);
+		textCombo.setCharacterSize(30);
+		textCombo.setFillColor(sf::Color::White);
+		textCombo.setPosition(sf::Vector2f(10, 550));
+
+		textAccuracy.setFont(font);
+		textAccuracy.setCharacterSize(20);
+		textAccuracy.setFillColor(sf::Color::White);
+		textAccuracy.setPosition(sf::Vector2f(700, 50));
 	}
 };

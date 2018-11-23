@@ -19,7 +19,7 @@ public:
 
 	int BeatmapID;
 
-	std::string User;
+	std::string User = "";
 	std::map<HitResult::Enum, int> Statistics;
 };
 

@@ -50,6 +50,8 @@ int main()
 	sf::Thread thread(&renderingThread, &window);
 	thread.launch();
 
+	aa.setUser("test user");
+
 	while (window.isOpen())
 	{
 		sf::Event event;
