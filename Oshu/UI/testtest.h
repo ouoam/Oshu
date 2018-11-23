@@ -21,7 +21,7 @@ class testtest : public UI {
 	sf::Texture texture;
 	sf::Sprite sprite;
 
-	sf::Shader shader;
+	sf::Transform tranform;
 
 protected:
 	void OnPressed(sf::Event event) {
@@ -44,14 +44,11 @@ public:
 
 		texture.loadFromImage(image);
 		sprite.setTexture(texture);
-		//sprite.setScale(0.5, 0.5);
+		sf::Vector2u size = texture.getSize();
+		sprite.setOrigin(size.x / 2.0, size.y / 2.0);
+		sprite.setScale(0.1, 0.1);
 
-
-		if (!shader.loadFromFile("blur.frag", sf::Shader::Fragment)) {
-			std::cout << "Error GLSL" << std::endl;
-		}
-
-		shader.setUniform("texture", sf::Shader::CurrentTexture);
+		tranform.scale(2, 2, 400, 300);
 	}
 
 	virtual ~testtest() {
@@ -59,24 +56,17 @@ public:
 	}
 
 
-	void update() {
+	void onUpdate() {
 		cur.update();
-
-		shader.setUniform("alpha", 0.7f);
+		sprite.setPosition(cur.getPosition());
 	}
 
-	void draw() {
-		m_window.draw(cur);
+	void onDraw() {
 
-		sf::BlendMode blendmode;
-		blendmode.colorSrcFactor = sf::BlendMode::SrcAlpha;
-		blendmode.colorDstFactor = sf::BlendMode::OneMinusSrcAlpha;
-		blendmode.colorEquation = sf::BlendMode::Add;
-		sf::RenderStates states;
-		states.shader = &shader;
-		states.texture = sprite.getTexture();
-		states.blendMode = blendmode;
-		m_window.draw(sprite, states);
+		m_window.draw(sprite, tranform.getInverse());
+
+		m_window.draw(cur);
+		
 		
 	}
 

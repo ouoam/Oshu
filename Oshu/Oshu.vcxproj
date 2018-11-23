@@ -149,7 +149,7 @@
     <ClInclude Include="Audio\hitsound.h" />
     <ClInclude Include="Beatmap\Beatmap.h" />
     <ClInclude Include="Beatmap\Difficulty.h" />
-    <ClInclude Include="DB\beatmap.h" />
+    <ClInclude Include="DB\beatmapDB.h" />
     <ClInclude Include="DB\DB.h" />
     <ClInclude Include="Object\Animate\Animate.h" />
     <ClInclude Include="Object\Animate\Easing.h" />
@@ -167,11 +167,10 @@
     <ClInclude Include="Scoring\Score.h" />
     <ClInclude Include="Scoring\ScoreProcessor.h" />
     <ClInclude Include="Skin\Skin.h" />
-    <ClInclude Include="UI\Playfield.h" />
     <ClInclude Include="UI\Select.h" />
     <ClInclude Include="UI\Select\selectSong.h" />
     <ClInclude Include="UI\testtest.h" />
-    <ClInclude Include="UI\testZone.h" />
+    <ClInclude Include="UI\Playfield.h" />
     <ClInclude Include="UI\UI.h" />
     <ClInclude Include="Utility\BezierApproximator.h" />
     <ClInclude Include="Utility\CircularArc.h" />

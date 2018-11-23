@@ -10,8 +10,8 @@
 #include <sfeMovie/Movie.hpp>
 
 #include "UI.h"
-#include "testZone.h"
-#include "../DB/beatmap.h"
+#include "Playfield.h"
+#include "../DB/beatmapDB.h"
 
 #include "../Object/Cursor.h"
 
@@ -342,7 +342,7 @@ protected:
 				randomSongs();
 				break;
 			case sf::Keyboard::Enter:
-				gotoUI(new testUI(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), &playSong));
+				gotoUI(new Playfield(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), &playSong));
 				break;
 
 			case sf::Keyboard::F5:

@@ -26,13 +26,13 @@ public:
 		sf::Vector2u size = Skin::Cursor::cursor.getSize();
 		mou.setTexture(Skin::Cursor::cursor);
 		mou.setOrigin(size.x / 2.0, size.y / 2.0);
-		mou.scale(sf::Vector2f(0.4, 0.4));
+		mou.scale(0.4, 0.4);
 		mou.setScaleFromNow();
 
 		sf::Vector2u size2 = Skin::Cursor::cursorMiddle.getSize();
 		mou2.setTexture(Skin::Cursor::cursorMiddle);
 		mou2.setOrigin(size2.x / 2.0, size2.y / 2.0);
-		mou2.scale(sf::Vector2f(0.3, 0.3));
+		mou2.scale(0.3, 0.3);
 
 		downCount = 0;
 	}
@@ -70,9 +70,7 @@ public:
 		sf::Vector2i temp = sf::Mouse::getPosition(m_window);
 
 		if (temp != oldLocation) {
-			//clock2.restart();
-			mou.setPosition((sf::Vector2f) temp);
-			mou2.setPosition((sf::Vector2f) temp);
+			this->setPosition((sf::Vector2f) temp);
 			oldLocation = temp;
 		}
 		
@@ -81,6 +79,7 @@ public:
 private:
 
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const {
+		states.transform *= this->getTransform();
 		target.draw(mou, states);
 		target.draw(mou2, states);
 	}

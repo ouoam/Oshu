@@ -5,7 +5,8 @@
 #include <SFML/System.hpp>
 
 #include "Skin/Skin.h"
-#include "DB/beatmap.h"
+#include "DB/DB.h"
+#include "DB/beatmapDB.h"
 
 #include "UI/UI.h"
 #include "UI/Select.h"
@@ -44,6 +45,7 @@ int main()
 
 	Skin::load();
 	ui = new SelectUI(window, nullptr, aa);
+	//ui = new testtest(window, nullptr);
 
 	window.setActive(false);
 	sf::Thread thread(&renderingThread, &window);

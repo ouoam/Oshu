@@ -107,17 +107,11 @@
     <ClInclude Include="Object\Cursor.h">
       <Filter>Header Files\Object</Filter>
     </ClInclude>
-    <ClInclude Include="UI\Playfield.h">
-      <Filter>Header Files\UI</Filter>
-    </ClInclude>
     <ClInclude Include="Object\Circle.h">
       <Filter>Header Files\Object</Filter>
     </ClInclude>
     <ClInclude Include="Object\Container.h">
       <Filter>Header Files\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="UI\testZone.h">
-      <Filter>Header Files\UI</Filter>
     </ClInclude>
     <ClInclude Include="Object\Pieces.h">
       <Filter>Header Files\Object</Filter>
@@ -126,9 +120,6 @@
       <Filter>Header Files\Object</Filter>
     </ClInclude>
     <ClInclude Include="DB\DB.h">
-      <Filter>Header Files\DB</Filter>
-    </ClInclude>
-    <ClInclude Include="DB\beatmap.h">
       <Filter>Header Files\DB</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -142,9 +133,6 @@
     </ClInclude>
     <ClInclude Include="UI\Select\selectSong.h">
       <Filter>Header Files\UI\Select</Filter>
-    </ClInclude>
-    <ClInclude Include="UI\testtest.h">
-      <Filter>Header Files\UI</Filter>
     </ClInclude>
     <ClInclude Include="Beatmap\Difficulty.h">
       <Filter>Header Files\Beatmap</Filter>
@@ -172,6 +160,15 @@
     </ClInclude>
     <ClInclude Include="Scoring\JudgementResult.h">
       <Filter>Header Files\Scoring</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\testtest.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Playfield.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="DB\beatmapDB.h">
+      <Filter>Header Files\DB</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
