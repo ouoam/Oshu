@@ -85,7 +85,14 @@ public:
 			score->Statistics[Scoring::HitResult::Meh] = std::stoi(GetWithDef(*ranking, "StatMeh", "0"));
 			score->Statistics[Scoring::HitResult::Good] = std::stoi(GetWithDef(*ranking, "StatGood", "0"));
 			score->Statistics[Scoring::HitResult::Great] = std::stoi(GetWithDef(*ranking, "StatGreat", "0"));
+
+			BeatmapScoreData->push_back(score);
 		}
+
+		for (std::unordered_map<std::string, std::string>* row : *tempData) {
+			delete row;
+		}
+		delete tempData;
 
 		return BeatmapScoreData;
 	}

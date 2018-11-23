@@ -26,6 +26,10 @@ class SelectUI : public UI {
 	myMutex updateTextMutex;
 	sf::Thread updateTextThread;
 
+	sf::RenderTexture renderScore;
+	bool updateScore = false;
+	myMutex updateScoreMutex;
+
 	std::vector<std::unordered_map<std::string, std::string>*> *searchData;
 	std::string searchKeyword = "";
 	std::string oldSearchKeyword = "..";
@@ -81,21 +85,22 @@ protected:
 		while ((random = generator() % searchData->size()) == selectBeatmapSet);
 		showDataCenter = random + 2;
 		selectNewBeatmapSet(random);
+		selectNewBeatmapIndex(0);
 		updateText = true;
 	}
 
 	void selectNewBeatmapIndex(int index) {
 		if (0 > index || index >= beatmapSetData->size())
 			return;
-		if (selectBeatmapIndex != index) {
-			selectBeatmapIndex = index;
+		
+		selectBeatmapIndex = index;
 
-			int selectBeatmapId = std::stoi((*((*beatmapSetData)[selectBeatmapIndex]))["id"]);
+		int selectBeatmapId = std::stoi((*((*beatmapSetData)[selectBeatmapIndex]))["id"]);
 
-			beatmapScore = gameDB.getBeatmapScore(selectBeatmapId);
+		beatmapScore = gameDB.getBeatmapScore(selectBeatmapId);
 
-			updateText = true;
-		}
+		updateScore = true;
+		updateText = true;
 	}
 
 	void selectNewBeatmapSet(int newBeatmapIndex) {
@@ -131,9 +136,7 @@ protected:
 	void updateTextFunc() {
 		updateTextMutex.lock();
 
-		this->renderText.setActive(true);
-
-		this->renderText.clear(sf::Color(0, 0, 0, 0));
+		renderText.clear(sf::Color::Transparent);
 
 		sf::Text textTitle;
 		sf::Text textDetail;
@@ -153,7 +156,7 @@ protected:
 		textSearch.setString(searchKeyword);
 		textSearch.setPosition(450, 40);
 
-		this->renderText.draw(textSearch);
+		renderText.draw(textSearch);
 
 		int from = showDataCenter - 6;
 		int to = showDataCenter + 6;
@@ -193,7 +196,7 @@ protected:
 					textVersion.setString((*((*beatmapSetData)[j]))["Version"]);
 					textVersion.setPosition(position);
 
-					this->renderText.draw(textVersion);
+					renderText.draw(textVersion);
 				}
 				position.x -= 80;
 			}
@@ -205,16 +208,66 @@ protected:
 			textDetail.setString(row["Artist"] + " // " + row["Creator"]);
 			textDetail.setPosition(position + sf::Vector2f(0, 20));
 			
-			this->renderText.draw(textTitle);
-			this->renderText.draw(textDetail);
+			renderText.draw(textTitle);
+			renderText.draw(textDetail);
 		}
 		
-		this->renderText.display();
+		renderText.display();
 		updateText = false;
 
-		//this->renderText.setActive(false);
-
 		updateTextMutex.unlock();
+	}
+
+	void updateScoreFunc() {
+		updateScoreMutex.lock();
+
+		renderScore.clear(sf::Color::Transparent);
+
+		sf::Text textUser;
+		sf::Text textScore;
+		sf::Text textText;
+
+		textText.setFont(font);
+		textText.setCharacterSize(20);
+		textText.setFillColor(sf::Color::White);
+
+		textUser.setFont(font);
+		textUser.setCharacterSize(18);
+		textUser.setFillColor(sf::Color::White);
+
+		textScore.setFont(font);
+		textScore.setCharacterSize(14);
+		textScore.setFillColor(sf::Color::White);
+
+		textText.setString("LeaderBoard");
+		textText.setPosition(sf::Vector2f(30, 30));
+		renderScore.draw(textText);
+
+		int to = (*beatmapScore).size() - 1;
+		for (int i = 0; i <= to; i++) {
+			sf::Vector2f position;
+			position.x = 50;
+			position.y = 100 + i * 60;
+
+			textUser.setString((*((*beatmapScore)[i])).User);
+			textUser.setPosition(position);
+
+			std::string temp = "Score : ";
+			temp += std::to_string((int)(*((*beatmapScore)[i])).TotalScore);
+			temp += " (x";
+			temp += std::to_string((*((*beatmapScore)[i])).MaxCombo);
+			temp += ")";
+			textScore.setString(temp);
+			textScore.setPosition(position + sf::Vector2f(0, 30));
+
+			renderScore.draw(textUser);
+			renderScore.draw(textScore);
+		}
+
+		renderScore.display();
+
+		updateScore = false;
+		updateScoreMutex.unlock();
 	}
 
 	void updatePlaySong() {
@@ -245,6 +298,8 @@ protected:
 		UI::onComeBack();
 		m_window.setKeyRepeatEnabled(true);
 		m_window.setMouseCursorGrabbed(false);
+
+		selectNewBeatmapIndex(selectBeatmapIndex);
 		//playSong.play();
 	}
 
@@ -308,7 +363,13 @@ protected:
 			updateTextMutex.unlock();
 			if (updateText) {
 				updateTextFunc();
-				//updateTextThread.launch();
+			}
+		}
+
+		if (updateScoreMutex.tryLock()) {
+			updateScoreMutex.unlock();
+			if (updateScore) {
+				updateScoreFunc();
 			}
 		}
 
@@ -326,9 +387,8 @@ protected:
 	void onDraw() {
 		m_window.draw(background);
 
-		const sf::Texture& texture = renderText.getTexture();
-		sf::Sprite sprite(texture);
-		m_window.draw(sprite);
+		m_window.draw(sf::Sprite(renderText.getTexture()));
+		m_window.draw(sf::Sprite(renderScore.getTexture()));
 
 		m_window.draw(cur);
 	}
@@ -439,6 +499,10 @@ public:
 			std::cout << "Error create render text" << std::endl;
 		}
 
+		if (!renderScore.create(800, 600)) {
+			std::cout << "Error create render text" << std::endl;
+		}
+
 		m_window.setKeyRepeatEnabled(true);
 
 		if (!backgroundTexture.loadFromFile("resource\\osu-resources-master\\osu.Game.Resources\\Textures\\Backgrounds\\bg2.jpg")) {
@@ -458,8 +522,6 @@ public:
 
 		unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 		generator.seed(seed);
-
-		renderText.setActive(false);
 
 		font.loadFromFile("resource\\Chakra-Petch-master\\fonts\\ChakraPetch-SemiBoldItalic.ttf");
 	}
