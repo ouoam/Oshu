@@ -38,6 +38,8 @@ class SelectUI : public UI {
 
 	sf::Sprite background;
 	sf::Texture backgroundTexture;
+	sf::Sprite Background;
+	sf::Texture BackgroundTexture;
 
 	int selectBeatmapSet = -1;
 	int selectBeatmapSetId = -1;
@@ -53,6 +55,8 @@ class SelectUI : public UI {
 	sf::Thread updatePlaySongThread;
 
 	sf::Font font;
+
+	
 
 protected:
 	void OnPressed(sf::Event event) {
@@ -99,6 +103,35 @@ protected:
 
 		beatmapScore = gameDB.getBeatmapScore(selectBeatmapId);
 
+		std::string path = gameDB.songsPath;
+		path += (*((*beatmapSetData)[selectBeatmapIndex]))["OsuDir"] + "/";
+
+		Beatmap::Beatmap bmTemp(path + (*((*beatmapSetData)[selectBeatmapIndex]))["OsuFile"], false, false);
+
+		if (!BackgroundTexture.loadFromFile(path + bmTemp.Events.Background)) {
+			Background.setColor(sf::Color(0, 0, 0, 0));
+			background.setColor(sf::Color(255, 255, 255, 255));
+		} else {
+			Background.setColor(sf::Color(255, 255, 255, 125));
+			background.setColor(sf::Color(0, 0, 0, 0));
+		}
+		BackgroundTexture.setSmooth(true);
+
+		Background.setTexture(BackgroundTexture);
+
+		sf::Vector2u winSize = m_window.getSize();
+		sf::Vector2u bgSize = BackgroundTexture.getSize();
+		double sx = (double)winSize.x / (double)bgSize.x;
+		double sy = (double)winSize.y / (double)bgSize.y;
+
+		Background.setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
+		Background.setPosition(winSize.x / 2.0, winSize.y / 2.0);
+		Background.setScale(sf::Vector2f(std::max(sx, sy), std::max(sx, sy)));
+
+		sf::Rect<int> BackgroundRect(0,0,bgSize.x,bgSize.y);
+		Background.setTextureRect(BackgroundRect);
+		
+
 		updateScore = true;
 		updateText = true;
 	}
@@ -118,7 +151,7 @@ protected:
 			updateText = true;
 			selectNewBeatmapIndex(0);
 
-			std::string path = "D:/osu!/Songs/";
+			std::string path = gameDB.songsPath;
 			path += (*((*beatmapSetData)[0]))["OsuDir"] + "/";
 			path += (*((*beatmapSetData)[0]))["AudioFilename"];
 
@@ -307,6 +340,7 @@ protected:
 		if (!isUIshow())
 			return;
 
+		playSong.update();
 		cur.update();
 
 		if (updateSearch) {
@@ -386,6 +420,7 @@ protected:
 
 	void onDraw() {
 		m_window.draw(background);
+		m_window.draw(Background);
 
 		m_window.draw(sf::Sprite(renderText.getTexture()));
 		m_window.draw(sf::Sprite(renderScore.getTexture()));
@@ -420,6 +455,7 @@ protected:
 				break;
 			case sf::Keyboard::Enter:
 				playSong.stop();
+				playSong.update();
 				gotoUI(new Playfield(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), playSong, gameDB));
 				break;
 

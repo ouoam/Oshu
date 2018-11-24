@@ -16,7 +16,7 @@ namespace Beatmap {
 	double bmHitObjects::TimeFadeIn = 400;
 	int bmHitObjects::CR = 5;
 
-	void Beatmap::load(std::string file, bool calcCurve) {
+	void Beatmap::load(std::string file, bool readHO, bool calcCurve) {
 		std::string line;
 		bmFile.open(file);
 		if (bmFile.is_open()) {
@@ -49,6 +49,8 @@ namespace Beatmap {
 						bmProColours();
 					}
 					else if (line == "[HitObjects]") {
+						if(!readHO)
+							break;
 						bmProHitObjects(calcCurve);
 					}
 				}
@@ -224,16 +226,21 @@ namespace Beatmap {
 		}
 	}
 
+	//https://github.com/ppy/osu/blob/master/osu.Game/Beatmaps/Formats/LegacyDecoder.cs#L156
 	void Beatmap::bmProEvents() {
 		std::string line = "++";
 		while (line != "") {
 			getline(bmFile, line);
-			std::string key;
-			std::string value;
-			std::istringstream str(line);
+			if (line == "") continue;
+			std::vector<std::string> split = explode(line, ',');
 
-			getline(str, key, ':');
-			getline(str, value);
+			if (split[0] == "0") {
+				Events.Background.assign(split[2], 1, split[2].size() - 2);
+			}
+			else if (split[0] == "1" || split[0] == "Video") {
+				Events.Video.assign(split[2], 1, split[2].size() - 2);
+				Events.VideoOffset = std::stoi(split[1]);
+			}
 
 			/* !!!! Wait !!!! */
 		}
@@ -345,11 +352,17 @@ namespace Beatmap {
 						bmho.sliders.curvePoints = line;
 					}
 					else if (bmho.sliders.sliderType == "P") {
-						bmho.sliders.curvePoints = CircularArcApproximator(curvePoints).CreateArc();
+						if (curvePoints.getVertexCount() == 3) {
+							sf::VertexArray subpath(sf::LineStrip);
+							subpath = CircularArcApproximator(curvePoints).CreateArc();
+							if (subpath.getVertexCount() != 0) {
+								bmho.sliders.curvePoints = subpath;
+							}
+						}
 					}
-					else if (bmho.sliders.sliderType == "B") {
+
+					if (bmho.sliders.curvePoints.getVertexCount() == 0)
 						bmho.sliders.curvePoints = BezierApproximator(curvePoints).CreateBezier();
-					}
 				}
 
 				getline(str, value, ',');

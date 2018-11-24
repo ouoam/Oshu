@@ -31,6 +31,9 @@ class Playfield : public UI {
 
 	std::unordered_map<std::string, std::string> beatmapData;
 	sfe::Movie playSong;
+	sfe::Movie playVideo;
+
+	sf::RectangleShape filter;
 
 	sf::Mutex Mutex;
 
@@ -55,6 +58,9 @@ class Playfield : public UI {
 	sf::Text textScore;
 	sf::Text textCombo;
 	sf::Text textAccuracy;
+
+	sf::Sprite Background;
+	sf::Texture BackgroundTexture;
 
 protected:
 	void OnPressed(sf::Event event) {
@@ -121,6 +127,8 @@ protected:
 	}
 
 	void onUpdate() {
+		playSong.update();
+		playVideo.update();
 		cur.update();
 
 		if (haveStart == 0) {
@@ -134,6 +142,12 @@ protected:
 		} else if (haveStart == 2) {
 			playSong.play();
 			haveStart++;
+		}
+
+		if (playVideo.getStatus() == sfe::Status::Stopped) {
+			if (aaaaa.getElapsedTime().asMilliseconds() >= bmPlay.General.AudioLeadIn + 1000 + bmPlay.Events.VideoOffset) {
+				playVideo.play();
+			}
 		}
 
 		if ((*scoreProcessor).hasCompleted()) {
@@ -150,10 +164,11 @@ protected:
 		}
 
 		char buff[100];
-		snprintf(buff, sizeof(buff), "%.02lf", scoreProcessor->Accuracy * 100);
-
-		textScore.setString(std::to_string((int)scoreProcessor->TotalScore));
+		
+		snprintf(buff, sizeof(buff), "%07.0lf", scoreProcessor->TotalScore);
+		textScore.setString(buff);
 		textCombo.setString(std::to_string(scoreProcessor->Combo) + "x");
+		snprintf(buff, sizeof(buff), "%.2lf", scoreProcessor->Accuracy * 100);
 		textAccuracy.setString(std::string(buff) + " %");
 
 
@@ -245,6 +260,11 @@ protected:
 	}
 
 	void onDraw() {
+		m_window.draw(Background);
+		m_window.draw(playVideo);
+
+		m_window.draw(filter);
+
 		Mutex.lock();
 		for (int i = 0; i < 5; i++) {  //Loop for select layer
 			Object::Container::renderLayer = i;
@@ -256,6 +276,7 @@ protected:
 			}
 		}
 		Mutex.unlock();
+		
 
 		m_window.draw(textScore);
 		m_window.draw(textCombo);
@@ -300,6 +321,18 @@ public:
 
 		bmPlay.load(base_dir + beatmapData["OsuFile"]);
 
+		playSong.stop();
+		playSong.update();
+
+		if (!playSong.openFromFile(base_dir + bmPlay.General.AudioFilename)) {
+			std::cout << "Error open Song" << std::endl;
+		}
+
+		
+		if (!playVideo.openFromFile(base_dir + bmPlay.Events.Video)) {
+			std::cout << "Error open Video" << std::endl;
+		}
+
 		loadHitSound(&bmPlay, base_dir);
 
 		// Calc For Hit Object
@@ -322,14 +355,47 @@ public:
 
 		font.loadFromFile("resource\\Chakra-Petch-master\\fonts\\ChakraPetch-SemiBoldItalic.ttf");
 
+		
+		if (!BackgroundTexture.loadFromFile(base_dir + bmPlay.Events.Background)) {
+			Background.setColor(sf::Color(0, 0, 0, 0));
+		}
+		BackgroundTexture.setSmooth(true);
+		Background.setTexture(BackgroundTexture);
+
+		sf::Vector2u winSize = m_window.getSize();
+		sf::Vector2u bgSize = BackgroundTexture.getSize();
+		double sx = (double)winSize.x / (double)bgSize.x;
+		double sy = (double)winSize.y / (double)bgSize.y;
+
+		Background.setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
+		Background.setPosition(winSize.x / 2.0, winSize.y / 2.0);
+		Background.setScale(sf::Vector2f(std::max(sx, sy), std::max(sx, sy)));
+
+		sf::Rect<int> BackgroundRect(0, 0, bgSize.x, bgSize.y);
+		Background.setTextureRect(BackgroundRect);
+
+		bgSize = (sf::Vector2u)playVideo.getSize();
+
+		sx = (double)winSize.x / (double)bgSize.x;
+		sy = (double)winSize.y / (double)bgSize.y;
+
+		double scale = std::max(sx, sy);
+
+		playVideo.fit(0, 0, bgSize.x * scale, bgSize.y * scale);
+		playVideo.setOrigin(bgSize.x * scale / 2.0, bgSize.y * scale / 2.0);
+		playVideo.setPosition(winSize.x / 2.0, winSize.y / 2.0);
+
+		filter.setSize((sf::Vector2f)winSize);
+		filter.setFillColor(sf::Color(0, 0, 0, 125));
+
 		textScore.setFont(font);
-		textScore.setCharacterSize(30);
+		textScore.setCharacterSize(35);
 		textScore.setFillColor(sf::Color::White);
 		textScore.setPosition(sf::Vector2f(600, 10));
 		
 
 		textCombo.setFont(font);
-		textCombo.setCharacterSize(30);
+		textCombo.setCharacterSize(35);
 		textCombo.setFillColor(sf::Color::White);
 		textCombo.setPosition(sf::Vector2f(10, 550));
 

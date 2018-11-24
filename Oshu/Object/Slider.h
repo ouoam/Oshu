@@ -54,7 +54,7 @@ public:
 	void onMiss() {
 		circle->miss();
 
-		sliderBody.fadeTo(0, 500).then().expire();
+		sliderBody.fadeTo(200).fadeTo(0, 500).then().expire();
 	}
 
 private:

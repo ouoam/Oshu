@@ -68,9 +68,9 @@ public:
 	}
 
 	void onMiss() {
-		circle.fadeTo(0, 500).then().expire();
-		circleOverlay.fadeTo(0, 500).then().expire();
-		approach.fadeTo(0, 500).then().expire();
+		circle.fadeTo(200).fadeTo(0, 500).then().expire();
+		circleOverlay.fadeTo(200).fadeTo(0, 500).then().expire();
+		approach.fadeTo(200).fadeTo(0, 500).then().expire();
 	}
 
 private:

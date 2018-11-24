@@ -58,8 +58,11 @@ namespace Beatmap {
 		double CircleRadius = 0;
 	};
 
-	struct nmEvents {
+	struct bmEvents {
 		// Wait !!!!!
+		std::string Background = "";
+		std::string Video = "";
+		int VideoOffset = 0;
 	};
 
 	struct bmTimingPoints {
@@ -123,7 +126,7 @@ namespace Beatmap {
 		struct bmEditor Editor;
 		struct bmMetadata Metadata;
 		struct bmDifficulty Difficulty;
-		struct nmEvents Events;
+		struct bmEvents Events;
 		std::vector<struct bmTimingPoints> TimingPoints;
 		struct bmColours Colours;
 		std::vector<struct bmHitObjects> HitObjects;
@@ -135,9 +138,9 @@ namespace Beatmap {
 		int nSlider = 0;
 		int nSplinners = 0;
 
-		void load(std::string, bool calcCurve = true);
-		Beatmap(std::string file, bool calcCurve = true) {
-			load(file, calcCurve);
+		void load(std::string, bool readHO = true, bool calcCurve = true);
+		Beatmap(std::string file, bool readHO = true, bool calcCurve = true) {
+			load(file, readHO, calcCurve);
 		}
 		Beatmap() {}
 	};

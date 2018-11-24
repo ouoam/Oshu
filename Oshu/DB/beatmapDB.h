@@ -26,7 +26,7 @@ private:
 		rc = sqlite3_prepare_v2(db, insertSQL, strlen(insertSQL), &insertStmt, nullptr);
 		if (haveErr("prepair insert")) return 1;
 
-		Beatmap::Beatmap bm(beatmap.string(), false);
+		Beatmap::Beatmap bm(beatmap.string(), true, false);
 
 		sqlite3_bind(insertStmt, 1, &bm.Metadata.Title);
 		sqlite3_bind(insertStmt, 2, &bm.Metadata.TitleUnicode);
