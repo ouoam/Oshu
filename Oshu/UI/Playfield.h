@@ -3,6 +3,7 @@
 #include <iostream>
 #include <deque>
 #include <cmath>
+#include <thread>
 
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
@@ -32,10 +33,14 @@ class Playfield : public UI {
 	std::unordered_map<std::string, std::string> beatmapData;
 	sfe::Movie playSong;
 	sfe::Movie playVideo;
+	sf::Texture playVideoTexture;
+	myMutex playVideoTextureMutex;
+	bool loadVideo = false;
 
 	sf::RectangleShape filter;
 
 	sf::Mutex Mutex;
+	sf::Mutex MutexText;
 
 	sf::Transform transform;
 
@@ -62,6 +67,38 @@ class Playfield : public UI {
 	sf::Sprite Background;
 	sf::Texture BackgroundTexture;
 
+	void updateVideo() {
+		float framerate = playVideo.getFramerate();
+		sf::Time m_frameTimeLimit = sf::seconds(1.f / framerate);
+		sf::Clock m_clock;
+
+		sf::Vector2f videoSize = playVideo.getSize();
+
+		sf::RenderTexture videoTexture;
+		if (!videoTexture.create(videoSize.x, videoSize.y)) {
+			std::cout << "Error create render text" << std::endl;
+		}
+		while (updateVideoThreadRunning) {
+			//if (loadVideo) {
+				playVideo.update();
+
+				videoTexture.draw(playVideo);
+				videoTexture.display();
+
+				playVideoTextureMutex.lock();
+				playVideoTexture = videoTexture.getTexture();
+				playVideoTextureMutex.unlock();
+			//}
+			//else break;
+
+			sf::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
+			m_clock.restart();
+		}
+	}
+
+	std::thread *updateVideoThread;
+	bool updateVideoThreadRunning = false;
+
 protected:
 	void OnPressed(sf::Event event) {
 		if (event.type == sf::Event::KeyPressed) {
@@ -78,7 +115,10 @@ protected:
 		for (Object::ContainerHitObject* obj : objs) {
 			
 			if (obj->canClick) {
-				sf::Vector2f offset = click - transform.transformPoint(sf::Vector2f(obj->hitObject->position));
+
+				sf::Vector2f clickPos = transform.getInverse().transformPoint(click);
+
+				sf::Vector2f offset = clickPos - (sf::Vector2f)obj->hitObject->position;
 
 				float dist = sqrt(offset.x * offset.x + offset.y * offset.y);
 
@@ -124,11 +164,12 @@ protected:
 		objs.clear();
 		if (scoreProcessor != nullptr)
 			delete scoreProcessor;
+		if (updateVideoThread != nullptr)
+			delete updateVideoThread;
 	}
 
 	void onUpdate() {
 		playSong.update();
-		playVideo.update();
 		cur.update();
 
 		if (haveStart == 0) {
@@ -144,11 +185,20 @@ protected:
 			haveStart++;
 		}
 
-		if (playVideo.getStatus() == sfe::Status::Stopped) {
-			if (aaaaa.getElapsedTime().asMilliseconds() >= bmPlay.General.AudioLeadIn + 1000 + bmPlay.Events.VideoOffset) {
-				playVideo.play();
+		if (loadVideo) {
+			if (playVideo.getStatus() == sfe::Status::Stopped) {
+				if (aaaaa.getElapsedTime().asMilliseconds() >= bmPlay.General.AudioLeadIn + 1000 + bmPlay.Events.VideoOffset) {
+					if (!updateVideoThreadRunning) {
+						playVideo.play();
+						playVideo.update();
+						updateVideoThreadRunning = true;
+						updateVideoThread = new std::thread(&Playfield::updateVideo, this);
+						updateVideoThread->detach();
+					}
+				}
 			}
 		}
+		
 
 		if ((*scoreProcessor).hasCompleted()) {
 			if (!haveStoreScore) {
@@ -261,7 +311,10 @@ protected:
 
 	void onDraw() {
 		m_window.draw(Background);
-		m_window.draw(playVideo);
+		playVideoTextureMutex.lock();
+		m_window.draw(sf::Sprite(playVideoTexture));
+		//m_window.draw(playVideo);
+		playVideoTextureMutex.unlock();
 
 		m_window.draw(filter);
 
@@ -277,10 +330,11 @@ protected:
 		}
 		Mutex.unlock();
 		
-
+		MutexText.lock();
 		m_window.draw(textScore);
 		m_window.draw(textCombo);
 		m_window.draw(textAccuracy);
+		MutexText.unlock();
 
 		m_window.draw(cur);
 	}
@@ -307,9 +361,75 @@ protected:
 		case sf::Event::GainedFocus:
 			m_window.setMouseCursorGrabbed(true);
 			break;
+
+		case sf::Event::Resized:
+			MutexText.lock();
+			setScale();
+			MutexText.unlock();
+			break;
 		}
 	}
 
+	void setScale() {
+		sf::Vector2u winSize = m_window.getSize();
+		double sx = (double)winSize.x / 800;
+		double sy = (double)winSize.y / 600;
+
+		double scale = std::min(sx, sy);
+
+		transform = sf::Transform::Identity;
+		transform.scale(scale, scale);
+		transform.translate(((winSize.x - (800 * scale)) / 2) + (800 * scale * 0.1),
+			                ((winSize.y - (600 * scale)) / 2) + (600 * scale * 0.1));
+
+		
+		textScore.setCharacterSize(18 * scale * 2.5);
+		textScore.setString("0000000p");
+		textScore.setOrigin(textScore.getGlobalBounds().width, 0);
+		textScore.setPosition(sf::Vector2f(winSize.x - 10, 10));
+
+		textCombo.setCharacterSize(18 * scale * 2.5);
+		textCombo.setString("0x");
+		textCombo.setOrigin(0, textCombo.getGlobalBounds().height);
+		textCombo.setPosition(sf::Vector2f(10, winSize.y - 30));
+
+		textAccuracy.setCharacterSize(12 * scale * 2.5);
+		textAccuracy.setString("100.00 %");
+		textAccuracy.setOrigin(textAccuracy.getGlobalBounds().width, 0);
+		textAccuracy.setPosition(sf::Vector2f(winSize.x - 10, textScore.getGlobalBounds().height + 30));
+
+
+
+		BackgroundTexture.setSmooth(true);
+		Background.setTexture(BackgroundTexture);
+
+		sf::Vector2u bgSize = BackgroundTexture.getSize();
+		sx = (double)winSize.x / (double)bgSize.x;
+		sy = (double)winSize.y / (double)bgSize.y;
+		scale = std::max(sx, sy);
+
+		Background.setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
+		Background.setPosition(winSize.x / 2.0, winSize.y / 2.0);
+		Background.setScale(scale, scale);
+
+		sf::Rect<int> BackgroundRect(0, 0, bgSize.x, bgSize.y);
+		Background.setTextureRect(BackgroundRect);
+
+		//if (loadVideo) {
+		//	bgSize = (sf::Vector2u)playVideo.getSize();
+
+		//	sx = (double)winSize.x / (double)bgSize.x;
+		//	sy = (double)winSize.y / (double)bgSize.y;
+		//	scale = std::max(sx, sy);
+
+		//	playVideo.fit(0, 0, bgSize.x * scale, bgSize.y * scale);
+		//	playVideo.setOrigin(bgSize.x * scale / 2.0, bgSize.y * scale / 2.0);
+		//	playVideo.setPosition(winSize.x / 2.0, winSize.y / 2.0);
+		//}
+
+		filter.setSize((sf::Vector2f)winSize);
+		filter.setFillColor(sf::Color(0, 0, 0, 125));
+	}
 
 public:
 
@@ -329,8 +449,13 @@ public:
 		}
 
 		
-		if (!playVideo.openFromFile(base_dir + bmPlay.Events.Video)) {
+		if (bmPlay.Events.Video == "") {
+
+		} else if (!playVideo.openFromFile(base_dir + bmPlay.Events.Video)) {
 			std::cout << "Error open Video" << std::endl;
+		} else {
+			loadVideo = true;
+			playVideo.stop();
 		}
 
 		loadHitSound(&bmPlay, base_dir);
@@ -343,8 +468,7 @@ public:
 
 		Beatmap::bmHitObjects::CR = bmPlay.Difficulty.CircleRadius;
 		// End Calc For Hit Object
-
-		transform.translate(80, 60);
+		
 
 		hitwindows.SetDifficulty(bmPlay.Difficulty.OverallDifficulty);
 		
@@ -359,50 +483,17 @@ public:
 		if (!BackgroundTexture.loadFromFile(base_dir + bmPlay.Events.Background)) {
 			Background.setColor(sf::Color(0, 0, 0, 0));
 		}
-		BackgroundTexture.setSmooth(true);
-		Background.setTexture(BackgroundTexture);
 
-		sf::Vector2u winSize = m_window.getSize();
-		sf::Vector2u bgSize = BackgroundTexture.getSize();
-		double sx = (double)winSize.x / (double)bgSize.x;
-		double sy = (double)winSize.y / (double)bgSize.y;
-
-		Background.setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
-		Background.setPosition(winSize.x / 2.0, winSize.y / 2.0);
-		Background.setScale(sf::Vector2f(std::max(sx, sy), std::max(sx, sy)));
-
-		sf::Rect<int> BackgroundRect(0, 0, bgSize.x, bgSize.y);
-		Background.setTextureRect(BackgroundRect);
-
-		bgSize = (sf::Vector2u)playVideo.getSize();
-
-		sx = (double)winSize.x / (double)bgSize.x;
-		sy = (double)winSize.y / (double)bgSize.y;
-
-		double scale = std::max(sx, sy);
-
-		playVideo.fit(0, 0, bgSize.x * scale, bgSize.y * scale);
-		playVideo.setOrigin(bgSize.x * scale / 2.0, bgSize.y * scale / 2.0);
-		playVideo.setPosition(winSize.x / 2.0, winSize.y / 2.0);
-
-		filter.setSize((sf::Vector2f)winSize);
-		filter.setFillColor(sf::Color(0, 0, 0, 125));
-
+		MutexText.lock();
 		textScore.setFont(font);
-		textScore.setCharacterSize(35);
 		textScore.setFillColor(sf::Color::White);
-		textScore.setPosition(sf::Vector2f(600, 10));
-		
-
 		textCombo.setFont(font);
-		textCombo.setCharacterSize(35);
 		textCombo.setFillColor(sf::Color::White);
-		textCombo.setPosition(sf::Vector2f(10, 550));
-
 		textAccuracy.setFont(font);
-		textAccuracy.setCharacterSize(20);
 		textAccuracy.setFillColor(sf::Color::White);
-		textAccuracy.setPosition(sf::Vector2f(700, 50));
+
+		setScale();
+		MutexText.unlock();
 	}
 
 	void retry() {

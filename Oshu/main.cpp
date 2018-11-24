@@ -13,21 +13,30 @@
 
 UI *ui;
 
-void renderingThread(sf::RenderWindow* window)
+void renderThread(sf::RenderWindow* window)
 {
 	window->setActive(true);
 
 	while (window->isOpen())
 	{
-		ui = ui->nowUI();
-
-		ui->update();
-
 		window->clear();
 
 		ui->draw();
 
 		window->display();
+	}
+}
+
+void updateThread(sf::RenderWindow* window) {
+	sf::Time m_frameTimeLimit = sf::seconds(1.f / 240);
+	sf::Clock m_clock;
+	while (window->isOpen()) {
+		ui = ui->nowUI();
+
+		ui->update();
+
+		sf::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
+		m_clock.restart();
 	}
 }
 
@@ -38,7 +47,7 @@ int main()
 	
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
-	sf::RenderWindow window(sf::VideoMode(800, 600), "Oshu!", sf::Style::Titlebar | sf::Style::Close, settings);
+	sf::RenderWindow window(sf::VideoMode(800, 600), "Oshu!", sf::Style::Default, settings);
 	window.setFramerateLimit(60);
 	window.setKeyRepeatEnabled(false);
 
@@ -47,8 +56,10 @@ int main()
 	//ui = new testtest(window, nullptr);
 
 	window.setActive(false);
-	sf::Thread thread(&renderingThread, &window);
+	sf::Thread thread(&renderThread, &window);
+	sf::Thread thread2(&updateThread, &window);
 	thread.launch();
+	thread2.launch();
 
 	aa.setUser("test user");
 
@@ -76,6 +87,10 @@ int main()
 
 			case sf::Event::GainedFocus:
 				window.setFramerateLimit(120);
+				break;
+
+			case sf::Event::Resized:
+				window.setView(sf::View(sf::FloatRect(0, 0, (float)window.getSize().x, (float)window.getSize().y)));
 				break;
 			}
 

@@ -24,11 +24,17 @@ class SelectUI : public UI {
 	sf::RenderTexture renderText;
 	bool updateText = true;
 	myMutex updateTextMutex;
-	sf::Thread updateTextThread;
+
+	sf::Texture renderTextTexture;
+	myMutex renderTextTextureMutex;
+
 
 	sf::RenderTexture renderScore;
 	bool updateScore = false;
 	myMutex updateScoreMutex;
+
+	sf::Texture updateScoreTexture;
+	myMutex updateScoreTextureMutex;
 
 	std::vector<std::unordered_map<std::string, std::string>*> *searchData;
 	std::string searchKeyword = "";
@@ -64,6 +70,7 @@ protected:
 
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (event.mouseButton.x + 40 >= 500 - (100 * std::cos((event.mouseButton.x - 300) / 325.0))) {
+				updateTextMutex.lock();
 				float newselectBeatmapSet;
 				newselectBeatmapSet = ((event.mouseButton.y - 300) / 65.0) + showDataCenter;
 				if (selectBeatmapSet != -2 && newselectBeatmapSet > selectBeatmapSet) {
@@ -75,6 +82,7 @@ protected:
 					}
 				}
 				selectNewBeatmapSet(newselectBeatmapSet);
+				updateTextMutex.unlock();
 			}
 		}
 	}
@@ -87,15 +95,20 @@ protected:
 		int random;
 		if (searchData->size() <= 1) return;
 		while ((random = generator() % searchData->size()) == selectBeatmapSet);
+		updateTextMutex.lock();
 		showDataCenter = random + 2;
 		selectNewBeatmapSet(random);
 		selectNewBeatmapIndex(0);
 		updateText = true;
+		updateTextMutex.unlock();
 	}
 
 	void selectNewBeatmapIndex(int index) {
 		if (0 > index || index >= beatmapSetData->size())
 			return;
+
+		updateScoreMutex.lock();
+		updateTextMutex.lock();
 		
 		selectBeatmapIndex = index;
 
@@ -108,38 +121,42 @@ protected:
 
 		Beatmap::Beatmap bmTemp(path + (*((*beatmapSetData)[selectBeatmapIndex]))["OsuFile"], false, false);
 
-		if (!BackgroundTexture.loadFromFile(path + bmTemp.Events.Background)) {
+		if (bmTemp.Events.Background == "" || !BackgroundTexture.loadFromFile(path + bmTemp.Events.Background)) {
 			Background.setColor(sf::Color(0, 0, 0, 0));
 			background.setColor(sf::Color(255, 255, 255, 255));
-		} else {
+		}
+		else {
 			Background.setColor(sf::Color(255, 255, 255, 125));
 			background.setColor(sf::Color(0, 0, 0, 0));
+
+			BackgroundTexture.setSmooth(true);
+			Background.setTexture(BackgroundTexture);
+
+			sf::Vector2u winSize = m_window.getSize();
+			sf::Vector2u bgSize = BackgroundTexture.getSize();
+			double sx = (double)winSize.x / (double)bgSize.x;
+			double sy = (double)winSize.y / (double)bgSize.y;
+
+			Background.setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
+			Background.setPosition(winSize.x / 2.0, winSize.y / 2.0);
+			Background.setScale(sf::Vector2f(std::max(sx, sy), std::max(sx, sy)));
+
+			sf::Rect<int> BackgroundRect(0, 0, bgSize.x, bgSize.y);
+			Background.setTextureRect(BackgroundRect);
 		}
-		BackgroundTexture.setSmooth(true);
-
-		Background.setTexture(BackgroundTexture);
-
-		sf::Vector2u winSize = m_window.getSize();
-		sf::Vector2u bgSize = BackgroundTexture.getSize();
-		double sx = (double)winSize.x / (double)bgSize.x;
-		double sy = (double)winSize.y / (double)bgSize.y;
-
-		Background.setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
-		Background.setPosition(winSize.x / 2.0, winSize.y / 2.0);
-		Background.setScale(sf::Vector2f(std::max(sx, sy), std::max(sx, sy)));
-
-		sf::Rect<int> BackgroundRect(0,0,bgSize.x,bgSize.y);
-		Background.setTextureRect(BackgroundRect);
 		
-
 		updateScore = true;
 		updateText = true;
+		updateScoreMutex.unlock();
+		updateTextMutex.unlock();
 	}
 
 	void selectNewBeatmapSet(int newBeatmapIndex) {
 		if (0 > newBeatmapIndex || newBeatmapIndex >= searchData->size())
 			return;
 		if (selectBeatmapSet != newBeatmapIndex) {
+			updateTextMutex.lock();
+
 			selectBeatmapSet = newBeatmapIndex;
 
 			selectBeatmapSetId = std::stoi((*((*searchData)[newBeatmapIndex]))["id"]);
@@ -150,6 +167,7 @@ protected:
 
 			updateText = true;
 			selectNewBeatmapIndex(0);
+			updateTextMutex.unlock();
 
 			std::string path = gameDB.songsPath;
 			path += (*((*beatmapSetData)[0]))["OsuDir"] + "/";
@@ -244,11 +262,15 @@ protected:
 			renderText.draw(textTitle);
 			renderText.draw(textDetail);
 		}
-		
-		renderText.display();
+
 		updateText = false;
 
 		updateTextMutex.unlock();
+		
+		renderText.display();
+		renderTextTextureMutex.lock();
+		renderTextTexture = renderText.getTexture();
+		renderTextTextureMutex.unlock();
 	}
 
 	void updateScoreFunc() {
@@ -297,10 +319,14 @@ protected:
 			renderScore.draw(textScore);
 		}
 
-		renderScore.display();
-
 		updateScore = false;
 		updateScoreMutex.unlock();
+
+		renderScore.display();
+
+		updateScoreTextureMutex.lock();
+		updateScoreTexture = renderScore.getTexture();
+		updateScoreTextureMutex.unlock();
 	}
 
 	void updatePlaySong() {
@@ -352,7 +378,8 @@ protected:
 				std::cout << "Search : " << searchKeyword << std::endl;
 				searchData = gameDB.searchSong(searchKeyword);
 				std::cout << "Use time : " << aa.getElapsedTime().asMilliseconds() << " ms." << std::endl;
-
+				
+				updateTextMutex.lock();
 				if (selectBeatmapSet == -1) {
 					randomSongs();
 				}
@@ -361,6 +388,7 @@ protected:
 						selectNewBeatmapSet(0);
 					}
 					else {
+						
 						int i = 0;
 						for (std::unordered_map<std::string, std::string>* row : *searchData) {
 							if (std::stoi((*row)["id"]) == selectBeatmapSetId) {
@@ -375,10 +403,12 @@ protected:
 							std::cout << "Not Found" << std::endl;
 							selectBeatmapSet = -2;
 						}
+						
 					}
 				}
 
 				updateText = true;
+				updateTextMutex.unlock();
 			}
 		}
 
@@ -394,17 +424,17 @@ protected:
 		}
 
 		if (updateTextMutex.tryLock()) {
-			updateTextMutex.unlock();
 			if (updateText) {
 				updateTextFunc();
 			}
+			updateTextMutex.unlock();
 		}
 
 		if (updateScoreMutex.tryLock()) {
-			updateScoreMutex.unlock();
 			if (updateScore) {
 				updateScoreFunc();
 			}
+			updateScoreMutex.unlock();
 		}
 
 
@@ -422,13 +452,19 @@ protected:
 		m_window.draw(background);
 		m_window.draw(Background);
 
-		m_window.draw(sf::Sprite(renderText.getTexture()));
-		m_window.draw(sf::Sprite(renderScore.getTexture()));
+		renderTextTextureMutex.lock();
+		m_window.draw(sf::Sprite(renderTextTexture));
+		renderTextTextureMutex.unlock();
+
+		updateScoreTextureMutex.lock();
+		m_window.draw(sf::Sprite(updateScoreTexture));
+		updateScoreTextureMutex.unlock();
 
 		m_window.draw(cur);
 	}
 
 	void onEvent(sf::Event event) {
+		updateTextMutex.lock();
 		switch (event.type) {
 		case sf::Event::MouseButtonPressed:
 			OnPressed(event);
@@ -439,10 +475,11 @@ protected:
 			break;
 
 		case sf::Event::MouseWheelMoved:
-			updateTextMutex.lock();
+			
 			showDataCenter -= event.mouseWheel.delta / 2.5;
+			std::cout << "--" << showDataCenter << std::endl;
 			updateText = true;
-			updateTextMutex.unlock();
+			
 			break;
 
 		case sf::Event::KeyPressed:
@@ -454,8 +491,6 @@ protected:
 				randomSongs();
 				break;
 			case sf::Keyboard::Enter:
-				playSong.stop();
-				playSong.update();
 				gotoUI(new Playfield(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), playSong, gameDB));
 				break;
 
@@ -468,12 +503,12 @@ protected:
 
 			case sf::Keyboard::Left:
 				selectNewBeatmapSet(selectBeatmapSet - 1);
-				showDataCenter = selectBeatmapSet;
+				showDataCenter = selectBeatmapSet + 2;
 				updateText = true;
 				break;
 			case sf::Keyboard::Right:
 				selectNewBeatmapSet(selectBeatmapSet + 1);
-				showDataCenter = selectBeatmapSet;
+				showDataCenter = selectBeatmapSet + 2;
 				updateText = true;
 				break;
 
@@ -481,7 +516,7 @@ protected:
 				if (selectBeatmapIndex == 0) {
 					if (selectBeatmapSet != 0) {
 						selectNewBeatmapSet(selectBeatmapSet - 1);
-						showDataCenter = selectBeatmapSet;
+						showDataCenter = selectBeatmapSet + 2;
 						selectNewBeatmapIndex((*beatmapSetData).size() - 1);
 					}
 				}
@@ -493,7 +528,7 @@ protected:
 				if (selectBeatmapIndex == (*beatmapSetData).size() - 1) {
 					if (selectBeatmapSet != (*searchData).size() - 1) {
 						selectNewBeatmapSet(selectBeatmapSet + 1);
-						showDataCenter = selectBeatmapSet;
+						showDataCenter = selectBeatmapSet + 2;
 					}
 				}
 				else {
@@ -523,11 +558,11 @@ protected:
 			updateSearch = true;
 			break;
 		}
+		updateTextMutex.unlock();
 	}
 
 public:
 	SelectUI(sf::RenderWindow& window, UI *from, DB::gameDB DB) : UI(window, from), cur(window), gameDB(DB),
-		updateTextThread(&SelectUI::updateTextFunc, this),
 		updatePlaySongThread(&SelectUI::updatePlaySong, this)
 	{
 		updateSearch = true;

@@ -162,17 +162,22 @@ public:
 		std::vector<std::string> split = explode(keyword, ' ');
 
 		sqlite3_stmt *searchStmt;
-		std::string searchSQL = "SELECT min(id) as id, Title, Artist, Creator FROM songs WHERE Mode = 0 ";
+		std::string searchSQL = "SELECT id, Title,Artist, Creator FROM ( ";
+		searchSQL += "SELECT min(id) as id, Title, Artist, Creator, min(Mode) as Mode FROM songs ";
 		if (keyword != "") {
+			searchSQL += "WHERE ";
 			for (int i = 0; i < split.size(); i++) {
-				searchSQL += "AND (Title like '%' || ? || '%' OR TitleUnicode like '%' || ? || '%' "
+				searchSQL += "(Title like '%' || ? || '%' OR TitleUnicode like '%' || ? || '%' "
 					"OR Artist like '%' || ? || '%' OR ArtistUnicode like '%' || ? || '%' "
 					"OR Creator like '%' || ? || '%' OR Version like '%' || ? || '%' "
-					"OR Source like '%' || ? || '%' OR Tags like '%' || ? || '%') ";
+					"OR Source like '%' || ? || '%' OR Tags like '%' || ? || '%') AND ";
 			}
-
+			searchSQL.pop_back(); //
+			searchSQL.pop_back(); // D
+			searchSQL.pop_back(); // N
+			searchSQL.pop_back(); // A
 		}
-		searchSQL += "GROUP BY OsuDir ORDER BY lower(Title);";
+		searchSQL += "GROUP BY OsuDir) WHERE Mode = 0 ORDER BY lower(Title);";
 
 		rc = sqlite3_prepare_v2(db, searchSQL.c_str(), searchSQL.size(), &searchStmt, nullptr);
 
@@ -204,7 +209,7 @@ public:
 		}
 
 		sqlite3_stmt *getBeatmapSetStmt;
-		std::string getSQL = "SELECT * FROM songs WHERE OsuDir = (SELECT OsuDir FROM songs WHERE id = ?);";
+		std::string getSQL = "SELECT * FROM songs WHERE OsuDir = (SELECT OsuDir FROM songs WHERE id = ?) AND Mode = 0 ;";
 
 		rc = sqlite3_prepare_v2(db, getSQL.c_str(), getSQL.size(), &getBeatmapSetStmt, nullptr);
 

@@ -66,7 +66,7 @@ public:
 
 		sqlite3_stmt *getBeatmapScoreStmt;
 		std::string getSQL = "SELECT * "
-			"FROM (SELECT * FROM score WHERE BeatmapID = ? ORDER BY TotalScore ASC, MaxCombo ASC, Time DESC) "
+			"FROM (SELECT * FROM score WHERE BeatmapID = ? ORDER BY TotalScore DESC, MaxCombo DESC, Time ASC) "
 			"GROUP BY User ORDER BY TotalScore DESC, MaxCombo DESC, Time ASC;";
 
 		rc = sqlite3_prepare_v2(db, getSQL.c_str(), getSQL.size(), &getBeatmapScoreStmt, nullptr);
