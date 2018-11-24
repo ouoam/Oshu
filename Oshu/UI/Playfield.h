@@ -68,6 +68,7 @@ class Playfield : public UI {
 	sf::Texture BackgroundTexture;
 
 	void updateVideo() {
+		updateVideoThreadRunningA = true;
 		float framerate = playVideo.getFramerate();
 		sf::Time m_frameTimeLimit = sf::seconds(1.f / framerate);
 		sf::Clock m_clock;
@@ -78,26 +79,32 @@ class Playfield : public UI {
 		if (!videoTexture.create(videoSize.x, videoSize.y)) {
 			std::cout << "Error create render text" << std::endl;
 		}
-		while (updateVideoThreadRunning) {
-			//if (loadVideo) {
-				playVideo.update();
+		while (updateVideoThreadRunning && isUIshow() && playVideo.getStatus() == sfe::Status::Playing) {
+			updateVideoMutex.lock();
+			playVideo.update();
+			if (!updateVideoThreadRunning || !isUIshow() || playVideo.getStatus() != sfe::Status::Playing) {
+				updateVideoMutex.unlock();
+				break;
+			}
+			videoTexture.draw(playVideo);
+			videoTexture.display();
+			updateVideoMutex.unlock();
 
-				videoTexture.draw(playVideo);
-				videoTexture.display();
-
-				playVideoTextureMutex.lock();
-				playVideoTexture = videoTexture.getTexture();
-				playVideoTextureMutex.unlock();
-			//}
-			//else break;
+			playVideoTextureMutex.lock();
+			playVideoTexture = videoTexture.getTexture();
+			playVideoTextureMutex.unlock();
+			
 
 			sf::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
 			m_clock.restart();
 		}
+		updateVideoThreadRunningA = false;
 	}
 
+	myMutex updateVideoMutex;
 	std::thread *updateVideoThread;
 	bool updateVideoThreadRunning = false;
+	bool updateVideoThreadRunningA = false;
 
 protected:
 	void OnPressed(sf::Event event) {
@@ -158,17 +165,24 @@ protected:
 		cur.onMouseUp(event.key.code);
 	}
 
-	void onDelete() {
+	virtual void onDelete() {
+		playVideo.stop();
+		updateVideoThreadRunning = false;
+		updateVideoMutex.lock();
+		playVideoTextureMutex.lock();
+
 		for (auto obj : objs)
 			delete obj;
 		objs.clear();
 		if (scoreProcessor != nullptr)
 			delete scoreProcessor;
-		if (updateVideoThread != nullptr)
-			delete updateVideoThread;
+		//updateVideoThread->join();
+		while (updateVideoThreadRunningA);
+		//if (updateVideoThread != nullptr)
+		//	delete updateVideoThread;
 	}
 
-	void onUpdate() {
+	virtual void onUpdate() {
 		playSong.update();
 		cur.update();
 
@@ -309,7 +323,7 @@ protected:
 		Mutex.unlock();
 	}
 
-	void onDraw() {
+	virtual void onDraw() {
 		m_window.draw(Background);
 		playVideoTextureMutex.lock();
 		m_window.draw(sf::Sprite(playVideoTexture));
@@ -339,7 +353,7 @@ protected:
 		m_window.draw(cur);
 	}
 
-	void onEvent(sf::Event event) {
+	virtual void onEvent(sf::Event event) {
 		switch (event.type) {
 		case sf::Event::KeyPressed:
 			if (event.key.code == sf::Keyboard::Escape)
@@ -516,5 +530,10 @@ public:
 		eventMutext.unlock();
 		drawMutex.unlock();
 		updateMutex.unlock();
+	}
+
+	virtual ~Playfield() {
+		UI::~UI();
+		onDelete();
 	}
 };

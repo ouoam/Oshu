@@ -366,7 +366,7 @@ protected:
 		if (!isUIshow())
 			return;
 
-		playSong.update();
+		//playSong.update();
 		cur.update();
 
 		if (updateSearch) {

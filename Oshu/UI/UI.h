@@ -43,10 +43,10 @@ protected:
 public:
 	UI(sf::RenderWindow& window, UI *from) : m_window(window) , fromUI(from) {}
 
-	~UI() {
-		eventMutext.lock();
-		drawMutex.lock();
-		updateMutex.lock();
+	virtual ~UI() {
+		//eventMutext.lock();
+		//drawMutex.lock();
+		//updateMutex.lock();
 
 		onDelete();
 	}
