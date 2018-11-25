@@ -47,31 +47,35 @@ protected:
 public:
 	UI(sf::RenderWindow& window, UI *from) : m_window(window) , fromUI(from) {}
 
-	virtual ~UI() {
-		onDelete();
-	}
+	//virtual ~UI() {
+	//	onDelete();
+	//}
 
 	void update() {
-		updateMutex.lock();
-		if (comebackUI) {
-			delete toUI;
-			toUI = nullptr;
-			comebackUI = false;
-			onComeBack();
+		if (updateMutex.tryLock()) {
+			if (comebackUI) {
+				toUI->onDelete();
+				delete toUI;
+				toUI = nullptr;
+				comebackUI = false;
+				onComeBack();
+			}
+			onUpdate();
+			updateMutex.unlock();
 		}
-		onUpdate();
-		updateMutex.unlock();
 	}
 	void draw() {
-		drawMutex.lock();
-		onDraw();
-		drawMutex.unlock();
+		if (drawMutex.tryLock()) {
+			onDraw();
+			drawMutex.unlock();
+		}
 	}
 
 	void newEvent(sf::Event event) {
-		eventMutext.lock();
-		onEvent(event);
-		eventMutext.unlock();
+		if (eventMutext.tryLock()) {
+			onEvent(event);
+			eventMutext.unlock();
+		}
 	}
 
 	inline UI *nowUI() {

@@ -57,14 +57,19 @@ public:
 		sliderBody.fadeTo(200).fadeTo(0, 500).then().expire();
 	}
 
+	void shake() {
+		circle->shake();
+	}
+
 private:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const {
-		states.transform *= getTransform();
-		
+		// Use only slider
+		sf::RenderStates thisStates = states;
+		thisStates.transform *= getTransform();
 
 		switch (renderLayer) {
 		case 1:
-			target.draw(sliderBody, states);
+			target.draw(sliderBody, thisStates);
 			break;
 		}
 		target.draw(*circle, states);

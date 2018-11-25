@@ -5,6 +5,7 @@
 #include <cmath>
 #include <chrono>
 #include <random>
+#include <thread>
 
 #include <SFML/System.hpp>
 #include <sfeMovie/Movie.hpp>
@@ -58,26 +59,29 @@ class SelectUI : public UI {
 
 	sfe::Movie playSong;
 	myMutex playSongMutex;
-	sf::Thread updatePlaySongThread;
+	std::thread updatePlaySongThread;
 
 	sf::Font font;
 
-	
+	sf::Vector2f globalScale;
 
 protected:
 	void OnPressed(sf::Event event) {
 		cur.onMouseDown(event.key.code);
 
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			if (event.mouseButton.x + 40 >= 500 - (100 * std::cos((event.mouseButton.x - 300) / 325.0))) {
+			sf::Vector2f position(event.mouseButton.x, event.mouseButton.y);
+			position.x /= globalScale.x;
+			position.y /= globalScale.y;
+			if (position.x + 40 >= 600 - (100 * std::cos((position.x - 300) / 325.0))) {
 				updateTextMutex.lock();
 				float newselectBeatmapSet;
-				newselectBeatmapSet = ((event.mouseButton.y - 300) / 65.0) + showDataCenter;
+				newselectBeatmapSet = ((position.y - 300) / 65.0) + showDataCenter;
 				if (selectBeatmapSet != -2 && newselectBeatmapSet > selectBeatmapSet) {
 					newselectBeatmapSet -= (*beatmapSetData).size() * 0.6;
 					if (newselectBeatmapSet <= selectBeatmapSet + 1) {
 						newselectBeatmapSet = selectBeatmapSet;
-						selectNewBeatmapIndex((((event.mouseButton.y - 300) / 65.0) + showDataCenter - selectBeatmapSet - 1) / 0.6);
+						selectNewBeatmapIndex((((position.y - 300) / 65.0) + showDataCenter - selectBeatmapSet - 1) / 0.6);
 						
 					}
 				}
@@ -129,20 +133,7 @@ protected:
 			Background.setColor(sf::Color(255, 255, 255, 125));
 			background.setColor(sf::Color(0, 0, 0, 0));
 
-			BackgroundTexture.setSmooth(true);
-			Background.setTexture(BackgroundTexture);
-
-			sf::Vector2u winSize = m_window.getSize();
-			sf::Vector2u bgSize = BackgroundTexture.getSize();
-			double sx = (double)winSize.x / (double)bgSize.x;
-			double sy = (double)winSize.y / (double)bgSize.y;
-
-			Background.setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
-			Background.setPosition(winSize.x / 2.0, winSize.y / 2.0);
-			Background.setScale(sf::Vector2f(std::max(sx, sy), std::max(sx, sy)));
-
-			sf::Rect<int> BackgroundRect(0, 0, bgSize.x, bgSize.y);
-			Background.setTextureRect(BackgroundRect);
+			setScale();
 		}
 		
 		updateScore = true;
@@ -194,15 +185,15 @@ protected:
 		sf::Text textSearch;
 		
 		textTitle.setFont(font);
-		textTitle.setCharacterSize(16);
+		textTitle.setCharacterSize(18 * globalScale.y);
 		textTitle.setFillColor(sf::Color::White);
 
 		textDetail.setFont(font);
-		textDetail.setCharacterSize(12);
+		textDetail.setCharacterSize(14 * globalScale.y);
 		textDetail.setFillColor(sf::Color::White);
 
 		textSearch.setFont(font);
-		textSearch.setCharacterSize(16);
+		textSearch.setCharacterSize(18 * globalScale.y);
 		textSearch.setFillColor(sf::Color::White);
 		textSearch.setString(searchKeyword);
 		textSearch.setPosition(450, 40);
@@ -226,38 +217,44 @@ protected:
 			}
 
 			sf::Vector2f position;
-			position.x = 500 - (100 * std::cos(offset / 5.0));
-			position.y = 300 + (offset * 65.0);
+			position.x = (600 - (100 * std::cos(offset / 5.0)));
+			position.y = (300 + (offset * 65.0));
 
 			if (i == selectBeatmapSet) {
 				sf::Text textVersion;
 				textVersion.setFont(font);
-				textVersion.setCharacterSize(12);
+				textVersion.setCharacterSize(14 * globalScale.y);
 				textVersion.setFillColor(sf::Color::White);
 				for (int j = 0; j < (*beatmapSetData).size(); j++) {
 					float offset = i - showDataCenter + j * 0.6 + 1;
 					sf::Vector2f position;
-					position.x = 500 - (100 * std::cos(offset / 5.0)) - 20;
-					position.y = 300 + (offset * 65.0);
+					position.x = ((600 - (100 * std::cos(offset / 5.0))) - 20);
+					position.y = (300 + (offset * 65.0));
 
 					if (j == selectBeatmapIndex) {
 						position.x -= 40;
 					}
 
 					textVersion.setString((*((*beatmapSetData)[j]))["Version"]);
+
+					position.x *= globalScale.x;
+					position.y *= globalScale.y;
+
 					textVersion.setPosition(position);
 
 					renderText.draw(textVersion);
 				}
 				position.x -= 80;
 			}
-				
+			
+			position.x *= globalScale.x;
+			position.y *= globalScale.y;
 
 			textTitle.setString(row["Title"]);
 			textTitle.setPosition(position);
 
 			textDetail.setString(row["Artist"] + " // " + row["Creator"]);
-			textDetail.setPosition(position + sf::Vector2f(0, 20));
+			textDetail.setPosition(position + sf::Vector2f(0, 25 * globalScale.y));
 			
 			renderText.draw(textTitle);
 			renderText.draw(textDetail);
@@ -283,19 +280,19 @@ protected:
 		sf::Text textText;
 
 		textText.setFont(font);
-		textText.setCharacterSize(20);
+		textText.setCharacterSize(20 * globalScale.y);
 		textText.setFillColor(sf::Color::White);
 
 		textUser.setFont(font);
-		textUser.setCharacterSize(18);
+		textUser.setCharacterSize(18 * globalScale.y);
 		textUser.setFillColor(sf::Color::White);
 
 		textScore.setFont(font);
-		textScore.setCharacterSize(14);
+		textScore.setCharacterSize(14 * globalScale.y);
 		textScore.setFillColor(sf::Color::White);
 
 		textText.setString("LeaderBoard");
-		textText.setPosition(sf::Vector2f(30, 30));
+		textText.setPosition(sf::Vector2f(30 * globalScale.x, 30 * globalScale.y));
 		renderScore.draw(textText);
 
 		int to = (*beatmapScore).size() - 1;
@@ -303,6 +300,9 @@ protected:
 			sf::Vector2f position;
 			position.x = 50;
 			position.y = 100 + i * 60;
+
+			position.x *= globalScale.x;
+			position.y *= globalScale.y;
 
 			textUser.setString((*((*beatmapScore)[i])).User);
 			textUser.setPosition(position);
@@ -313,7 +313,7 @@ protected:
 			temp += std::to_string((*((*beatmapScore)[i])).MaxCombo);
 			temp += ")";
 			textScore.setString(temp);
-			textScore.setPosition(position + sf::Vector2f(0, 30));
+			textScore.setPosition(position + sf::Vector2f(0, 30 * globalScale.y));
 
 			renderScore.draw(textUser);
 			renderScore.draw(textScore);
@@ -345,7 +345,6 @@ protected:
 				catch (const std::exception& e) {
 					std::cout << "Audio Seek Error : " << e.what() << std::endl;
 				}
-				
 			}
 			if (isUIshow()) {
 				try {
@@ -363,7 +362,7 @@ protected:
 	virtual void gotoUI(UI *ui) {
 		UI::gotoUI(ui);
 
-		playSong.stop();
+		//playSong.stop();
 	}
 
 	virtual void onComeBack() {
@@ -454,8 +453,8 @@ protected:
 		if (playSongMutex.tryLock()) {
 			playSongMutex.unlock();
 			if (playSong.getStatus() == sfe::Status::Stopped) {
-				//updatePlaySong();
-				updatePlaySongThread.launch();
+				updatePlaySongThread = std::thread(&SelectUI::updatePlaySong, this);
+				updatePlaySongThread.detach();
 			}
 			playSong.update();
 		}
@@ -568,22 +567,60 @@ protected:
 			}
 			updateSearch = true;
 			break;
+
+		case sf::Event::Resized:
+			setScale();
+			break;
 		}
 		updateTextMutex.unlock();
 	}
 
+	void setScale() {
+		sf::Vector2u winSize = m_window.getSize();
+		double sx = (double)winSize.x / 800;
+		double sy = (double)winSize.y / 600;
+
+		globalScale = sf::Vector2f(sx, sy);
+	
+		auto setNewScale = [&](sf::Sprite *sp, sf::Texture *tx) {
+			sf::Vector2u bgSize = tx->getSize();
+
+			double sx = (double)winSize.x / (double)bgSize.x;
+			double sy = (double)winSize.y / (double)bgSize.y;
+
+			double scale = std::max(sx, sy);
+
+			sp->setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
+			sp->setPosition(winSize.x / 2.0, winSize.y / 2.0);
+			sp->setScale(scale, scale);
+
+			tx->setSmooth(true);
+			sp->setTexture(*tx);
+
+			sf::Rect<int> rect(0, 0, bgSize.x, bgSize.y);
+			sp->setTextureRect(rect);
+		};
+
+		setNewScale(&Background, &BackgroundTexture);
+		setNewScale(&background, &backgroundTexture);
+
+		if (!renderText.create(winSize.x, winSize.y)) {
+			std::cout << "Error create render text" << std::endl;
+		}
+		updateText = true;
+
+		if (!renderScore.create(winSize.x, winSize.y)) {
+			std::cout << "Error create render text" << std::endl;
+		}
+		updateScore = true;
+	}
+
 public:
-	SelectUI(sf::RenderWindow& window, UI *from, DB::gameDB DB) : UI(window, from), cur(window), gameDB(DB),
-		updatePlaySongThread(&SelectUI::updatePlaySong, this)
+	SelectUI(sf::RenderWindow& window, UI *from, DB::gameDB DB) : UI(window, from), cur(window), gameDB(DB)
 	{
 		updateSearch = true;
-		if (!renderText.create(800, 600)) {
-			std::cout << "Error create render text" << std::endl;
-		}
-
-		if (!renderScore.create(800, 600)) {
-			std::cout << "Error create render text" << std::endl;
-		}
+		
+		setScale();
 
 		m_window.setKeyRepeatEnabled(true);
 
@@ -592,15 +629,7 @@ public:
 		}
 		background.setTexture(backgroundTexture);
 		
-		sf::Vector2u winSize = m_window.getSize();
-		sf::Vector2u bgSize = backgroundTexture.getSize();
-		double sx = (double)winSize.x / (double)bgSize.x;
-		double sy = (double)winSize.y / (double)bgSize.y;
 		
-		background.setScale(sf::Vector2f(std::max(sx,sy), std::max(sx, sy)));
-
-		background.setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
-		background.setPosition(winSize.x / 2.0, winSize.y / 2.0);
 
 		unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 		generator.seed(seed);

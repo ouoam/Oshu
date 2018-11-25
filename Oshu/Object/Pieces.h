@@ -7,19 +7,27 @@ namespace Object {
 
 namespace Pieces {
 
-class ApproachCircle : public Object::Animate::AnimeSprite {
+class HitPieces : public Object::Animate::AnimeSprite {
 public:
-	ApproachCircle() : AnimeSprite(Skin::Hitcircle::approachcircle) {}
+	HitPieces(const sf::Texture& texture) : AnimeSprite(texture) {
+		sf::Vector2u size = texture.getSize();
+		setOrigin(size.x / 2, size.y / 2);
+	}
 };
 
-class CirclePiece : public Object::Animate::AnimeSprite {
+class ApproachCircle : public HitPieces {
 public:
-	CirclePiece() : AnimeSprite(Skin::Hitcircle::hitcircle) {}
+	ApproachCircle() : HitPieces(Skin::Hitcircle::approachcircle) {}
 };
 
-class CircleOverlay : public Object::Animate::AnimeSprite {
+class CirclePiece : public HitPieces {
 public:
-	CircleOverlay() : AnimeSprite(Skin::Hitcircle::hitcircleoverlay) {}
+	CirclePiece() : HitPieces(Skin::Hitcircle::hitcircle) {}
+};
+
+class CircleOverlay : public HitPieces {
+public:
+	CircleOverlay() : HitPieces(Skin::Hitcircle::hitcircleoverlay) {}
 };
 
 }

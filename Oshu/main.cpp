@@ -15,10 +15,10 @@ UI *ui;
 
 void renderThread(sf::RenderWindow* window)
 {
-	window->setActive(true);
-
 	while (window->isOpen())
 	{
+		window->setActive(true);
+
 		window->clear();
 
 		ui->draw();
@@ -48,6 +48,7 @@ int main()
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
 	sf::RenderWindow window(sf::VideoMode(800, 600), "Oshu!", sf::Style::Default, settings);
+	//sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Oshu!", sf::Style::Fullscreen, settings);
 	window.setFramerateLimit(60);
 	window.setKeyRepeatEnabled(false);
 
@@ -60,6 +61,8 @@ int main()
 	sf::Thread thread2(&updateThread, &window);
 	thread.launch();
 	thread2.launch();
+
+	bool fullscreen = false;
 
 	aa.setUser("test user");
 
@@ -92,6 +95,19 @@ int main()
 			case sf::Event::Resized:
 				window.setView(sf::View(sf::FloatRect(0, 0, (float)window.getSize().x, (float)window.getSize().y)));
 				break;
+			//case sf::Event::KeyPressed:
+			//	switch (event.key.code) {
+			//	case sf::Keyboard::F11:
+			//		fullscreen = !fullscreen;
+
+			//		if (fullscreen)
+			//			window.create(sf::VideoMode::getDesktopMode(), "Oshu!", sf::Style::Fullscreen, settings);
+			//		else
+			//			window.create(sf::VideoMode(800, 600), "Oshu!", sf::Style::Default, settings);
+
+			//		window.setFramerateLimit(60);
+			//		window.setActive(false);
+			//	}
 			}
 
 			ui->newEvent(event);

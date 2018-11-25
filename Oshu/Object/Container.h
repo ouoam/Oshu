@@ -13,8 +13,7 @@ public:
 	virtual void onMouseMove(uint8_t) {};
 
 	virtual void update() {};
-	virtual void StartPreemptState() {};
-
+	
 	bool willBeRemove = false;
 	bool canClick = true;
 
@@ -33,7 +32,11 @@ public:
 		isMiss = true;
 	}
 
-	virtual void onMiss() {};
+	virtual void StartPreemptState() {};
+
+	virtual void shake() { };
+
+	virtual void onMiss() { };
 
 	ContainerHitObject(Beatmap::bmHitObjects *HitObject) : hitObject(HitObject) {}
 };

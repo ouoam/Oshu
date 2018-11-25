@@ -67,7 +67,6 @@ class Playfield : public UI {
 	sf::Texture BackgroundTexture;
 
 	void updateVideo() {
-		updateVideoThreadRunningA = true;
 		float framerate = playVideo.getFramerate();
 		sf::Time m_frameTimeLimit = sf::seconds(1.f / framerate);
 		sf::Clock m_clock;
@@ -104,13 +103,11 @@ class Playfield : public UI {
 			sf::sleep(m_frameTimeLimit - m_clock.getElapsedTime());
 			m_clock.restart();
 		}
-		updateVideoThreadRunningA = false;
 	}
 
 	myMutex updateVideoMutex;
-	std::thread *updateVideoThread;
+	std::thread updateVideoThread;
 	bool updateVideoThreadRunning = false;
-	bool updateVideoThreadRunningA = false;
 
 protected:
 	void OnPressed(sf::Event event) {
@@ -139,8 +136,7 @@ protected:
 					int64_t offsetTime = time - obj->hitObject->time;
 					Scoring::HitResult::Enum result = hitwindows.ResultFor(offsetTime);
 					if (result == Scoring::HitResult::None) {
-						//  do shake
-						std::cout << offsetTime << "----------------------------------------------------------\n";
+						obj->shake();
 						break;
 					} else {
 						obj->onMouseClick(event.key.code);
@@ -172,6 +168,8 @@ protected:
 	}
 
 	virtual void onDelete() {
+		UI::onDelete();
+
 		playVideo.stop();
 		updateVideoThreadRunning = false;
 
@@ -186,12 +184,9 @@ protected:
 		objs.clear();
 		if (scoreProcessor != nullptr)
 			delete scoreProcessor;
-		//updateVideoThread->join();
-		while (updateVideoThreadRunningA);
-		//if (updateVideoThread != nullptr)
-		//	delete updateVideoThread;
 
-		
+		if (updateVideoThread.joinable())
+			updateVideoThread.join();
 	}
 
 	virtual void onUpdate() {
@@ -246,8 +241,8 @@ protected:
 						playVideo.play();
 						playVideo.update();
 						updateVideoThreadRunning = true;
-						updateVideoThread = new std::thread(&Playfield::updateVideo, this);
-						updateVideoThread->detach();
+						updateVideoThread = std::thread(&Playfield::updateVideo, this);
+						updateVideoThread.detach();
 					}
 				}
 			}
@@ -354,9 +349,13 @@ protected:
 	virtual void onDraw() {
 		m_window.draw(Background);
 		playVideoTextureMutex.lock();
-		m_window.draw(playVideoSpike);
-		//m_window.draw(sf::Sprite(videoTexture.getTexture()));
-		//m_window.draw(playVideo);
+		try {
+			m_window.draw(playVideoSpike);
+		}
+		catch (...) {
+			std::cout << "Draw Error" << std::endl;
+		}
+		
 		playVideoTextureMutex.unlock();
 
 		m_window.draw(filter);
@@ -441,11 +440,6 @@ protected:
 		textAccuracy.setOrigin(textAccuracy.getGlobalBounds().width, 0);
 		textAccuracy.setPosition(sf::Vector2f(winSize.x - 10, textScore.getGlobalBounds().height + 30));
 
-
-
-		BackgroundTexture.setSmooth(true);
-		Background.setTexture(BackgroundTexture);
-
 		sf::Vector2u bgSize = BackgroundTexture.getSize();
 		sx = (double)winSize.x / (double)bgSize.x;
 		sy = (double)winSize.y / (double)bgSize.y;
@@ -485,14 +479,6 @@ public:
 		base_dir += beatmapData["OsuDir"] + "/";
 
 		bmPlay.load(base_dir + beatmapData["OsuFile"]);
-
-		playSong.stop();
-		playSong.update();
-
-		if (!playSong.openFromFile(base_dir + bmPlay.General.AudioFilename)) {
-			std::cout << "Error open Song" << std::endl;
-		}
-
 		
 		if (bmPlay.Events.Video == "") {
 
@@ -528,6 +514,8 @@ public:
 		if (!BackgroundTexture.loadFromFile(base_dir + bmPlay.Events.Background)) {
 			Background.setColor(sf::Color(0, 0, 0, 0));
 		}
+		BackgroundTexture.setSmooth(true);
+		Background.setTexture(BackgroundTexture);
 
 		MutexText.lock();
 		textScore.setFont(font);
@@ -539,6 +527,10 @@ public:
 
 		setScale();
 		MutexText.unlock();
+
+		if (!playSong.openFromFile(base_dir + bmPlay.General.AudioFilename)) {
+			std::cout << "Error open Song" << std::endl;
+		}
 	}
 
 	void retry() {
@@ -565,9 +557,9 @@ public:
 		playVideoTextureMutex.unlock();
 	}
 
-	virtual ~Playfield() {
-		UI::onDelete();
-		onDelete();
-		//UI::~UI();
-	}
+	//virtual ~Playfield() {
+	//	UI::onDelete();
+	//	onDelete();
+	//	//UI::~UI();
+	//}
 };
