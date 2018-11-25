@@ -33,7 +33,7 @@ class Playfield : public UI {
 	std::unordered_map<std::string, std::string> beatmapData;
 	sfe::Movie playSong;
 	sfe::Movie playVideo;
-	sf::Texture playVideoTexture;
+	sf::Sprite playVideoSpike;
 	myMutex playVideoTextureMutex;
 	bool loadVideo = false;
 
@@ -57,7 +57,6 @@ class Playfield : public UI {
 	Beatmap::Beatmap bmPlay;
 
 	Scoring::ScoreProcessor *scoreProcessor = nullptr;
-	bool haveStoreScore = false;
 
 	sf::Font font;
 	sf::Text textScore;
@@ -73,25 +72,32 @@ class Playfield : public UI {
 		sf::Time m_frameTimeLimit = sf::seconds(1.f / framerate);
 		sf::Clock m_clock;
 
-		sf::Vector2f videoSize = playVideo.getSize();
+		sf::Texture temp;
 
-		sf::RenderTexture videoTexture;
-		if (!videoTexture.create(videoSize.x, videoSize.y)) {
-			std::cout << "Error create render text" << std::endl;
-		}
 		while (updateVideoThreadRunning && isUIshow() && playVideo.getStatus() == sfe::Status::Playing) {
-			updateVideoMutex.lock();
-			playVideo.update();
 			if (!updateVideoThreadRunning || !isUIshow() || playVideo.getStatus() != sfe::Status::Playing) {
-				updateVideoMutex.unlock();
 				break;
 			}
-			videoTexture.draw(playVideo);
-			videoTexture.display();
+
+			updateVideoMutex.lock();
+			try {
+				playVideo.update();
+			}
+			catch (...) {
+				std::cout << "Video Update Error" << std::endl;
+				updateVideoThreadRunning = false;
+			}
 			updateVideoMutex.unlock();
 
+			if (!updateVideoThreadRunning || !isUIshow() || playVideo.getStatus() != sfe::Status::Playing) {
+				break;
+			}
+
+			temp = playVideo.getCurrentImage();
+			temp.setSmooth(true);
+
 			playVideoTextureMutex.lock();
-			playVideoTexture = videoTexture.getTexture();
+			playVideoSpike.setTexture(temp);
 			playVideoTextureMutex.unlock();
 			
 
@@ -141,7 +147,7 @@ protected:
 
 						int sampleset = bmPlay.TimingPoints[std::max(bmPlay.iTimingPoints - 1, 0)].SampleSet;
 						int sound_id = obj->hitObject->hitSound;
-						int index = bmPlay.TimingPoints[bmPlay.iTimingPoints - 1].SampleIndex;
+						int index = bmPlay.TimingPoints[std::max(bmPlay.iTimingPoints - 1, 0)].SampleIndex;
 						sound_id = (sound_id & 8) ? 3 : ((sound_id & 4) ? 2 : ((sound_id & 2) ? 1 : 0));
 						sound[iSound % 10].setBuffer(hitSoundList[sampleset][sound_id][index]);
 						sound[iSound % 10].play();
@@ -168,8 +174,12 @@ protected:
 	virtual void onDelete() {
 		playVideo.stop();
 		updateVideoThreadRunning = false;
+
 		updateVideoMutex.lock();
 		playVideoTextureMutex.lock();
+
+		MutexText.lock();
+		Mutex.lock();
 
 		for (auto obj : objs)
 			delete obj;
@@ -180,28 +190,58 @@ protected:
 		while (updateVideoThreadRunningA);
 		//if (updateVideoThread != nullptr)
 		//	delete updateVideoThread;
+
+		
 	}
 
 	virtual void onUpdate() {
 		playSong.update();
 		cur.update();
 
-		if (haveStart == 0) {
+		int startSongTime = 1000;
+		startSongTime += bmPlay.General.AudioLeadIn;
+		if (bmPlay.Events.VideoOffset < 0)
+			startSongTime -= bmPlay.Events.VideoOffset;
+
+		switch (haveStart) {
+		case 0:
+			try {
+				playSong.setPlayingOffset(sf::Time::Zero);
+			}
+			catch (const std::exception& e) {
+				std::cout << "Audio setOffset Error : " << e.what() << std::endl;
+			}
 			playSong.stop();
 			aaaaa.restart();
 			haveStart++;
-		} else if (haveStart == 1) {
-			if (aaaaa.getElapsedTime().asMilliseconds() >= bmPlay.General.AudioLeadIn + 1000) {
+			break;
+		case 1:
+			if (aaaaa.getElapsedTime().asMilliseconds() >= startSongTime) {
+				playSong.play();
 				haveStart++;
 			}
-		} else if (haveStart == 2) {
-			playSong.play();
-			haveStart++;
+			break;
+		case 2:
+			if ((*scoreProcessor).hasCompleted()) {
+				aaaaa.restart();
+				haveStart++;
+			}
+			break;
+		case 3:
+			if (aaaaa.getElapsedTime().asMilliseconds() >= 1000) {
+				Scoring::Score record;
+				(*scoreProcessor).PopulateScore(&record);
+				record.BeatmapID = std::stoi(beatmapData["id"]);
+				gameDB.addScoreToDB(record);
+				gobackUI();
+				haveStart++;
+			}
+			break;
 		}
 
-		if (loadVideo) {
+		if (loadVideo && (haveStart == 1 || haveStart == 2)) {
 			if (playVideo.getStatus() == sfe::Status::Stopped) {
-				if (aaaaa.getElapsedTime().asMilliseconds() >= bmPlay.General.AudioLeadIn + 1000 + bmPlay.Events.VideoOffset) {
+				if (aaaaa.getElapsedTime().asMilliseconds() >= startSongTime + bmPlay.Events.VideoOffset) {
 					if (!updateVideoThreadRunning) {
 						playVideo.play();
 						playVideo.update();
@@ -214,18 +254,7 @@ protected:
 		}
 		
 
-		if ((*scoreProcessor).hasCompleted()) {
-			if (!haveStoreScore) {
-				std::cout << "END" << std::endl;
-				Scoring::Score record;
-				(*scoreProcessor).PopulateScore(&record);
-
-				record.BeatmapID = std::stoi(beatmapData["id"]);
-				gameDB.addScoreToDB(record);
-				gobackUI();
-				haveStoreScore = true;
-			}
-		}
+		
 
 		char buff[100];
 		
@@ -236,8 +265,7 @@ protected:
 		textAccuracy.setString(std::string(buff) + " %");
 
 
-		if (playSong.getStatus() == sfe::Status::Paused || playSong.getStatus() == sfe::Status::Stopped) {
-			
+		if (playSong.getStatus() == sfe::Status::Paused || playSong.getStatus() == sfe::Status::Stopped || haveStart < 2 ) {
 			return;
 		}
 			
@@ -326,7 +354,8 @@ protected:
 	virtual void onDraw() {
 		m_window.draw(Background);
 		playVideoTextureMutex.lock();
-		m_window.draw(sf::Sprite(playVideoTexture));
+		m_window.draw(playVideoSpike);
+		//m_window.draw(sf::Sprite(videoTexture.getTexture()));
 		//m_window.draw(playVideo);
 		playVideoTextureMutex.unlock();
 
@@ -429,17 +458,19 @@ protected:
 		sf::Rect<int> BackgroundRect(0, 0, bgSize.x, bgSize.y);
 		Background.setTextureRect(BackgroundRect);
 
-		//if (loadVideo) {
-		//	bgSize = (sf::Vector2u)playVideo.getSize();
+		if (loadVideo) {
+			bgSize = (sf::Vector2u)playVideo.getSize();
 
-		//	sx = (double)winSize.x / (double)bgSize.x;
-		//	sy = (double)winSize.y / (double)bgSize.y;
-		//	scale = std::max(sx, sy);
+			playVideoSpike.setTextureRect(sf::IntRect(0, 0, bgSize.x, bgSize.y));
 
-		//	playVideo.fit(0, 0, bgSize.x * scale, bgSize.y * scale);
-		//	playVideo.setOrigin(bgSize.x * scale / 2.0, bgSize.y * scale / 2.0);
-		//	playVideo.setPosition(winSize.x / 2.0, winSize.y / 2.0);
-		//}
+			sx = (double)winSize.x / (double)bgSize.x;
+			sy = (double)winSize.y / (double)bgSize.y;
+			scale = std::max(sx, sy);
+
+			playVideoSpike.setOrigin(bgSize.x / 2.0, bgSize.y / 2.0);
+			playVideoSpike.setPosition(winSize.x / 2.0, winSize.y / 2.0);
+			playVideoSpike.setScale(scale, scale);
+		}
 
 		filter.setSize((sf::Vector2f)winSize);
 		filter.setFillColor(sf::Color(0, 0, 0, 125));
@@ -522,7 +553,6 @@ public:
 		scoreProcessor = new Scoring::ScoreProcessor(&bmPlay);
 
 		haveStart = 0;
-		haveStoreScore = false;
 
 		showHitObj.front = 0;
 		showHitObj.back = 0;
@@ -530,10 +560,14 @@ public:
 		eventMutext.unlock();
 		drawMutex.unlock();
 		updateMutex.unlock();
+
+		updateVideoMutex.unlock();
+		playVideoTextureMutex.unlock();
 	}
 
 	virtual ~Playfield() {
-		UI::~UI();
+		UI::onDelete();
 		onDelete();
+		//UI::~UI();
 	}
 };

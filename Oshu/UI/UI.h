@@ -37,17 +37,17 @@ protected:
 	virtual void onUpdate() {};
 	virtual void onDraw() {};
 	virtual void onEvent(sf::Event event) {};
-	virtual void onDelete() {};
+	virtual void onDelete() {
+		eventMutext.lock();
+		drawMutex.lock();
+		updateMutex.lock();
+	};
 	virtual void onComeBack() {};
 
 public:
 	UI(sf::RenderWindow& window, UI *from) : m_window(window) , fromUI(from) {}
 
 	virtual ~UI() {
-		//eventMutext.lock();
-		//drawMutex.lock();
-		//updateMutex.lock();
-
 		onDelete();
 	}
 

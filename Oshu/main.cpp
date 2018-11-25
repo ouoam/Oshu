@@ -28,7 +28,7 @@ void renderThread(sf::RenderWindow* window)
 }
 
 void updateThread(sf::RenderWindow* window) {
-	sf::Time m_frameTimeLimit = sf::seconds(1.f / 240);
+	sf::Time m_frameTimeLimit = sf::seconds(1.f / 120);
 	sf::Clock m_clock;
 	while (window->isOpen()) {
 		ui = ui->nowUI();
@@ -86,7 +86,7 @@ int main()
 				break;
 
 			case sf::Event::GainedFocus:
-				window.setFramerateLimit(120);
+				window.setFramerateLimit(60);
 				break;
 
 			case sf::Event::Resized:

@@ -337,12 +337,25 @@ protected:
 
 			// some song block by seek and some song can not seek
 			if (playSong.getDuration() > sf::milliseconds(time) && time > 0) {
-				if (!playSong.setPlayingOffset(sf::milliseconds(time))) {
-					playSong.setPlayingOffset(sf::milliseconds(0));
+				try {
+					if (!playSong.setPlayingOffset(sf::milliseconds(time))) {
+						playSong.stop();
+					}
+				}
+				catch (const std::exception& e) {
+					std::cout << "Audio Seek Error : " << e.what() << std::endl;
+				}
+				
+			}
+			if (isUIshow()) {
+				try {
+					playSong.play();
+				}
+				catch (const std::exception& e) {
+					std::cout << "Audio Play Error : " << e.what() << std::endl;
 				}
 			}
-			if (isUIshow())
-				playSong.play();
+				
 		}
 		playSongMutex.unlock();
 	}
@@ -477,9 +490,7 @@ protected:
 		case sf::Event::MouseWheelMoved:
 			
 			showDataCenter -= event.mouseWheel.delta / 2.5;
-			std::cout << "--" << showDataCenter << std::endl;
 			updateText = true;
-			
 			break;
 
 		case sf::Event::KeyPressed:
