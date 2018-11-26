@@ -479,8 +479,6 @@ public:
 			playVideo.stop();
 		}
 
-		Audio::loadHitSound(&bmPlay, base_dir);
-
 		// Calc For Hit Object
 		int AR = bmPlay.Difficulty.ApproachRate;
 
@@ -521,6 +519,11 @@ public:
 		if (!playSong.openFromFile(base_dir + bmPlay.General.AudioFilename)) {
 			std::cout << "Error open Song" << std::endl;
 		}
+
+		Audio::loadHitSound(&bmPlay, base_dir);
+		Skin::load(base_dir);
+
+		cur.loadNewSkin();
 	}
 
 	void retry() {

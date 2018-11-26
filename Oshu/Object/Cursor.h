@@ -23,16 +23,7 @@ class Cursor : public Container {
 public:
 
 	Cursor(sf::RenderWindow& window) : m_window(window) {
-		sf::Vector2u size = Skin::Cursor::cursor.getSize();
-		mou.setTexture(Skin::Cursor::cursor);
-		mou.setOrigin(size.x / 2.0, size.y / 2.0);
-		mou.scale(0.4, 0.4);
-		mou.setScaleFromNow();
-
-		sf::Vector2u size2 = Skin::Cursor::cursorMiddle.getSize();
-		mou2.setTexture(Skin::Cursor::cursorMiddle);
-		mou2.setOrigin(size2.x / 2.0, size2.y / 2.0);
-		mou2.scale(0.3, 0.3);
+		loadNewSkin();
 
 		downCount = 0;
 	}
@@ -74,6 +65,24 @@ public:
 			oldLocation = temp;
 		}
 		
+	}
+
+	void loadNewSkin() {
+		sf::Texture *texture = Skin::get("cursor");
+		sf::Vector2u size = texture->getSize();
+		float scale = 60.0 / (float)std::min(size.x, size.y);
+		mou.setTexture(*texture);
+		mou.setOrigin(size.x / 2.0, size.y / 2.0);
+		mou.setScale(scale, scale);
+		mou.setScaleFromNow();
+
+		texture = Skin::get("cursormiddle");
+		size = texture->getSize();
+		scale = 20.0 / (float)std::min(size.x, size.y);
+		mou2.setTexture(*texture);
+		mou2.setOrigin(size.x / 2.0, size.y / 2.0);
+		mou2.setScale(scale, scale);
+		mou2.setScaleFromNow();
 	}
 
 private:

@@ -60,7 +60,6 @@ bool loadSound(sf::SoundBuffer *sb, std::string file) {
 				catch (const std::exception& e) {
 					std::cout << "Load Sound Error : " << e.what() << std::endl;
 				}
-
 			}
 		}
 	}
@@ -85,11 +84,11 @@ void loadHitSound(Beatmap::Beatmap *bmPlay, std::string base_dir) {
 			std::string end = (index != 0 ? std::to_string(index) : "");
 			sf::SoundBuffer *sb = &hitSoundList[sampleset][sound][index];
 			if (!loadSound(sb, base_dir + file + end + ".wav"))
-				if (!loadSound(sb, "resource/Modify/" + file + ".wav"))
+				// DISABLE CUSTOM SKIN
+				//if (!loadSound(sb, "resource/Modify/" + file + ".wav"))
 					if (!loadSound(sb, "resource/default/" + file + ".wav"))
-						if (!loadSound(sb, "resource/default/" + file + ".wav"))
-							if (!loadSound(sb, "resource/soft-hitnormal.wav"))
-								std::cout << "Can not load any sound : " << file << end << std::endl;
+						if (!loadSound(sb, "resource/soft-hitnormal.wav"))
+							std::cout << "Can not load any sound : " << file << end << std::endl;
 		}
 	}
 }

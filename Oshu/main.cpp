@@ -52,7 +52,6 @@ int main()
 	window.setFramerateLimit(60);
 	window.setKeyRepeatEnabled(false);
 
-	Skin::load();
 	ui = new SelectUI(window, nullptr, aa);
 	//ui = new testtest(window, nullptr);
 
