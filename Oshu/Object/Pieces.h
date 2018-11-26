@@ -17,17 +17,17 @@ public:
 
 class ApproachCircle : public HitPieces {
 public:
-	ApproachCircle() : HitPieces(Skin::Hitcircle::approachcircle) {}
+	ApproachCircle() : HitPieces(*Skin::get("approachcircle")) {}
 };
 
 class CirclePiece : public HitPieces {
 public:
-	CirclePiece() : HitPieces(Skin::Hitcircle::hitcircle) {}
+	CirclePiece() : HitPieces(*Skin::get("hitcircle")) {}
 };
 
 class CircleOverlay : public HitPieces {
 public:
-	CircleOverlay() : HitPieces(Skin::Hitcircle::hitcircleoverlay) {}
+	CircleOverlay() : HitPieces(*Skin::get("hitcircleoverlay")) {}
 };
 
 }

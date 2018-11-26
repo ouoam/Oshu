@@ -68,7 +68,7 @@ public:
 	}
 
 	void loadNewSkin() {
-		sf::Texture *texture = &Skin::Cursor::cursor;
+		sf::Texture *texture = Skin::get("cursor");
 		sf::Vector2u size = texture->getSize();
 		float scale = 60.0 / (float)std::min(size.x, size.y);
 		mou.setTexture(*texture);
@@ -76,7 +76,7 @@ public:
 		mou.setScale(scale, scale);
 		mou.setScaleFromNow();
 
-		texture = &Skin::Cursor::cursorMiddle;
+		texture = Skin::get("cursormiddle");
 		size = texture->getSize();
 		scale = 20.0 / (float)std::min(size.x, size.y);
 		mou2.setTexture(*texture);
