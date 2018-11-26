@@ -47,26 +47,31 @@ public:
 	}
 
 	void StartPreemptState() {
-		circle.fadeTo(255, hitObject->TimeFadeIn);
-		circleOverlay.fadeTo(255, hitObject->TimeFadeIn);
+		circle.fadeTo(255, hitObject->TimeFadeIn).moveTo(sf::Vector2f(0, 0));
+		circleOverlay.fadeTo(255, hitObject->TimeFadeIn).moveTo(sf::Vector2f(0, 0));
 		approach.fadeTo(255, std::min(hitObject->TimeFadeIn * 2, hitObject->TimePreempt));
 		approach.scaleTo(1.1, hitObject->TimePreempt);
-		
 	}
 
 	void onMouseClick(uint8_t key) {
-		approach.fadeTo(255).fadeTo(0, 50).then().expire();
+		approach.fadeTo(255).fadeTo(0, 50)
+			.moveTo(sf::Vector2f(0, 0)).then().expire();
 		circle.fadeTo(0, 500).scaleTo(1)
-			.scaleTo(1.5f, 250, Object::Animate::Easing::OutQuad).then().expire();
+			.scaleTo(1.5f, 250, Object::Animate::Easing::OutQuad)
+			.moveTo(sf::Vector2f(0, 0)).then().expire();
 		circleOverlay.fadeTo(0, 500).scaleTo(1)
-			.scaleTo(1.5f, 250, Object::Animate::Easing::OutQuad).then().expire();
+			.scaleTo(1.5f, 250, Object::Animate::Easing::OutQuad)
+			.then().expire();
 		canClick = false;
 	}
 
 	void onMiss() {
-		circle.fadeTo(200).fadeTo(0, 500).then().expire();
-		circleOverlay.fadeTo(200).fadeTo(0, 500).then().expire();
-		approach.fadeTo(200).fadeTo(0, 500).then().expire();
+		circle.fadeTo(200).fadeTo(0, 500)
+			.moveTo(sf::Vector2f(0, 0)).then().expire();
+		circleOverlay.fadeTo(200).fadeTo(0, 500)
+			.moveTo(sf::Vector2f(0, 0)).then().expire();
+		approach.fadeTo(200).fadeTo(0, 500)
+			.then().expire();
 	}
 
 	void shake() {

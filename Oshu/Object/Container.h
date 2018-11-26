@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
 #include "../Beatmap/Beatmap.h"
 
 namespace Object {
@@ -18,6 +19,10 @@ public:
 	bool canClick = true;
 
 	static int renderLayer;
+
+	virtual bool canBeHit(sf::Vector2f pos) {
+		return false;
+	};
 };
 
 class ContainerHitObject : public Container {
@@ -39,6 +44,12 @@ public:
 	virtual void onMiss() { };
 
 	ContainerHitObject(Beatmap::bmHitObjects *HitObject) : hitObject(HitObject) {}
+
+	virtual bool canBeHit(sf::Vector2f pos) {
+		sf::Vector2f offset = pos - getPosition();
+		float dist = sqrt(offset.x * offset.x + offset.y * offset.y);
+		return (dist <= (hitObject->CR) / 2);
+	}
 };
 
 }

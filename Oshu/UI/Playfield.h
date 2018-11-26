@@ -128,11 +128,7 @@ protected:
 
 				sf::Vector2f clickPos = transform.getInverse().transformPoint(click);
 
-				sf::Vector2f offset = clickPos - (sf::Vector2f)obj->hitObject->position;
-
-				float dist = sqrt(offset.x * offset.x + offset.y * offset.y);
-
-				if (dist <= (obj->hitObject->CR) / 2) {
+				if (obj->canBeHit(clickPos)) {
 					int64_t offsetTime = time - obj->hitObject->time;
 					Scoring::HitResult::Enum result = hitwindows.ResultFor(offsetTime);
 					if (result == Scoring::HitResult::None) {
@@ -170,18 +166,19 @@ protected:
 	virtual void onDelete() {
 		UI::onDelete();
 
-		playVideo.stop();
-		updateVideoThreadRunning = false;
-
 		updateVideoMutex.lock();
 		playVideoTextureMutex.lock();
 
 		MutexText.lock();
 		Mutex.lock();
 
+		playVideo.stop();
+		updateVideoThreadRunning = false;
+
 		for (auto obj : objs)
 			delete obj;
 		objs.clear();
+
 		if (scoreProcessor != nullptr)
 			delete scoreProcessor;
 
@@ -251,7 +248,7 @@ protected:
 
 		
 
-		char buff[100];
+		char buff[20];
 		
 		snprintf(buff, sizeof(buff), "%07.0lf", scoreProcessor->TotalScore);
 		textScore.setString(buff);
@@ -386,8 +383,8 @@ protected:
 		case sf::Event::KeyPressed:
 			if (event.key.code == sf::Keyboard::Escape)
 				gobackUI();
-			if (event.key.alt && event.key.control)
-				m_window.setMouseCursorGrabbed(false);
+			//if (event.key.alt && event.key.control)
+			//	m_window.setMouseCursorGrabbed(false);
 			if (event.key.code == sf::Keyboard::Tilde)
 				retry();
 
@@ -401,7 +398,7 @@ protected:
 			break;
 
 		case sf::Event::GainedFocus:
-			m_window.setMouseCursorGrabbed(true);
+			//m_window.setMouseCursorGrabbed(true);
 			break;
 
 		case sf::Event::Resized:
@@ -504,7 +501,7 @@ public:
 		hitwindows.SetDifficulty(bmPlay.Difficulty.OverallDifficulty);
 		
 		m_window.setKeyRepeatEnabled(false);
-		m_window.setMouseCursorGrabbed(true);
+		//m_window.setMouseCursorGrabbed(true);
 
 		scoreProcessor = new Scoring::ScoreProcessor(&bmPlay);
 
@@ -534,11 +531,11 @@ public:
 	}
 
 	void retry() {
-		eventMutext.lock();
-		drawMutex.lock();
-		updateMutex.lock();
+		//eventMutext.lock();
+		//drawMutex.lock();
+		//updateMutex.lock();
 
-		playSong.stop();
+		//playSong.stop();
 
 		onDelete();
 		
@@ -555,6 +552,9 @@ public:
 
 		updateVideoMutex.unlock();
 		playVideoTextureMutex.unlock();
+
+		MutexText.unlock();
+		Mutex.unlock();
 	}
 
 	//virtual ~Playfield() {

@@ -278,6 +278,7 @@ protected:
 		sf::Text textUser;
 		sf::Text textScore;
 		sf::Text textText;
+		sf::Text textAccuracy;
 
 		textText.setFont(font);
 		textText.setCharacterSize(20 * globalScale.y);
@@ -290,6 +291,10 @@ protected:
 		textScore.setFont(font);
 		textScore.setCharacterSize(14 * globalScale.y);
 		textScore.setFillColor(sf::Color::White);
+
+		textAccuracy.setFont(font);
+		textAccuracy.setCharacterSize(14 * globalScale.y);
+		textAccuracy.setFillColor(sf::Color::White);
 
 		textText.setString("LeaderBoard");
 		textText.setPosition(sf::Vector2f(30 * globalScale.x, 30 * globalScale.y));
@@ -315,8 +320,14 @@ protected:
 			textScore.setString(temp);
 			textScore.setPosition(position + sf::Vector2f(0, 30 * globalScale.y));
 
+			char buff[20];
+			snprintf(buff, sizeof(buff), "%.2lf", ((*beatmapScore)[i])->Accuracy * 100.0);
+			textAccuracy.setString(std::string(buff) + " %");
+			textAccuracy.setPosition(position + sf::Vector2f(150 * globalScale.x, 6 * globalScale.y));
+
 			renderScore.draw(textUser);
 			renderScore.draw(textScore);
+			renderScore.draw(textAccuracy);
 		}
 
 		updateScore = false;

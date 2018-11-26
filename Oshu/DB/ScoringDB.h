@@ -85,7 +85,7 @@ public:
 
 			score->Rank = (Scoring::ScoreRank::Enum)std::stoi(GetWithDef(*ranking, "Rank", "0"));
 			score->TotalScore = std::stod(GetWithDef(*ranking, "TotalScore", "0"));
-			score->Accuracy = std::stod(GetWithDef(*ranking, "TotalScore", "0"));
+			score->Accuracy = std::stod(GetWithDef(*ranking, "Accuracy", "0"));
 			score->MaxCombo = std::stoi(GetWithDef(*ranking, "MaxCombo", "0"));
 
 			score->Statistics[Scoring::HitResult::Miss] = std::stoi(GetWithDef(*ranking, "StatMiss", "0"));

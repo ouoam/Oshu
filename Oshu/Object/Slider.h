@@ -20,6 +20,9 @@ class Slider : public ContainerHitObject {
 
 public:
 	Slider(Beatmap::bmHitObjects *HitObject) : ContainerHitObject(HitObject) {
+		setPosition((sf::Vector2f)HitObject->position);
+		setOrigin((sf::Vector2f)HitObject->position);
+
 		lineThinkness = GenerateTrianglesStrip(hitObject->sliders.curvePoints, hitObject->CR - 5);
 		sliderBody.setVertex(lineThinkness);
 
@@ -41,24 +44,28 @@ public:
 	void StartPreemptState() {
 		circle->StartPreemptState();
 
-		sliderBody.fadeTo(255, hitObject->TimeFadeIn);
+		sliderBody.fadeTo(255, hitObject->TimeFadeIn).moveOriginTo(sf::Vector2f(0, 0));
 	}
 
 	void onMouseClick(uint8_t key) {
 		circle->onMouseClick(key);
 		canClick = circle->canClick;
 
-		sliderBody.fadeTo(0, 500).then().expire(); /////////
+		sliderBody.fadeTo(0, 500).moveOriginTo(sf::Vector2f(0, 0)).then().expire(); /////////
 	}
 
 	void onMiss() {
 		circle->miss();
 
-		sliderBody.fadeTo(200).fadeTo(0, 500).then().expire();
+		sliderBody.fadeTo(200).fadeTo(0, 500).moveOriginTo(sf::Vector2f(0, 0)).then().expire();
 	}
 
 	void shake() {
 		circle->shake();
+	}
+
+	virtual bool canBeHit(sf::Vector2f pos) {
+		return circle->canBeHit(pos);
 	}
 
 private:
