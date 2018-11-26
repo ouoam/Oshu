@@ -383,6 +383,9 @@ protected:
 
 		selectNewBeatmapIndex(selectBeatmapIndex);
 		//playSong.play();
+		Skin::loadSkin();
+
+		cur.loadNewSkin();
 	}
 
 	virtual void onUpdate() {
