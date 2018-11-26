@@ -32,6 +32,7 @@ public:
 
 		sf::Vector2u size2 = circleOverlay.getTexture()->getSize();
 		scale = (float)std::min(size.x, size.y) / (float)std::min(size2.x, size2.y);
+
 		circleOverlay.setScale(scale, scale);
 		circleOverlay.setScaleFromNow();
 		circleOverlay.fadeTo(0);
@@ -39,6 +40,7 @@ public:
 
 		size2 = approach.getTexture()->getSize();
 		scale = (float)std::min(size.x, size.y) / (float)std::min(size2.x, size2.y);
+
 		approach.setScale(scale, scale);
 		approach.setScaleFromNow();
 		approach.scaleTo(4);

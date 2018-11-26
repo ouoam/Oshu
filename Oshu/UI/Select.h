@@ -383,7 +383,7 @@ protected:
 
 		selectNewBeatmapIndex(selectBeatmapIndex);
 		//playSong.play();
-		Skin::loadSkin();
+		Skin::load();
 
 		cur.loadNewSkin();
 	}

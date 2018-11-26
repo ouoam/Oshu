@@ -521,7 +521,7 @@ public:
 		}
 
 		Audio::loadHitSound(&bmPlay, base_dir);
-		Skin::loadSkin(base_dir);
+		Skin::load(base_dir);
 
 		cur.loadNewSkin();
 	}
