@@ -30,9 +30,17 @@ public:
 		circle.colorTo(sf::Color(128, 0, 0));
 		circle.update();
 
+		sf::Vector2u size2 = circleOverlay.getTexture()->getSize();
+		scale = (float)std::min(size.x, size.y) / (float)std::min(size2.x, size2.y);
+		circleOverlay.setScale(scale, scale);
+		circleOverlay.setScaleFromNow();
 		circleOverlay.fadeTo(0);
 		circleOverlay.update();
 
+		size2 = approach.getTexture()->getSize();
+		scale = (float)std::min(size.x, size.y) / (float)std::min(size2.x, size2.y);
+		approach.setScale(scale, scale);
+		approach.setScaleFromNow();
 		approach.scaleTo(4);
 		approach.fadeTo(0);
 		approach.update();
@@ -76,16 +84,12 @@ public:
 
 	void shake() {
 		circle.fadeTo(255).scaleTo(1)
-			.moveTo(sf::Vector2f(-50, 0), 50).then()
-			.moveTo(sf::Vector2f(50, 0), 50).then()
 			.moveTo(sf::Vector2f(-30, 0), 50).then()
 			.moveTo(sf::Vector2f(30, 0), 50).then()
 			.moveTo(sf::Vector2f(-10, 0), 50).then()
 			.moveTo(sf::Vector2f(10, 0), 50).then()
 			.moveTo(sf::Vector2f(0, 0), 50);
 		circleOverlay.fadeTo(255).scaleTo(1)
-			.moveTo(sf::Vector2f(-50, 0), 50).then()
-			.moveTo(sf::Vector2f(50, 0), 50).then()
 			.moveTo(sf::Vector2f(-30, 0), 50).then()
 			.moveTo(sf::Vector2f(30, 0), 50).then()
 			.moveTo(sf::Vector2f(-10, 0), 50).then()
