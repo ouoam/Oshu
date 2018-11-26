@@ -66,7 +66,7 @@ namespace Skin {
 		}
 	}
 
-	namespace Cursor {
-		sf::Texture cursorTrail;
-	}
+	//WHY SQLite will be error
+	sf::Texture dbWillErrorIfDontHaveThis;
+	
 }
