@@ -164,6 +164,9 @@
     <ClInclude Include="DB\gameDB.h">
       <Filter>Header Files\DB</Filter>
     </ClInclude>
+    <ClInclude Include="UI\Results.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">

@@ -168,6 +168,7 @@
     <ClInclude Include="Scoring\Score.h" />
     <ClInclude Include="Scoring\ScoreProcessor.h" />
     <ClInclude Include="Skin\Skin.h" />
+    <ClInclude Include="UI\Results.h" />
     <ClInclude Include="UI\Select.h" />
     <ClInclude Include="UI\testtest.h" />
     <ClInclude Include="UI\Playfield.h" />
