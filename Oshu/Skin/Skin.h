@@ -67,12 +67,6 @@ namespace Skin {
 	}
 
 	namespace Cursor {
-		sf::Texture cursor;
-		sf::Texture cursorMiddle;
-		sf::Texture cursorSmoke;
 		sf::Texture cursorTrail;
-
-		void load() {
-		}
 	}
 }
