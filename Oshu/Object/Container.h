@@ -13,6 +13,8 @@ public:
 	virtual void onMouseUp(uint8_t) {};
 	virtual void onMouseMove(uint8_t) {};
 
+	virtual void loadNewSkin() {};
+
 	virtual void update() {};
 	
 	bool willBeRemove = false;

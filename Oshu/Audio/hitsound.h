@@ -60,7 +60,6 @@ bool loadSound(sf::SoundBuffer *sb, std::string file) {
 				catch (const std::exception& e) {
 					std::cout << "Load Sound Error : " << e.what() << std::endl;
 				}
-
 			}
 		}
 	}
