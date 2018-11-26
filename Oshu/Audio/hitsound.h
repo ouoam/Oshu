@@ -7,7 +7,9 @@
 
 #include "../Beatmap/Beatmap.h"
 #include "../Utility/file.h"
+#include "../Object/Container.h"
 
+namespace Audio {
 
 sf::Sound sound[10];
 int iSound = 0;
@@ -46,10 +48,28 @@ std::string hitNum2String(int sampleset, int sound) {
 	return out;
 }
 
+bool loadSound(sf::SoundBuffer *sb, std::string file) {
+	sf::FileInputStream stream;
+	if (file_exists(file)) {
+		if (stream.open(file)) {
+			if (stream.getSize() > 64) {
+				try {
+					sb->loadFromFile(file);
+					return true;
+				}
+				catch (const std::exception& e) {
+					std::cout << "Load Sound Error : " << e.what() << std::endl;
+				}
+
+			}
+		}
+	}
+	return false;
+}
+
 void loadHitSound(Beatmap::Beatmap *bmPlay, std::string base_dir) {
 	int iTP = 0;
-	for (int i = 0; i < bmPlay->HitObjects.size(); i++)
-	{
+	for (int i = 0; i < bmPlay->HitObjects.size(); i++) {
 		int time = bmPlay->HitObjects[i].time;
 		if (iTP < bmPlay->TimingPoints.size() - 1) {
 			if (bmPlay->TimingPoints[iTP].Offset <= time) {
@@ -62,30 +82,20 @@ void loadHitSound(Beatmap::Beatmap *bmPlay, std::string base_dir) {
 		sound = (sound & 8) ? 3 : ((sound & 4) ? 2 : ((sound & 2) ? 1 : 0));
 		if (hitSoundList[sampleset][sound][index].getSampleCount() == 0) {
 			std::string file = hitNum2String(sampleset, sound);
-			std::string end = (index != 0 ? std::to_string(index) : "") + ".wav";
-			if (file_exists(base_dir + file + end)) {
-				sf::FileInputStream stream;
-				if (stream.open(base_dir + file + end))
-					if (stream.getSize() > 64) 
-					//std::cout << "ddddddddd" << stream.getSize() << std::endl;
-						hitSoundList[sampleset][sound][index].loadFromFile(base_dir + file + end);
-			}
-			else if (file_exists("resource/Modify/" + file + ".wav")) {
-				hitSoundList[sampleset][sound][index].loadFromFile("resource/Modify/" + file + ".wav");
-			}
-			else if (file_exists("resource/default/" + file + ".wav")) {
-				hitSoundList[sampleset][sound][index].loadFromFile("resource/default/" + file + ".wav");
-			}
-			else {
-				hitSoundList[sampleset][sound][index].loadFromFile("resource/soft-hitnormal.wav");
-			}
+			std::string end = (index != 0 ? std::to_string(index) : "");
+			sf::SoundBuffer *sb = &hitSoundList[sampleset][sound][index];
+			if (!loadSound(sb, base_dir + file + end + ".wav"))
+				if (!loadSound(sb, "resource/Modify/" + file + ".wav"))
+					if (!loadSound(sb, "resource/default/" + file + ".wav"))
+						if (!loadSound(sb, "resource/default/" + file + ".wav"))
+							if (!loadSound(sb, "resource/soft-hitnormal.wav"))
+								std::cout << "Can not load any sound : " << file << end << std::endl;
 		}
 	}
 }
 
 float mspb = 0;
 float oldmspb = 0;
-
 
 void updateHitsound(Beatmap::Beatmap *bmPlay, int64_t time) {
 	// set volume of sound effect
@@ -105,4 +115,17 @@ void updateHitsound(Beatmap::Beatmap *bmPlay, int64_t time) {
 			bmPlay->iTimingPoints++;
 		}
 	}
+}
+
+void playHitSound(Beatmap::Beatmap *bmPlay, Object::ContainerHitObject *obj) {
+	int sampleset = bmPlay->TimingPoints[std::max(bmPlay->iTimingPoints - 1, 0)].SampleSet;
+	int sound_id = obj->hitObject->hitSound;
+	int index = bmPlay->TimingPoints[std::max(bmPlay->iTimingPoints - 1, 0)].SampleIndex;
+	sound_id = (sound_id & 8) ? 3 : ((sound_id & 4) ? 2 : ((sound_id & 2) ? 1 : 0));
+	sound[iSound % 10].setBuffer(hitSoundList[sampleset][sound_id][index]);
+	sound[iSound % 10].play();
+	sound[iSound % 10].setPlayingOffset(sf::seconds(0));
+	iSound++;
+}
+
 }

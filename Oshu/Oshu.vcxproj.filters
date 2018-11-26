@@ -19,9 +19,6 @@
     <Filter Include="Header Files\Utility">
       <UniqueIdentifier>{a0c224a5-8032-4f1e-91c6-f6042b10988a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Overlay">
-      <UniqueIdentifier>{72ff8825-206b-43a0-b7f9-aaba58e13baf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Audio">
       <UniqueIdentifier>{6d876899-6206-41cf-ad2a-b3becf214c79}</UniqueIdentifier>
     </Filter>
@@ -39,9 +36,6 @@
     </Filter>
     <Filter Include="Header Files\DB">
       <UniqueIdentifier>{1adfd02f-af69-417c-a6a7-ee06b8889fd2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\UI\Select">
-      <UniqueIdentifier>{a730f5b1-dfe3-4b19-a3f9-8ec2db582e00}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Scoring">
       <UniqueIdentifier>{875bd6df-6a11-40b5-86a1-793d4b286087}</UniqueIdentifier>
@@ -86,9 +80,6 @@
     <ClInclude Include="Utility\lineThinkness.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Overlay\hitwindows.h">
-      <Filter>Header Files\Overlay</Filter>
-    </ClInclude>
     <ClInclude Include="Audio\hitsound.h">
       <Filter>Header Files\Audio</Filter>
     </ClInclude>
@@ -130,9 +121,6 @@
     </ClInclude>
     <ClInclude Include="UI\Select.h">
       <Filter>Header Files\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="UI\Select\selectSong.h">
-      <Filter>Header Files\UI\Select</Filter>
     </ClInclude>
     <ClInclude Include="Beatmap\Difficulty.h">
       <Filter>Header Files\Beatmap</Filter>

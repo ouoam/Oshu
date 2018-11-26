@@ -141,7 +141,7 @@ protected:
 
 						scoreProcessor->ApplyResult(Scoring::JudgementResult(result));
 
-						//std::cout << "R:" << result << "\tS:" << scoreProcessor->TotalScore << "\tC:" << scoreProcessor->Combo << "\tR:" << scoreProcessor->Rank << "\tA:" << scoreProcessor->Accuracy << std::endl;
+						std::cout << "R:" << result << "\tS:" << scoreProcessor->TotalScore << "\tC:" << scoreProcessor->Combo << "\tR:" << scoreProcessor->Rank << "\tA:" << scoreProcessor->Accuracy << std::endl;
 
 						break;
 					}
