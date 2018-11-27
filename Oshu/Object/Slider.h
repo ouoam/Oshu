@@ -76,7 +76,7 @@ private:
 
 		switch (renderLayer) {
 		case 1:
-			target.draw(sliderBody, thisStates);
+			//target.draw(sliderBody, thisStates);
 			break;
 		}
 		target.draw(*circle, states);

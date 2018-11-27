@@ -67,6 +67,10 @@ class SelectUI : public UI {
 	sf::Vector2f globalScale;
 
 	sf::Text name;
+	sf::Text user;
+	sf::Text UserName;
+
+	std::string userName = " - USER - ";
 
 protected:
 	void OnPressed(sf::Event event) {
@@ -452,10 +456,9 @@ protected:
 						
 					}
 				}
-
-				updateText = true;
 				updateTextMutex.unlock();
 			}
+			updateText = true;
 		}
 
 		if ((*searchData).size() == 0) return;
@@ -506,6 +509,10 @@ protected:
 		m_window.draw(sf::Sprite(updateScoreTexture));
 		updateScoreTextureMutex.unlock();
 
+		m_window.draw(name);
+		m_window.draw(user);
+		m_window.draw(UserName);
+
 		m_window.draw(cur);
 	}
 
@@ -541,8 +548,9 @@ protected:
 					score = (*beatmapScore)[0];
 				else
 					score = new Scoring::Score;
-				gotoUI(new Results(m_window, this, gameDB, *((*beatmapSetData)[selectBeatmapIndex]), *score));
-				//gotoUI(new Playfield(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), playSong, gameDB));
+				//gotoUI(new Results(m_window, this, gameDB, *((*beatmapSetData)[selectBeatmapIndex]), *score));
+				gameDB.setUser(userName);
+				gotoUI(new Playfield(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), playSong, gameDB));
 			}
 				break;
 
@@ -600,14 +608,32 @@ protected:
 			break;
 
 		case sf::Event::TextEntered:
-			if (event.text.unicode == '\b') {
-				if (searchKeyword.size() > 0)
-					searchKeyword.pop_back();
+		{
+			sf::Vector2i position = sf::Mouse::getPosition(m_window);
+			sf::Vector2u winSize = m_window.getSize();
+			if (winSize.y - 10 - 2 * (name.getLocalBounds().height) < position.y && winSize.x / 2 < position.y) {
+				if (event.text.unicode == '\b') {
+					if (userName.size() > 0)
+						userName.pop_back();
+				}
+				else if (32 <= event.text.unicode && event.text.unicode <= 126) {
+					userName.push_back(event.text.unicode);
+				}
+				UserName.setString(userName);
 			}
-			else if (32 <= event.text.unicode && event.text.unicode <= 126) {
-				searchKeyword.push_back(event.text.unicode);
+			else {
+				if (event.text.unicode == '\b') {
+					if (searchKeyword.size() > 0)
+						searchKeyword.pop_back();
+				}
+				else if (32 <= event.text.unicode && event.text.unicode <= 126) {
+					searchKeyword.push_back(event.text.unicode);
+				}
+				updateSearch = true;
 			}
-			updateSearch = true;
+		}
+			
+			
 			break;
 
 		case sf::Event::Resized:
@@ -655,6 +681,14 @@ protected:
 			std::cout << "Error create render text" << std::endl;
 		}
 		updateScore = true;
+
+		name.setOrigin(sf::Vector2f(0, name.getLocalBounds().height));
+		name.setPosition(10, winSize.y);
+
+		user.setOrigin(sf::Vector2f(0, name.getLocalBounds().height));
+		user.setPosition(10, winSize.y - 10 - name.getLocalBounds().height);
+		UserName.setOrigin(sf::Vector2f(0, name.getLocalBounds().height));
+		UserName.setPosition(user.getGlobalBounds().width + 20, winSize.y - 10 - name.getLocalBounds().height);
 	}
 
 public:
@@ -680,5 +714,9 @@ public:
 
 		name.setFont(font);
 		name.setString(L"61010827 ÀÙÁÔä¼·  ¨Ñ¹·ÃÈÃÕÇ§Èì");
+		user.setFont(font);
+		user.setString("User name : ");
+		UserName.setFont(font);
+		UserName.setString(userName);
 	}
 };
