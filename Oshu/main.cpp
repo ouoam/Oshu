@@ -11,9 +11,6 @@
 #include "UI/Select.h"
 #include "UI/testtest.h"
 
-#include "UI/Results.h"
-#include "Scoring/Score.h"
-
 UI *ui;
 
 void renderThread(sf::RenderWindow* window)
@@ -57,9 +54,6 @@ int main()
 
 	ui = new SelectUI(window, nullptr, aa);
 	//ui = new testtest(window, nullptr);
-
-	Scoring::Score score;
-	//ui = new Results(window, nullptr, aa, score);
 
 	window.setActive(false);
 	sf::Thread thread(&renderThread, &window);

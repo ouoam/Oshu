@@ -93,6 +93,8 @@ public:
 			score->Statistics[Scoring::HitResult::Good] = std::stoi(GetWithDef(*ranking, "StatGood", "0"));
 			score->Statistics[Scoring::HitResult::Great] = std::stoi(GetWithDef(*ranking, "StatGreat", "0"));
 
+			score->time = GetWithDef(*ranking, "Time", "Now");
+
 			BeatmapScoreData->push_back(score);
 		}
 

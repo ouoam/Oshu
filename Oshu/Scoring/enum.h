@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace Scoring {
 
 class HitResult {
@@ -36,6 +38,20 @@ public:
 		X,
 		XH
 	};
+
+	static std::string tostring(Enum e) {
+		switch (e) {
+		case F: return "F";
+		case D: return "D";
+		case C: return "C";
+		case B: return "B";
+		case A: return "A";
+		case S: return "S";
+		case SH: return "SH";
+		case X: return "X";
+		case XH: return "XH";
+		}
+	}
 };
 
 class ScoringMode {

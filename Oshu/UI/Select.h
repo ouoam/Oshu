@@ -12,6 +12,7 @@
 
 #include "UI.h"
 #include "Playfield.h"
+#include "Results.h"
 #include "../DB/gameDB.h"
 
 #include "../Object/Cursor.h"
@@ -64,6 +65,8 @@ class SelectUI : public UI {
 	sf::Font font;
 
 	sf::Vector2f globalScale;
+
+	sf::Text name;
 
 protected:
 	void OnPressed(sf::Event event) {
@@ -303,11 +306,27 @@ protected:
 		int to = (*beatmapScore).size() - 1;
 		for (int i = 0; i <= to; i++) {
 			sf::Vector2f position;
-			position.x = 50;
+			position.x = 10;
 			position.y = 100 + i * 60;
 
 			position.x *= globalScale.x;
 			position.y *= globalScale.y;
+
+			float scale = std::max(globalScale.x, globalScale.y);
+
+			sf::Sprite rank;
+			rank.setTexture(*Skin::get("ranking-" + Scoring::ScoreRank::tostring((*((*beatmapScore)[i])).Rank) + "-small"));
+			rank.setPosition(sf::Vector2f(10, position.y + 60 * globalScale.y * 0.05));
+
+			sf::Vector2u size = rank.getTexture()->getSize();
+
+			float sy = (60.0 * globalScale.y * 0.9) / size.y;
+
+			rank.setScale(sy, sy);
+
+			position.x += (sy * (float)size.x) + 10;
+
+			
 
 			textUser.setString((*((*beatmapScore)[i])).User);
 			textUser.setPosition(position);
@@ -325,6 +344,7 @@ protected:
 			textAccuracy.setString(std::string(buff) + " %");
 			textAccuracy.setPosition(position + sf::Vector2f(150 * globalScale.x, 6 * globalScale.y));
 
+			renderScore.draw(rank);
 			renderScore.draw(textUser);
 			renderScore.draw(textScore);
 			renderScore.draw(textAccuracy);
@@ -515,7 +535,15 @@ protected:
 				randomSongs();
 				break;
 			case sf::Keyboard::Enter:
-				gotoUI(new Playfield(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), playSong, gameDB));
+			{
+				Scoring::Score *score;
+				if (beatmapScore->size() > 0)
+					score = (*beatmapScore)[0];
+				else
+					score = new Scoring::Score;
+				gotoUI(new Results(m_window, this, gameDB, *((*beatmapSetData)[selectBeatmapIndex]), *score));
+				//gotoUI(new Playfield(m_window, this, *((*beatmapSetData)[selectBeatmapIndex]), playSong, gameDB));
+			}
 				break;
 
 			case sf::Keyboard::F5:
@@ -649,5 +677,8 @@ public:
 		generator.seed(seed);
 
 		font.loadFromFile("resource\\Chakra-Petch-master\\fonts\\ChakraPetch-SemiBoldItalic.ttf");
+
+		name.setFont(font);
+		name.setString(L"61010827 ¿Ÿ¡‘‰º∑  ®—π∑√»√’«ß»Ï");
 	}
 };

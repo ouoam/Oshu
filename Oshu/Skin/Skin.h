@@ -48,6 +48,7 @@ namespace Skin {
 				textureLoad = loadFile(base_dir + file);
 			if (!textureLoad)
 				std::cout << "can not load" << std::endl;
+
 			setSmooth(true);
 		}
 	};
