@@ -108,7 +108,7 @@ private:
 	std::vector<std::unordered_map<std::string, std::string>*> *beatmapSetData = nullptr;
 
 public:
-	std::string songsPath = "D:/osu!/Songs/";
+	std::string songsPath = "resource/Songs/";
 
 	beatmapDB(std::string dbFile) : DB(dbFile) {
 		checkHaveTable();

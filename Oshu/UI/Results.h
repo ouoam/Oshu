@@ -110,7 +110,7 @@ public:
 	Results(sf::RenderWindow& window, UI *from, DB::gameDB DB, std::unordered_map<std::string, std::string> bmData, Scoring::Score rec) :
 		UI(window, from), cur(window), gameDB(DB), beatmapData(bmData), record(rec)
 	{
-		std::string base_dir = "D:/osu!/Songs/";
+		std::string base_dir = gameDB.songsPath;
 		base_dir += beatmapData["OsuDir"] + "/";
 
 		bmPlay.load(base_dir + beatmapData["OsuFile"]);

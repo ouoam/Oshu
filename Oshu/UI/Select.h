@@ -700,7 +700,7 @@ public:
 
 		m_window.setKeyRepeatEnabled(true);
 
-		if (!backgroundTexture.loadFromFile("resource\\osu-resources-master\\osu.Game.Resources\\Textures\\Backgrounds\\bg2.jpg")) {
+		if (!backgroundTexture.loadFromFile("resource\\bg2.jpg")) {
 			std::cout << "55" << std::endl;
 		}
 		background.setTexture(backgroundTexture);

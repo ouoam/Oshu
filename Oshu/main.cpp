@@ -51,6 +51,7 @@ int main()
 	//sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Oshu!", sf::Style::Fullscreen, settings);
 	window.setFramerateLimit(60);
 	window.setKeyRepeatEnabled(false);
+	window.setVerticalSyncEnabled(true);
 
 	ui = new SelectUI(window, nullptr, aa);
 	//ui = new testtest(window, nullptr);

@@ -465,7 +465,7 @@ public:
 	Playfield(sf::RenderWindow& window, UI *from, std::unordered_map<std::string, std::string> bmData, sfe::Movie playSong, DB::gameDB gameDB) :
 		UI(window, from) , cur(window), beatmapData(bmData), playSong(playSong), gameDB(gameDB)
 	{
-		std::string base_dir = "D:/osu!/Songs/";
+		std::string base_dir = gameDB.songsPath;
 		base_dir += beatmapData["OsuDir"] + "/";
 
 		bmPlay.load(base_dir + beatmapData["OsuFile"]);
@@ -478,6 +478,8 @@ public:
 			loadVideo = true;
 			playVideo.stop();
 		}
+
+		playSong.setVolume(80);
 
 		// Calc For Hit Object
 		int AR = bmPlay.Difficulty.ApproachRate;

@@ -87,8 +87,7 @@ void loadHitSound(Beatmap::Beatmap *bmPlay, std::string base_dir) {
 				// DISABLE CUSTOM SKIN
 				//if (!loadSound(sb, "resource/Modify/" + file + ".wav"))
 					if (!loadSound(sb, "resource/default/" + file + ".wav"))
-						if (!loadSound(sb, "resource/soft-hitnormal.wav"))
-							std::cout << "Can not load any sound : " << file << end << std::endl;
+						std::cout << "Can not load any sound : " << file << end << std::endl;
 		}
 	}
 }
